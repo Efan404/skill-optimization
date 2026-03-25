@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["name", "version", "source", "domain", "task_type", "when_to_use", "procedure", "common_failures", "verification"],
+  "properties": {
+    "name": {"type": "string"},
+    "version": {"type": "string"},
+    "source": {"type": "string", "enum": ["self_generated", "curated", "optimized"]},
+    "domain": {"type": "string"},
+    "task_type": {"type": "string"},
+    "when_to_use": {"type": "string"},
+    "when_not_to_use": {"type": "string"},
+    "preconditions": {"type": "array", "items": {"type": "string"}},
+    "procedure": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["step", "check"],
+        "properties": {
+          "step": {"type": "string"},
+          "check": {"type": "string"}
+        }
+      }
+    },
+    "common_failures": {"type": "array", "items": {"type": "string"}},
+    "verification": {"type": "string"},
+    "evidence": {"type": "object"}
+  }
+}
