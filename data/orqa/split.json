@@ -1,0 +1,14 @@
+{
+  "seed": [
+    "orqa_lp_001", "orqa_lp_002",
+    "orqa_co_001", "orqa_co_002"
+  ],
+  "dev": [
+    "orqa_lp_003", "orqa_lp_004", "orqa_lp_005", "orqa_lp_006", "orqa_lp_007",
+    "orqa_co_003", "orqa_co_004", "orqa_co_005", "orqa_co_006", "orqa_co_007"
+  ],
+  "test": [
+    "orqa_lp_008", "orqa_lp_009", "orqa_lp_010", "orqa_lp_011", "orqa_lp_012",
+    "orqa_co_008", "orqa_co_009", "orqa_co_010", "orqa_co_011", "orqa_co_012"
+  ]
+}
