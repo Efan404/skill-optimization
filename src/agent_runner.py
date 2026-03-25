@@ -193,6 +193,19 @@ def run_condition(
     """
     results: dict[str, dict] = {}
     for question in questions:
-        result = run_single(client, question, condition, skill=skill)
-        results[result["question_id"]] = result
+        try:
+            result = run_single(client, question, condition, skill=skill)
+            results[result["question_id"]] = result
+        except Exception as e:
+            # Log failure but continue with remaining questions.
+            # A transient API error should not abort the entire condition.
+            qid = question.get("id", "unknown")
+            results[qid] = {
+                "question_id": qid,
+                "condition": condition,
+                "response": "",
+                "model": getattr(client, "config", {}).get("model", "unknown"),
+                "tokens_used": 0,
+                "error": str(e),
+            }
     return results

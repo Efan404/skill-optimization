@@ -112,7 +112,13 @@ def validate_scaffold_length(
     scaffold_skill: dict,
     tolerance: float = 0.15,
 ) -> tuple[bool, dict]:
-    """Check that the scaffold skill is within tolerance of the v1 skill token count.
+    """Validate that the scaffold matches v1 on structural dimensions and token length.
+
+    Checks:
+    1. Same procedure step count
+    2. Same common_failures count
+    3. Same preconditions count
+    4. Token count within +/-tolerance of v1
 
     Args:
         v1_skill: The domain-specific v1 curated skill.
@@ -120,20 +126,51 @@ def validate_scaffold_length(
         tolerance: Maximum allowed fractional deviation (default 0.15 = 15%).
 
     Returns:
-        A tuple of (is_valid, info_dict) where info_dict contains:
-        - v1_tokens: token count for the v1 skill
-        - scaffold_tokens: token count for the scaffold skill
-        - ratio: scaffold_tokens / v1_tokens
-        - tolerance: the tolerance used
+        A tuple of (is_valid, info_dict) with details of all checks.
     """
+    issues = []
+
+    # Structural checks
+    v1_steps = len(v1_skill.get("procedure", []))
+    scaffold_steps = len(scaffold_skill.get("procedure", []))
+    if v1_steps != scaffold_steps:
+        issues.append(f"step_count: v1={v1_steps}, scaffold={scaffold_steps}")
+
+    v1_failures = len(v1_skill.get("common_failures", []))
+    scaffold_failures = len(scaffold_skill.get("common_failures", []))
+    if v1_failures != scaffold_failures:
+        issues.append(f"common_failures_count: v1={v1_failures}, scaffold={scaffold_failures}")
+
+    v1_preconditions = len(v1_skill.get("preconditions", []))
+    scaffold_preconditions = len(scaffold_skill.get("preconditions", []))
+    if v1_preconditions != scaffold_preconditions:
+        issues.append(f"preconditions_count: v1={v1_preconditions}, scaffold={scaffold_preconditions}")
+
+    # Check each procedure step has a 'check' field
+    for i, step in enumerate(scaffold_skill.get("procedure", [])):
+        if "check" not in step:
+            issues.append(f"procedure[{i}] missing 'check' field")
+
+    # Token length check
     v1_tokens = count_skill_tokens(v1_skill)
     scaffold_tokens = count_skill_tokens(scaffold_skill)
     ratio = scaffold_tokens / v1_tokens if v1_tokens > 0 else float("inf")
-    is_valid = abs(ratio - 1.0) <= tolerance
+    token_valid = abs(ratio - 1.0) <= tolerance
+    if not token_valid:
+        issues.append(f"token_ratio: {ratio:.2f} (outside +/-{tolerance:.0%})")
+
+    is_valid = len(issues) == 0
 
     return is_valid, {
         "v1_tokens": v1_tokens,
         "scaffold_tokens": scaffold_tokens,
         "ratio": ratio,
         "tolerance": tolerance,
+        "v1_steps": v1_steps,
+        "scaffold_steps": scaffold_steps,
+        "v1_failures": v1_failures,
+        "scaffold_failures": scaffold_failures,
+        "v1_preconditions": v1_preconditions,
+        "scaffold_preconditions": scaffold_preconditions,
+        "issues": issues,
     }

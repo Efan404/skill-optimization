@@ -196,4 +196,4 @@ def test_get_skill_for_unknown_condition():
 def test_get_skill_for_missing_file():
     """Condition with missing file raises FileNotFoundError."""
     with pytest.raises(FileNotFoundError):
-        get_skill_for_condition("v0_self_generated", "linear_programming")
+        get_skill_for_condition("v1_curated", "nonexistent_task_type")

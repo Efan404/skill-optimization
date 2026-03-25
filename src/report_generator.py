@@ -18,39 +18,72 @@ TASK_TYPES = ["linear_programming", "combinatorial_optimization"]
 def compute_accuracy(results: dict, questions: list[dict], task_type: str = None) -> float:
     """Compute accuracy for a set of results, optionally filtered by task_type.
 
+    The denominator is always the number of questions in the target set, NOT the
+    number of results returned. Missing results are treated as failures — this
+    prevents API errors from inflating accuracy.
+
     Args:
         results: {question_id: {"outcome": "correct"|"incorrect"|"extraction_failed", ...}}
-        questions: list of question dicts (for task_type filtering)
+        questions: list of question dicts (defines the denominator)
         task_type: if specified, only count questions of this type
 
     Returns:
         Accuracy as float between 0 and 1. Returns 0.0 if no matching questions.
     """
     if task_type:
-        valid_ids = {q["id"] for q in questions if q["task_type"] == task_type}
+        target_ids = [q["id"] for q in questions if q["task_type"] == task_type]
     else:
-        valid_ids = {q["id"] for q in questions}
+        target_ids = [q["id"] for q in questions]
 
-    matching = {qid: r for qid, r in results.items() if qid in valid_ids}
-    if not matching:
+    if not target_ids:
         return 0.0
 
-    correct = sum(1 for r in matching.values() if r.get("outcome") == "correct")
-    return correct / len(matching)
+    correct = sum(
+        1 for qid in target_ids
+        if results.get(qid, {}).get("outcome") == "correct"
+    )
+    return correct / len(target_ids)
 
 
-def compute_paired_win_loss(baseline_results: dict, condition_results: dict) -> dict:
+def compute_paired_win_loss(
+    baseline_results: dict,
+    condition_results: dict,
+    question_ids: list[str] | None = None,
+) -> dict:
     """Compute paired win/loss between baseline and a condition.
 
-    Returns:
-        {"wins": N, "losses": N, "ties_correct": N, "ties_incorrect": N, "net_delta": N}
-    """
-    wins = losses = ties_correct = ties_incorrect = 0
-    common_ids = set(baseline_results.keys()) & set(condition_results.keys())
+    Uses the union of all question IDs (or an explicit list) as the denominator,
+    so missing results are treated as failures — not silently excluded.
 
-    for qid in common_ids:
-        b_correct = baseline_results[qid].get("outcome") == "correct"
-        c_correct = condition_results[qid].get("outcome") == "correct"
+    Args:
+        baseline_results: {qid: {"outcome": ...}}
+        condition_results: {qid: {"outcome": ...}}
+        question_ids: If provided, use this as the authoritative set of question IDs.
+                      Otherwise uses the union of both result dicts.
+
+    Returns:
+        {"wins": N, "losses": N, "ties_correct": N, "ties_incorrect": N,
+         "net_delta": N, "missing_baseline": N, "missing_condition": N}
+    """
+    if question_ids is not None:
+        all_ids = set(question_ids)
+    else:
+        all_ids = set(baseline_results.keys()) | set(condition_results.keys())
+
+    wins = losses = ties_correct = ties_incorrect = 0
+    missing_baseline = missing_condition = 0
+
+    for qid in all_ids:
+        b = baseline_results.get(qid)
+        c = condition_results.get(qid)
+
+        if b is None:
+            missing_baseline += 1
+        if c is None:
+            missing_condition += 1
+
+        b_correct = (b.get("outcome") == "correct") if b else False
+        c_correct = (c.get("outcome") == "correct") if c else False
 
         if not b_correct and c_correct:
             wins += 1
@@ -67,6 +100,8 @@ def compute_paired_win_loss(baseline_results: dict, condition_results: dict) -> 
         "ties_correct": ties_correct,
         "ties_incorrect": ties_incorrect,
         "net_delta": wins - losses,
+        "missing_baseline": missing_baseline,
+        "missing_condition": missing_condition,
     }
 
 
