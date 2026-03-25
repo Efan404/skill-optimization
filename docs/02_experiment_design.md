@@ -8,20 +8,54 @@ The ORQA benchmark is published as part of the AAAI 2025 paper: *"Evaluating LLM
 
 **Acquisition plan:**
 1. Check the paper's official repository / supplementary materials for the dataset
-2. If a downloadable dataset exists, extract a representative subset
-3. If not directly downloadable, manually curate 15 questions from the paper's examples and described problem types
+2. If a downloadable dataset exists, extract a representative subset via stratified random sampling
+3. If not directly downloadable, manually curate questions from the paper's examples and described problem types
 
-**Target subset: 15 questions** covering two primary OR task types:
+### Data Split Design
 
-| Task Type | Target Count | Why |
-|-----------|-------------|-----|
-| **Linear Programming** | 7-8 | Classic OR, well-structured, clear skill mapping |
-| **Combinatorial Optimization** | 7-8 | More complex reasoning, tests skill limits |
+**Critical methodological requirement:** Data is split into three disjoint sets to prevent train-on-test contamination.
 
-**Why 15 questions and 2 task types:**
-- 15 questions x 4 conditions = 60 data points — enough to show patterns
-- 2 task types allow cross-type comparison without exploding the skill curation workload
-- Each task type gets its own skill through all 4 conditions = 8 skill variants total (manageable)
+```
+Total: ~25 questions (across 2 task types)
+
+┌─────────────────────────────────────────────────────┐
+│  Seed Set (2-3 per type, ~5 total)                  │
+│  Purpose: v0 skill generation examples ONLY         │
+│  Never evaluated. Never seen by optimizer.           │
+├─────────────────────────────────────────────────────┤
+│  Dev Set (5 per type, ~10 total)                    │
+│  Purpose: run all 5 conditions, error analysis,     │
+│  skill optimization (v1 -> v2)                      │
+│  Optimizer sees dev failures to produce v2.          │
+├─────────────────────────────────────────────────────┤
+│  Test Set (5 per type, ~10 total)                   │
+│  Purpose: held-out final evaluation                 │
+│  Run all 5 conditions ONCE. Optimizer NEVER sees    │
+│  test questions, test failures, or test answers.     │
+│  This is the ONLY set used for final comparison.     │
+└─────────────────────────────────────────────────────┘
+```
+
+**Sampling rule:** If the ORQA dataset is available, questions are selected by stratified random sampling within each task type. The split is fixed before any experiment runs and recorded in `data/orqa/split.json`. No manual cherry-picking.
+
+**Why this split matters:**
+- v2_optimized is refined based on dev-set errors. If we evaluate v2 on the same dev set, improvement could be overfitting.
+- The held-out test set that the optimizer never sees validates whether optimization **generalizes**.
+- Seed examples for v0 generation are fully disjoint from both dev and test, preventing information leakage.
+
+### Data Volumes
+
+| Task Type | Seed | Dev | Test | Total |
+|-----------|------|-----|------|-------|
+| **Linear Programming** | 2-3 | 5 | 5 | 12-13 |
+| **Combinatorial Optimization** | 2-3 | 5 | 5 | 12-13 |
+| **Total** | ~5 | ~10 | ~10 | ~25 |
+
+### Reporting
+
+- Dev results are reported as "development performance" — used to explain the optimization process
+- Test results are reported as "held-out evaluation" — the primary evidence for claims
+- Both are shown in the report, clearly labeled
 
 ### Question Format
 
@@ -31,6 +65,7 @@ Each question is stored as JSON:
 {
   "id": "orqa_lp_001",
   "task_type": "linear_programming",
+  "split": "dev",
   "question": "A factory produces two products X and Y...",
   "choices": {
     "A": "120",
@@ -39,42 +74,67 @@ Each question is stored as JSON:
     "D": "200"
   },
   "correct_answer": "B",
-  "source": "ORQA benchmark, adapted from Problem 3.2"
+  "source": "ORQA benchmark, stratified random sample"
 }
 ```
 
-## Four Experimental Conditions
+## Five Experimental Conditions
 
 | Condition | Skill Source | Description |
 |-----------|-------------|-------------|
-| **baseline** | None | Raw LLM, task prompt only |
-| **v0_self_generated** | LLM generates from task-type description | LLM receives the task-type description and 2 example questions, then generates a general skill. This skill is then used for ALL questions of that type. Two separate LLM calls: (1) generate skill, (2) solve with skill. |
+| **baseline** | None | Raw LLM, task prompt only with basic CoT |
+| **generic_scaffold** | Length-matched generic procedure | A structured prompt with the same format as v1 (steps, checks, verification) but containing **generic problem-solving advice** only — no domain-specific OR content. Controls for the prompt-length/structure confound. |
+| **v0_self_generated** | LLM generates from task-type description | LLM receives the task-type description and 2 seed examples (from the disjoint seed set — never from dev or test), then generates a general skill. Two separate LLM calls: (1) generate skill, (2) solve with skill. |
 | **v1_curated** | Human-designed | Researcher writes structured skill following the unified schema |
-| **v2_optimized** | AI refines v1 based on errors | After v1 runs, error analysis feeds back into LLM to produce refined skill |
+| **v2_optimized** | AI refines v1 based on dev errors | After v1 runs on dev set, dev-set error analysis feeds into LLM to produce refined skill. **Optimizer never sees test set.** |
 
-**v0 clarification:** The self-generated skill is produced per task type (not per question) to make it comparable to v1_curated. The LLM sees 2 example questions to understand the format, but must produce a general-purpose skill — not a task-specific one.
+**v0 clarification:** The self-generated skill is produced per task type (not per question). The LLM sees 2 seed examples (disjoint from dev and test) to understand the format, but must produce a general-purpose skill.
+
+**generic_scaffold clarification:** This condition uses the same YAML structure as v1 but with domain-agnostic content:
+```yaml
+procedure:
+  - step: "Read the problem carefully and identify what is being asked"
+    check: "Can you state the goal in one sentence?"
+  - step: "List all given information"
+    check: "Have you captured every number and constraint mentioned?"
+  - step: "Choose an appropriate method to solve"
+    check: "Does your method match the problem type?"
+  - step: "Execute the solution step by step"
+    check: "Is each step logically following from the previous?"
+  - step: "Verify your answer"
+    check: "Does your answer satisfy all constraints?"
+```
+The scaffold should be approximately the same token length as v1_curated.
 
 ## Pipeline Flow
 
 ```
-Phase 1: Baseline
-  task_loader -> agent_runner (no skill) -> evaluator -> results
+Phase 0: Data Preparation
+  Load questions.json -> split into seed / dev / test
+  Verify split integrity (no overlap)
 
-Phase 2: Self-Generated Skill
-  task_loader -> skill_generator (LLM writes skill per task type)
-             -> agent_runner (with v0) -> evaluator -> results
+Phase 1: Run All Conditions on Dev Set
+  For each condition in [baseline, generic_scaffold, v0, v1]:
+    agent_runner (dev set) -> evaluator -> dev results
 
-Phase 3: Curated Skill
-  task_loader -> skill_manager (load v1)
-             -> agent_runner (with v1) -> evaluator -> results
+Phase 2: Error Analysis (Dev Set Only)
+  error_analyzer (dev results for all conditions)
+  -> root cause classification for incorrect answers
+  -> outcome labels (improved/degraded/no_change) across conditions
 
-Phase 4: Error Analysis + Optimization
-  error_analyzer (compare all runs, classify failures)
-  -> skill_optimizer (LLM refines v1 -> v2, with error evidence)
-  -> agent_runner (with v2) -> evaluator -> results
+Phase 3: Skill Optimization (Using Dev Evidence Only)
+  skill_optimizer (v1 skill + dev-set error analysis)
+  -> produces v2_optimized skill + changelog
+  Run v2 on dev set -> evaluate (for development tracking only)
+
+Phase 4: Held-Out Test Evaluation
+  For each condition in [baseline, generic_scaffold, v0, v1, v2]:
+    agent_runner (test set) -> evaluator -> test results
+  This is the primary evidence for all claims.
 
 Phase 5: Report
-  report_generator -> comparison tables, case studies, skill diffs, marketplace mapping
+  report_generator -> dev results, test results (clearly separated),
+  comparison tables, paired win/loss, case studies, skill diffs
 ```
 
 ## Models
@@ -86,10 +146,11 @@ Phase 5: Report
 
 ## Reproducibility Settings
 
-- **Temperature: 0** for all LLM calls — ensures deterministic outputs
+- **Temperature: 0** for all LLM calls — reduces output variance (note: full determinism is not guaranteed on hosted APIs; providers may update models or have residual sampling noise)
 - **Fixed model versions** — record exact model identifiers in results
 - **All prompts saved** — every LLM call logs the full request and response
 - **Run timestamps** — each experiment run gets a unique ID with timestamp
+- **Data split frozen** — `split.json` is committed before any runs and never modified
 
 ## API Configuration
 
@@ -126,7 +187,7 @@ models:
 - 1-second minimum delay between calls
 - Graceful failure: if a call fails after 3 retries, log the error and continue
 
-**Estimated cost:** 15 questions x 4 conditions x ~2K tokens/call = ~120K tokens total. Well within DeepSeek free/cheap tier.
+**Estimated cost:** ~25 questions x 5 conditions x ~2K tokens/call = ~250K tokens total. Well within DeepSeek free/cheap tier.
 
 ## Prompt Templates
 
@@ -145,6 +206,28 @@ C) {choice_c}
 D) {choice_d}
 
 Think through this step by step, then provide your final answer.
+
+**IMPORTANT:** Your final line MUST be exactly: "ANSWER: X" where X is A, B, C, or D.
+```
+
+### Generic Scaffold Prompt (Length-Matched Control)
+
+```
+You are an expert in operations research. You have been given a structured problem-solving guide. Follow the procedure carefully.
+
+**GUIDE:**
+{generic_scaffold_yaml}
+
+**Problem:**
+{question}
+
+**Options:**
+A) {choice_a}
+B) {choice_b}
+C) {choice_c}
+D) {choice_d}
+
+Follow the procedure step by step, then provide your final answer.
 
 **IMPORTANT:** Your final line MUST be exactly: "ANSWER: X" where X is A, B, C, or D.
 ```
@@ -179,10 +262,12 @@ You are an expert in operations research and problem-solving methodology.
 I need you to create a structured problem-solving skill for the following type of OR problem: {task_type_description}
 
 Here are 2 example problems of this type (for context only — do NOT solve them):
-{example_1}
-{example_2}
+{seed_example_1}
+{seed_example_2}
 
-Create a general-purpose skill that would help someone systematically solve ANY problem of this type. The skill should be a step-by-step procedure with verification checks.
+NOTE: These examples are provided only to illustrate the problem format. Your skill must be general-purpose — it should work for ANY problem of this type, not just these examples.
+
+Create a general-purpose skill as a step-by-step procedure with verification checks.
 
 Output the skill in this exact YAML format:
 
@@ -215,60 +300,91 @@ The evaluator extracts answers using this strategy (in priority order):
 3. **Last letter match:** If response ends with a single capital letter A-D
 4. **Failure:** If no answer can be extracted, mark as `extraction_failed`
 
-## Error Taxonomy
+## Classification System
 
-Predefined error categories for failure classification:
+The classification system is split into two independent layers to avoid conflating diagnostics with conclusions.
+
+### Layer 1: Outcome Labels (Automated)
+
+Computed mechanically from evaluation results — no LLM needed.
+
+**Per-condition outcome:**
+
+| Label | Code | How Computed |
+|-------|------|-------------|
+| Correct | `correct` | Extracted answer matches correct answer |
+| Incorrect | `incorrect` | Extracted answer does not match |
+| Extraction Failed | `extraction_failed` | Could not parse answer from response |
+
+**Cross-condition outcome** (per question, comparing each skill condition to baseline):
+
+| Label | Code | How Computed |
+|-------|------|-------------|
+| Improved | `improved` | Baseline incorrect, this condition correct |
+| Degraded | `degraded` | Baseline correct, this condition incorrect |
+| No Change (both correct) | `no_change_correct` | Both correct |
+| No Change (both wrong) | `no_change_incorrect` | Both incorrect |
+
+### Layer 2: Root Cause Taxonomy (LLM-Assisted, Incorrect Answers Only)
+
+Applied only to incorrect answers to diagnose **why** the LLM failed. This is the input to the skill optimizer (dev set only).
 
 | Category | Code | Description |
 |----------|------|-------------|
-| Task Misunderstood | `task_misunderstood` | Agent misread the problem |
+| Task Misunderstood | `task_misunderstood` | LLM misread the problem |
 | Constraint Missed | `constraint_missed` | A constraint from the problem was ignored |
 | Wrong Reasoning | `wrong_reasoning` | Reasoning steps are logically flawed |
 | Calculation Error | `calculation_error` | Math or arithmetic mistake |
 | Skill Mismatch | `skill_mismatch` | Skill doesn't fit this task type |
-| Skill Overfit | `skill_overfit` | Agent followed skill too rigidly, missed nuance |
-| Verbosity Overload | `verbosity_overload` | Skill too long, agent lost focus |
-| Hallucinated Procedure | `hallucinated_procedure` | Agent invented steps not in the skill |
-| Answer Extraction Failed | `extraction_failed` | Could not parse a valid answer from response |
-| Correct Without Skill | `correct_baseline` | Baseline correct — skill not needed |
-| Improved With Skill | `improved_with_skill` | Skill helped |
-| Degraded With Skill | `degraded_with_skill` | Skill hurt performance |
+| Skill Overfit | `skill_overfit` | LLM followed skill too rigidly, missed nuance |
+| Verbosity Overload | `verbosity_overload` | Skill too long, LLM lost focus |
+| Hallucinated Procedure | `hallucinated_procedure` | LLM invented steps not in the skill |
 
-The error analyzer uses the LLM to classify each failure into one or more categories, with a brief explanation.
+**Separation principle:** Outcome labels go into the report as results. Root causes go into the optimizer as diagnostic input. They are never mixed in the same table.
 
 ## Skill Optimization Logic
+
+### Critical Constraint: Dev-Set Only
+
+The optimizer **only** receives evidence from the dev set. It never sees:
+- Test set questions
+- Test set answers
+- Test set failures or reasoning traces
+
+This ensures that v2's improvement on the test set (if any) represents genuine generalization.
 
 ### Input to Optimizer
 
 1. Current skill (v1_curated)
-2. List of tasks where v1 failed (with question text, expected answer, agent response)
-3. Error categories for each failure
-4. Full reasoning traces for failed tasks
-5. List of tasks where v1 succeeded (to avoid breaking what works)
+2. Dev-set tasks where v1 failed (with question text, expected answer, LLM response)
+3. Root cause categories for each dev failure
+4. Full reasoning traces for dev failures
+5. Dev-set tasks where v1 succeeded (to avoid breaking what works)
 
 ### Optimizer Prompt
 
 ```
 You are a skill optimization expert. You are given:
 
-1. A problem-solving skill that was tested on {n} benchmark tasks
+1. A problem-solving skill that was tested on {n} development tasks
 2. It succeeded on {n_success} tasks and failed on {n_fail} tasks
-3. Error analysis for each failure (error categories + explanations)
+3. Root cause analysis for each failure
 4. The full reasoning traces for both successes and failures
 
 **Current Skill:**
 {current_skill_yaml}
 
-**Failure Analysis:**
-{failure_details}
+**Failure Analysis (development set only):**
+{dev_failure_details}
 
 **Success Cases (do not break these):**
-{success_summaries}
+{dev_success_summaries}
 
 Your job: produce an IMPROVED version of the skill that:
 1. Fixes the identified failure patterns
 2. Does NOT break the cases that already succeed
 3. Stays concise — do not make the skill longer than necessary
+4. Produces GENERAL improvements — not fixes targeted at specific questions
 
 Output the complete updated skill in the same YAML format, followed by:
 
@@ -285,4 +401,4 @@ Output the complete updated skill in the same YAML format, followed by:
 | **Ordering** | Move constraint-checking earlier in the procedure |
 | **Constraint coverage** | Add a step for bounds/integer checks if those were missed |
 | **Length** | Remove verbose explanations that cause context dilution |
-| **Failure avoidance** | Add specific common_failures based on observed errors |
+| **Failure avoidance** | Add specific common_failures based on observed error patterns |

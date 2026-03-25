@@ -8,81 +8,135 @@
 - **Run ID:** `{run_id}`
 - **Timestamp:** `{timestamp}`
 - **Model:** `{model_name}`
-- **Total questions:** `{n_questions}`
+- **Total questions:** `{n_total}` (seed: `{n_seed}`, dev: `{n_dev}`, test: `{n_test}`)
 - **Task types:** `{task_types}`
+- **Conditions:** baseline, generic_scaffold, v0_self_generated, v1_curated, v2_optimized
 
-## Accuracy Summary
+## Development Set Results
 
-| Condition | LP Accuracy | Combinatorial Accuracy | Overall Accuracy |
-|-----------|------------|----------------------|-----------------|
+> These results are used for error analysis and skill optimization.
+> They are NOT the primary evidence for claims.
+
+### Dev Accuracy Summary
+
+| Condition | LP Accuracy | Combinatorial Accuracy | Overall Dev Accuracy |
+|-----------|------------|----------------------|---------------------|
 | baseline | — | — | — |
+| generic_scaffold | — | — | — |
 | v0_self_generated | — | — | — |
 | v1_curated | — | — | — |
 | v2_optimized | — | — | — |
 
+### Dev Root Cause Analysis (Incorrect Answers Only)
+
+| Root Cause | baseline | generic_scaffold | v0 | v1 | v2 |
+|-----------|----------|-----------------|----|----|-----|
+| task_misunderstood | — | — | — | — | — |
+| constraint_missed | — | — | — | — | — |
+| wrong_reasoning | — | — | — | — | — |
+| calculation_error | — | — | — | — | — |
+| skill_mismatch | — | — | — | — | — |
+| skill_overfit | — | — | — | — | — |
+| verbosity_overload | — | — | — | — | — |
+| hallucinated_procedure | — | — | — | — | — |
+
+## Held-Out Test Set Results
+
+> **This is the primary evidence for all claims.**
+> The optimizer never saw test set questions, answers, or failures.
+
+### Test Accuracy Summary
+
+| Condition | LP Accuracy | Combinatorial Accuracy | Overall Test Accuracy |
+|-----------|------------|----------------------|----------------------|
+| baseline | — | — | — |
+| generic_scaffold | — | — | — |
+| v0_self_generated | — | — | — |
+| v1_curated | — | — | — |
+| v2_optimized | — | — | — |
+
+### Paired Win/Loss Analysis (Test Set)
+
+Comparing each condition to baseline:
+
+| Condition vs Baseline | Wins | Losses | Ties (both correct) | Ties (both wrong) | Net Delta |
+|----------------------|------|--------|---------------------|--------------------|----|
+| generic_scaffold | — | — | — | — | — |
+| v0_self_generated | — | — | — | — | — |
+| v1_curated | — | — | — | — | — |
+| v2_optimized | — | — | — | — | — |
+
+Comparing v2_optimized to v1_curated:
+
+| v2 vs v1 | Wins | Losses | Ties (both correct) | Ties (both wrong) |
+|----------|------|--------|---------------------|-------------------|
+| Test set | — | — | — | — |
+
+### Dev-to-Test Gap (Overfitting Check)
+
+| Condition | Dev Accuracy | Test Accuracy | Gap |
+|-----------|-------------|--------------|-----|
+| baseline | — | — | — |
+| generic_scaffold | — | — | — |
+| v0_self_generated | — | — | — |
+| v1_curated | — | — | — |
+| v2_optimized | — | — | — |
+
+> A large positive gap for v2 (dev >> test) would indicate overfitting to the dev set.
+
 ## Hypothesis Check
 
 ```
-Expected: v2_optimized > v1_curated > baseline >= v0_self_generated
+Expected: v2_optimized > v1_curated > generic_scaffold >= baseline >= v0_self_generated
 Observed: [fill after run]
 ```
 
-## Per-Question Results
+**Assessment:** [fill after run — state whether the directional evidence supports, partially supports, or contradicts the hypothesis]
 
-| Question ID | Task Type | Baseline | v0 | v1 | v2 | Correct Answer |
-|-------------|-----------|----------|----|----|----|----|
-| ... | ... | ... | ... | ... | ... | ... |
+**Note:** These are directional findings from a small sample (~10 test questions). Statistical significance testing requires a larger dataset (Phase 2).
 
-## Error Analysis Summary
+## Per-Question Test Results
 
-### Error Distribution by Condition
-
-| Error Category | baseline | v0 | v1 | v2 |
-|---------------|----------|----|----|-----|
-| task_misunderstood | — | — | — | — |
-| constraint_missed | — | — | — | — |
-| wrong_reasoning | — | — | — | — |
-| calculation_error | — | — | — | — |
-| skill_mismatch | — | — | — | — |
-| skill_overfit | — | — | — | — |
-| verbosity_overload | — | — | — | — |
-| extraction_failed | — | — | — | — |
-
-### Key Findings
-
-1. **Where skills helped most:** [fill after analysis]
-2. **Where skills hurt:** [fill after analysis]
-3. **Most common failure mode:** [fill after analysis]
+| Question ID | Task Type | Baseline | Scaffold | v0 | v1 | v2 | Correct |
+|-------------|-----------|----------|----------|----|----|----|----|
+| ... | ... | ... | ... | ... | ... | ... | ... |
 
 ## Skill Optimization Diff
 
 ### v1 -> v2 Changelog
 
 **Linear Programming skill:**
-- [changes from optimizer]
+- [changes from optimizer, based on dev-set evidence]
 
 **Combinatorial Optimization skill:**
-- [changes from optimizer]
+- [changes from optimizer, based on dev-set evidence]
 
 ## Case Studies
 
-### Success Case: Skill Improved Performance
+### Success Case: Domain Skill Outperformed Generic Scaffold
 
 **Question:** [id]
-- Baseline: incorrect ([answer]) — [error type]
+- generic_scaffold: incorrect ([answer]) — [root cause]
 - v1_curated: correct ([answer])
-- Why: [explanation]
+- Why: the domain-specific procedure captured [specific OR concept] that generic scaffolding missed
+
+### Success Case: Optimization Generalized to Test Set
+
+**Question:** [id] (test set — optimizer never saw this question)
+- v1_curated: incorrect — [root cause on similar dev question]
+- v2_optimized: correct
+- What changed in the skill: [specific change triggered by dev-set error analysis]
 
 ### Failure Case: Skill Hurt Performance
 
 **Question:** [id]
 - Baseline: correct ([answer])
-- v1_curated: incorrect ([answer]) — [error type]
+- v1_curated: incorrect ([answer]) — [root cause]
 - Why: [explanation]
 
-### Optimization Success: v2 Fixed v1 Failure
+### Failure Case: Optimization Did Not Generalize
 
-**Question:** [id]
-- v1_curated: incorrect — [error type]
-- v2_optimized: correct
-- What changed in the skill: [specific change]
+**Question:** [id] (test set)
+- v1_curated: incorrect
+- v2_optimized: still incorrect
+- Analysis: [why the dev-set-derived fix did not help on this test question]
