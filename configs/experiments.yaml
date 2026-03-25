@@ -1,0 +1,12 @@
+experiment:
+  name: "skill-optimization-v1"
+  model: "deepseek"
+  conditions:
+    - "baseline"
+    - "generic_scaffold"
+    - "v0_self_generated"
+    - "v1_curated"
+    - "v2_optimized"
+  task_types:
+    - "linear_programming"
+    - "combinatorial_optimization"
