@@ -11,6 +11,8 @@
 - **Total questions:** `{n_total}` (seed: `{n_seed}`, dev: `{n_dev}`, test: `{n_test}`)
 - **Task types:** `{task_types}`
 - **Conditions:** baseline, generic_scaffold, v0_self_generated, v1_curated, v2_optimized
+- **Dataset label:** `{dataset_label}` (either "ORQA subset" if all questions from source 1/2, or "ORQA-derived evaluation set" if any source 3 questions used)
+- **Source (3) proportion:** `{n_source3}` / `{n_total}` constructed questions
 
 ## Development Set Results
 

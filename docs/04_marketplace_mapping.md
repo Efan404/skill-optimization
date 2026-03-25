@@ -65,7 +65,7 @@ domain: "operations_research"
 supported_models: ["deepseek-chat"]  # Only validated on this single model
 evidence:
   evidence_level: "demo"             # NOT "validated" or "production"
-  benchmark: "ORQA"
+  benchmark: "ORQA subset"          # or "ORQA-derived" if source (3) questions used
   methodology:
     dev_test_split: true
     scaffold_controlled: true

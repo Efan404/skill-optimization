@@ -119,12 +119,18 @@ If the ORQA dataset is not directly downloadable, questions are curated under th
 - **Ordering:** if more questions are available than needed, select by document order (not researcher preference)
 - **Documentation:** record the exact source (page number, table, figure) for every question in `data/orqa/README.md`
 
+**Dataset labeling rule:**
+- If all questions come from source (1) or (2): label the dataset as **"ORQA subset"** in all reporting
+- If any questions come from source (3): label the dataset as **"ORQA-derived evaluation set"** in all reporting, and note the proportion of constructed questions
+
+This label propagates to results, marketplace cards, and all documentation. The `questions.json` file records each question's source category.
+
 ### Data Split Design
 
 **Critical methodological requirement:** Data is split into three disjoint sets to prevent train-on-test contamination.
 
 ```
-Total: ~25 questions per task type (50 total across 2 types)
+Total: ~25 questions across 2 task types (~12-13 per type)
 
 ┌─────────────────────────────────────────────────────┐
 │  Seed Set (2-3 per type, ~5 total)                  │
@@ -181,7 +187,8 @@ Each question is stored as JSON:
     "D": "200"
   },
   "correct_answer": "B",
-  "source": "ORQA benchmark, stratified random sample"
+  "source_category": 1,
+  "source_detail": "ORQA paper, Table 2, Problem 3"
 }
 ```
 
@@ -681,7 +688,7 @@ asset_type: "capsule"
 domain: "operations_research"
 supported_models: ["deepseek-chat"]  # Only validated on this model
 evidence:
-  benchmark: "ORQA"
+  benchmark: "ORQA subset"          # or "ORQA-derived" if source (3) questions used
   evidence_level: "demo"             # NOT "validated" or "production"
   split: "held-out test set"
   n_test_tasks: 5
