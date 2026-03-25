@@ -108,7 +108,16 @@ The ORQA benchmark is published as part of the AAAI 2025 paper: *"Evaluating LLM
 **Acquisition plan:**
 1. Check the paper's official repository / supplementary materials for the dataset
 2. If a downloadable dataset exists, extract a representative subset via stratified random sampling
-3. If not directly downloadable, manually curate questions from the paper's examples and described problem types
+3. If not directly downloadable, curate questions using the fixed inclusion protocol below
+
+**Manual curation protocol (fallback only):**
+If the ORQA dataset is not directly downloadable, questions are curated under these fixed rules to prevent cherry-picking:
+
+- **Source priority:** (1) questions reproduced verbatim in the paper, (2) questions from official supplementary materials, (3) questions constructed to match the paper's described problem types and difficulty distribution
+- **Inclusion rule:** include ALL questions found in sources (1) and (2) for the target task types, up to the per-split quota. Only use source (3) if (1) + (2) are insufficient.
+- **Exclusion rule:** exclude only if a question is ambiguous (multiple defensible answers), requires external data not in the question text, or is a duplicate
+- **Ordering:** if more questions are available than needed, select by document order (not researcher preference)
+- **Documentation:** record the exact source (page number, table, figure) for every question in `data/orqa/README.md`
 
 ### Data Split Design
 
@@ -199,21 +208,32 @@ Deferred to Phase 2. When revisited:
 
 **v0 clarification:** The self-generated skill is produced per task type (not per question). The LLM sees 2 seed examples (disjoint from dev and test) to understand the format, but must produce a general-purpose skill.
 
-**generic_scaffold clarification:** This condition uses the same YAML structure as v1 but with domain-agnostic content. Example:
+**generic_scaffold matching rules:** The scaffold must match v1_curated on all structural dimensions to isolate domain content as the only variable:
+
+- **Same YAML schema** — identical fields (name, procedure, common_failures, verification, etc.)
+- **Same step count** — if v1 has 6 procedure steps, scaffold has 6 steps
+- **Same field density** — each step has a `check`; same number of `common_failures` and `preconditions`
+- **Token band** — total scaffold tokens must be within +/- 15% of v1_curated token count
+- **Generic content only** — steps describe universal problem-solving (read, identify, plan, execute, verify) with no OR-specific terms, formulas, or domain heuristics
+
+Example (must be adjusted per v1 to match step count and length):
 ```yaml
 procedure:
   - step: "Read the problem carefully and identify what is being asked"
     check: "Can you state the goal in one sentence?"
-  - step: "List all given information"
-    check: "Have you captured every number and constraint mentioned?"
+  - step: "List all given information and constraints"
+    check: "Have you captured every number and condition mentioned?"
+  - step: "Identify what type of problem this is"
+    check: "Can you name the general category?"
   - step: "Choose an appropriate method to solve"
     check: "Does your method match the problem type?"
   - step: "Execute the solution step by step"
     check: "Is each step logically following from the previous?"
-  - step: "Verify your answer"
-    check: "Does your answer satisfy all constraints?"
+  - step: "Verify your answer against all stated constraints"
+    check: "Does your answer satisfy every condition in the problem?"
 ```
-The scaffold should be approximately the same token length as v1_curated to control for the prompt-length confound.
+
+**Validation:** Before running experiments, count tokens for both v1_curated and generic_scaffold using the model's tokenizer. Log both counts in results metadata. If they differ by more than 15%, adjust the scaffold.
 
 ### Pipeline Flow
 
@@ -698,7 +718,7 @@ quality_signals:
 | v1_curated shows directional improvement over baseline on test set | Yes — paired win/loss + accuracy delta |
 | v1_curated outperforms generic_scaffold on test set | Yes — isolates domain content vs structure |
 | v2_optimized shows directional improvement over v1 on test set | Yes — paired win/loss + accuracy delta |
-| Dev-to-test gap for v2 is small (no overfitting) | Yes — compare dev vs test accuracy |
+| Dev-to-test gap for v2 is reported as descriptive signal | Yes — report raw dev vs test accuracy; do not treat as pass/fail criterion at this sample size |
 | At least 3 success and 3 failure cases are interpretable | Yes — case study in report |
 | Root cause taxonomy is populated with real examples | Yes — error analysis output |
 | Skill diffs (v1->v2) have clear changelogs | Yes — optimization output |

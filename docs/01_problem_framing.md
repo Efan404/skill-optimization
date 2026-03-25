@@ -131,7 +131,7 @@ Negative results are still valuable findings:
 | v1_curated shows directional improvement over baseline on test set | Yes — paired win/loss + accuracy delta |
 | v1_curated outperforms generic_scaffold on test set | Yes — isolates domain content vs structure |
 | v2_optimized shows directional improvement over v1 on test set | Yes — paired win/loss + accuracy delta |
-| Dev-to-test gap for v2 is small (no overfitting) | Yes — compare dev vs test accuracy |
+| Dev-to-test gap for v2 is reported as descriptive signal | Yes — report raw dev vs test accuracy; do not treat as pass/fail criterion at this sample size |
 | At least 3 success and 3 failure cases are interpretable | Yes — case study in report |
 | Root cause taxonomy is populated with real examples | Yes — error analysis output |
 | Skill diffs (v1->v2) have clear changelogs | Yes — optimization output |
