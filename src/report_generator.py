@@ -398,6 +398,7 @@ def generate_report(
     run_id: str,
     model_name: str,
     questions: list[dict],
+    provenance: dict | None = None,
 ) -> str:
     """Generate the full markdown report.
 
@@ -407,6 +408,7 @@ def generate_report(
         The markdown report string.
     """
     sections = [
+        f"<!-- AUTO-GENERATED from run {run_id}; DO NOT EDIT BY HAND -->\n",
         "# Results and Analysis\n",
         _build_overview(run_id, model_name, dataset_label, questions),
         "## Development Set Results\n\n"
@@ -450,6 +452,7 @@ def generate_marketplace_cards(
     model_name: str,
     questions: list[dict],
     run_id: str = "latest",
+    provenance: dict | None = None,
 ) -> None:
     """Generate demo marketplace cards for each task type.
 
@@ -478,6 +481,7 @@ def generate_marketplace_cards(
                 "Evidence strength is demo-level and requires cross-model, "
                 "larger-sample validation before marketplace publication."
             ),
+            "_provenance": provenance if provenance else {},
             "asset_name": f"or-{task_type.replace('_', '-')}",
             "asset_type": "capsule",
             "domain": "operations_research",
