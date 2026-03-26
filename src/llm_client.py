@@ -136,6 +136,7 @@ class LLMClient:
         safe_purpose = purpose.replace("/", "_").replace(" ", "_") if purpose else "call"
         filename = f"{safe_purpose}_{request_id[:8]}.json"
         log_path = self.log_dir / filename
+        self.log_dir.mkdir(parents=True, exist_ok=True)
 
         with open(log_path, "w") as f:
             json.dump(log_entry, f, indent=2, default=str)
