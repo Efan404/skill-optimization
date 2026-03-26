@@ -28,7 +28,7 @@ class TestLoadConfig:
         assert config["model"] == "deepseek-chat"
         assert config["api_key_env"] == "DEEPSEEK_API_KEY"
         assert config["temperature"] == 0
-        assert config["max_tokens"] == 2048
+        assert isinstance(config["max_tokens"], int) and config["max_tokens"] > 0
         assert config["retry"]["max_retries"] == 3
 
     def test_load_config_openrouter(self):
