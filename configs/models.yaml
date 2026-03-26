@@ -34,9 +34,9 @@ models:
     max_tokens: 8192
     timeout: 600
     retry:
-      max_retries: 3
-      backoff_seconds: 5
-    min_delay_between_calls: 0.0
+      max_retries: 5
+      backoff_seconds: 10
+    min_delay_between_calls: 3.0
 
   qwen3_4b:
     provider: "openai_compatible"
@@ -47,6 +47,6 @@ models:
     max_tokens: 8192
     timeout: 600
     retry:
-      max_retries: 3
-      backoff_seconds: 5
-    min_delay_between_calls: 0.0
+      max_retries: 5
+      backoff_seconds: 10
+    min_delay_between_calls: 3.0
