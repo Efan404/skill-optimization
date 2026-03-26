@@ -1,11 +1,30 @@
 """Skill Optimizer — LLM refines v1 -> v2 skill using dev evidence only."""
 
-import re
-
-import yaml
+import json
 
 from src.llm_client import LLMClient
 from src.skill_manager import save_skill, skill_to_yaml_string
+from src.skill_schema import validate_skill_dict
+
+OPTIMIZER_SCHEMA_FOR_PROMPT = """
+Output a JSON object with this structure:
+{
+  "skill": {
+    "name": "string",
+    "version": "v2_optimized",
+    "source": "optimized",
+    "domain": "string",
+    "task_type": "string",
+    "when_to_use": "string",
+    "when_not_to_use": "string",
+    "preconditions": ["string", ...],
+    "procedure": [{"step": "string", "check": "string"}, ...],
+    "common_failures": ["string", ...],
+    "verification": "string"
+  },
+  "changelog": ["string - what changed and why", ...]
+}
+"""
 
 OPTIMIZER_PROMPT = """You are a skill optimization expert. You are given:
 
@@ -29,163 +48,7 @@ Your job: produce an IMPROVED version of the skill that:
 3. Stays concise — do not make the skill longer than necessary
 4. Produces GENERAL improvements — not fixes targeted at specific questions
 
-Output the complete updated skill in the same YAML format, followed by:
-
-**CHANGELOG:**
-- What you changed and why (one bullet per change)"""
-
-
-def _try_parse_yaml(text: str) -> dict | None:
-    """Try to parse YAML, with a repair pass for common LLM output issues.
-
-    LLMs often produce YAML with unquoted strings containing colons, e.g.:
-        check: Match the question to: objective, constraints
-    This is invalid YAML. We attempt a repair by quoting such lines.
-
-    Returns parsed dict, or None if parsing fails.
-    """
-    # First, try parsing as-is
-    try:
-        result = yaml.safe_load(text)
-        if isinstance(result, dict):
-            return result
-    except yaml.YAMLError:
-        pass
-
-    # Repair: quote values that contain unquoted colons
-    # Handle any key: value lines where value contains colons
-    repaired_lines = []
-    for line in text.split("\n"):
-        stripped = line.lstrip()
-        indent = line[:len(line) - len(stripped)]
-
-        # Skip empty lines, comments, block scalar indicators
-        if not stripped or stripped.startswith("#"):
-            repaired_lines.append(line)
-            continue
-
-        # Handle list items: "- key: value with: colon"
-        if stripped.startswith("- "):
-            inner = stripped[2:].strip()
-            if ":" in inner:
-                key_part, _, val_part = inner.partition(":")
-                val_stripped = val_part.strip()
-                if val_stripped and ":" in val_stripped and not (
-                    val_stripped.startswith("'") or val_stripped.startswith('"') or
-                    val_stripped.startswith(">") or val_stripped.startswith("|")
-                ):
-                    val_escaped = val_stripped.replace("'", "''")
-                    repaired_lines.append(f"{indent}- {key_part}: '{val_escaped}'")
-                    continue
-            repaired_lines.append(line)
-            continue
-
-        # Handle regular key: value lines
-        if ":" in stripped:
-            key_part, _, val_part = stripped.partition(":")
-            val_stripped = val_part.strip()
-            if val_stripped and ":" in val_stripped and not (
-                val_stripped.startswith("'") or val_stripped.startswith('"') or
-                val_stripped.startswith("[") or val_stripped.startswith(">") or
-                val_stripped.startswith("|")
-            ):
-                val_escaped = val_stripped.replace("'", "''")
-                repaired_lines.append(f"{indent}{key_part}: '{val_escaped}'")
-                continue
-
-        repaired_lines.append(line)
-
-    repaired_text = "\n".join(repaired_lines)
-    try:
-        result = yaml.safe_load(repaired_text)
-        if isinstance(result, dict):
-            return result
-    except yaml.YAMLError:
-        pass
-
-    return None
-
-
-def extract_yaml_from_response(response: str) -> dict:
-    """Extract a YAML skill dict from an LLM response.
-
-    Tries multiple strategies:
-    1. Look for a YAML code block (```yaml ... ```)
-    1b. Unclosed ```yaml block (truncated response)
-    2. Look for any code block (``` ... ```)
-    3. Try to parse everything before the CHANGELOG marker as YAML
-    4. Try the entire response as YAML
-
-    All parsing attempts use _try_parse_yaml which includes a repair
-    pass for common LLM YAML issues (unquoted colons in strings).
-
-    Args:
-        response: The raw LLM response text.
-
-    Returns:
-        The parsed YAML as a dictionary.
-
-    Raises:
-        ValueError: If no valid YAML could be extracted.
-    """
-    # Strategy 1: Look for ```yaml ... ``` code block (closed)
-    yaml_block_match = re.search(r"```yaml\s*\n(.*?)```", response, re.DOTALL)
-    if yaml_block_match:
-        result = _try_parse_yaml(yaml_block_match.group(1).strip())
-        if result:
-            return result
-
-    # Strategy 1b: Unclosed ```yaml block (LLM response truncated at max_tokens)
-    yaml_open_match = re.search(r"```yaml\s*\n(.*)", response, re.DOTALL)
-    if yaml_open_match:
-        yaml_text = re.sub(r"\n?```\s*$", "", yaml_open_match.group(1).strip())
-        result = _try_parse_yaml(yaml_text)
-        if result:
-            return result
-
-    # Strategy 2: Look for any code block ``` ... ``` (closed)
-    code_block_match = re.search(r"```\s*\n(.*?)```", response, re.DOTALL)
-    if code_block_match:
-        result = _try_parse_yaml(code_block_match.group(1).strip())
-        if result:
-            return result
-
-    # Strategy 3: Everything before **CHANGELOG:** or CHANGELOG:
-    changelog_match = re.search(r"\*?\*?CHANGELOG\*?\*?\s*:", response)
-    if changelog_match:
-        yaml_text = response[: changelog_match.start()].strip()
-        yaml_text = re.sub(r"^```(?:yaml)?\s*\n?", "", yaml_text)
-        yaml_text = re.sub(r"\n?```\s*$", "", yaml_text)
-        result = _try_parse_yaml(yaml_text)
-        if result:
-            return result
-
-    # Strategy 4: Try parsing the entire response as YAML (last resort)
-    result = _try_parse_yaml(response)
-    if result:
-        return result
-
-    raise ValueError(
-        f"Could not extract valid YAML from LLM response. "
-        f"Response preview: {response[:300]}"
-    )
-
-
-def _extract_changelog(response: str) -> str:
-    """Extract the changelog section from an LLM response.
-
-    Args:
-        response: The raw LLM response text.
-
-    Returns:
-        The changelog text, or a default message if not found.
-    """
-    # Look for **CHANGELOG:** or CHANGELOG: section
-    match = re.search(r"\*?\*?CHANGELOG\*?\*?\s*:\s*\n(.*)", response, re.DOTALL)
-    if match:
-        return match.group(1).strip()
-
-    return "No changelog provided by the optimizer."
+""" + OPTIMIZER_SCHEMA_FOR_PROMPT.strip()
 
 
 def _assert_dev_split(item: dict, label: str) -> None:
@@ -315,39 +178,54 @@ def optimize_skill(
         dev_success_summaries=_format_success_summaries(dev_successes),
     )
 
-    last_error = None
-    for attempt in range(3):
-        messages = [{"role": "user", "content": prompt}]
-        result = client.chat(
-            messages,
-            purpose=f"optimize_skill_{task_type}",
+    messages = [{"role": "user", "content": prompt}]
+    result = client.chat(
+        messages,
+        purpose=f"optimize_skill_{task_type}",
+        response_format={"type": "json_object"},
+    )
+
+    # Parse JSON response
+    try:
+        response_data = json.loads(result["response"])
+    except json.JSONDecodeError as e:
+        raise ValueError(
+            f"LLM returned invalid JSON for skill optimization. "
+            f"Error: {e}. Response preview: {result['response'][:300]}"
+        ) from e
+
+    if not isinstance(response_data, dict):
+        raise ValueError(
+            f"LLM returned JSON but not a dict (got {type(response_data).__name__}). "
+            f"Response preview: {result['response'][:300]}"
         )
 
-        response_text = result["response"]
+    # Extract skill and changelog from the response
+    if "skill" not in response_data:
+        raise ValueError(
+            f"LLM JSON response missing 'skill' key. "
+            f"Keys found: {list(response_data.keys())}. "
+            f"Response preview: {result['response'][:300]}"
+        )
 
-        try:
-            # Extract YAML skill and changelog from the response
-            optimized_skill = extract_yaml_from_response(response_text)
-            changelog = _extract_changelog(response_text)
+    optimized_skill = response_data["skill"]
 
-            # Save the optimized skill
-            output_path = f"skills/orqa/v2_optimized/{task_type}.yaml"
-            save_skill(optimized_skill, output_path)
+    # Validate required fields
+    issues = validate_skill_dict(optimized_skill)
+    if issues:
+        raise ValueError(
+            f"Optimized skill is missing required fields: {'; '.join(issues)}. "
+            f"Response preview: {result['response'][:300]}"
+        )
 
-            return optimized_skill, changelog
+    # Build changelog string
+    changelog_items = response_data.get("changelog", [])
+    changelog = "\n".join(f"- {item}" for item in changelog_items)
+    if not changelog:
+        changelog = "No changelog provided by the optimizer."
 
-        except (ValueError, yaml.YAMLError) as e:
-            last_error = e
-            if attempt < 2:
-                # Add instruction for cleaner YAML on retry
-                prompt += (
-                    "\n\nIMPORTANT: Your previous response had YAML formatting errors. "
-                    "Ensure ALL string values containing colons are properly quoted "
-                    "with single quotes. Use > or | YAML block scalar syntax for long text."
-                )
-                continue
+    # Save the optimized skill (internal storage remains YAML)
+    output_path = f"skills/orqa/v2_optimized/{task_type}.yaml"
+    save_skill(optimized_skill, output_path)
 
-    raise ValueError(
-        f"Failed to extract optimized skill after 3 attempts. "
-        f"Last error: {last_error}"
-    )
+    return optimized_skill, changelog
