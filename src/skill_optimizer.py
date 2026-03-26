@@ -52,7 +52,7 @@ def extract_yaml_from_response(response: str) -> dict:
     Raises:
         ValueError: If no valid YAML could be extracted.
     """
-    # Strategy 1: Look for ```yaml ... ``` code block
+    # Strategy 1: Look for ```yaml ... ``` code block (closed)
     yaml_block_match = re.search(r"```yaml\s*\n(.*?)```", response, re.DOTALL)
     if yaml_block_match:
         yaml_text = yaml_block_match.group(1).strip()
@@ -63,7 +63,20 @@ def extract_yaml_from_response(response: str) -> dict:
         except yaml.YAMLError:
             pass
 
-    # Strategy 2: Look for any code block ``` ... ```
+    # Strategy 1b: Unclosed ```yaml block (LLM response truncated at max_tokens)
+    yaml_open_match = re.search(r"```yaml\s*\n(.*)", response, re.DOTALL)
+    if yaml_open_match:
+        yaml_text = yaml_open_match.group(1).strip()
+        # Remove trailing ``` if present
+        yaml_text = re.sub(r"\n?```\s*$", "", yaml_text)
+        try:
+            result = yaml.safe_load(yaml_text)
+            if isinstance(result, dict):
+                return result
+        except yaml.YAMLError:
+            pass
+
+    # Strategy 2: Look for any code block ``` ... ``` (closed)
     code_block_match = re.search(r"```\s*\n(.*?)```", response, re.DOTALL)
     if code_block_match:
         yaml_text = code_block_match.group(1).strip()
