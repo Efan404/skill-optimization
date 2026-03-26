@@ -3,6 +3,8 @@
 import json
 from pathlib import Path
 
+from tqdm import tqdm
+
 from src.llm_client import LLMClient
 
 ROOT_CAUSE_CODES = [
@@ -155,7 +157,9 @@ def analyze_dev_failures(
 
     analysis_results: dict = {}
 
-    for condition, condition_results in dev_results.items():
+    all_conditions = list(dev_results.keys())
+    for condition in tqdm(all_conditions, desc="  Error analysis", unit="cond"):
+        condition_results = dev_results[condition]
         analysis_results[condition] = {}
 
         for question_id, result_data in condition_results.items():

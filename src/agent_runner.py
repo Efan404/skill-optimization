@@ -8,6 +8,8 @@ Supports five experimental conditions:
   - v2_optimized: iteratively refined skill
 """
 
+from tqdm import tqdm
+
 from src.llm_client import LLMClient
 from src.skill_manager import skill_to_yaml_string
 
@@ -202,7 +204,7 @@ def run_condition(
         A dict mapping ``question_id -> run_single result``.
     """
     results: dict[str, dict] = {}
-    for question in questions:
+    for question in tqdm(questions, desc=f"  {condition}", unit="q", leave=False):
         try:
             result = run_single(client, question, condition, skill=skill)
             results[result["question_id"]] = result
