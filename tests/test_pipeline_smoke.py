@@ -26,7 +26,7 @@ class FakeLLMClient:
         self.run_id = run_id
         self._call_count = 0
 
-    def chat(self, messages, purpose=""):
+    def chat(self, messages, purpose="", response_format=None):
         self._call_count += 1
         # Return a canned response that always picks "A"
         return {

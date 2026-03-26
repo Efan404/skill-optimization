@@ -124,6 +124,61 @@ class TestLLMClientChat:
         assert result["tokens_used"] == 100
         assert "request_id" in result
 
+    def test_chat_with_response_format(self, client):
+        """Chat passes response_format to the API when provided."""
+        mock_completion = self._make_mock_completion('{"key": "value"}', 50)
+
+        with patch.object(
+            client.client.chat.completions, "create", return_value=mock_completion
+        ) as mock_create:
+            result = client.chat(
+                messages=[{"role": "user", "content": "Hi"}],
+                purpose="json_test",
+                response_format={"type": "json_object"},
+            )
+
+        # Verify response_format was passed through to the API call
+        call_kwargs = mock_create.call_args[1]
+        assert call_kwargs["response_format"] == {"type": "json_object"}
+        assert result["response"] == '{"key": "value"}'
+
+    def test_chat_without_response_format(self, client):
+        """Chat does not pass response_format when not provided."""
+        mock_completion = self._make_mock_completion("Plain text", 50)
+
+        with patch.object(
+            client.client.chat.completions, "create", return_value=mock_completion
+        ) as mock_create:
+            result = client.chat(
+                messages=[{"role": "user", "content": "Hi"}],
+                purpose="no_format_test",
+            )
+
+        # Verify response_format was NOT passed to the API call
+        call_kwargs = mock_create.call_args[1]
+        assert "response_format" not in call_kwargs
+        assert result["response"] == "Plain text"
+
+    def test_chat_logs_response_format(self, client):
+        """Log file includes response_format when provided."""
+        import json as _json
+
+        mock_completion = self._make_mock_completion('{"a": 1}', 30)
+
+        with patch.object(
+            client.client.chat.completions, "create", return_value=mock_completion
+        ):
+            client.chat(
+                messages=[{"role": "user", "content": "Hi"}],
+                purpose="log_format_test",
+                response_format={"type": "json_object"},
+            )
+
+        log_files = list(client.log_dir.glob("*.json"))
+        assert len(log_files) == 1
+        log_data = _json.loads(log_files[0].read_text())
+        assert log_data["response_format"] == {"type": "json_object"}
+
     def test_chat_logs_request(self, client):
         """Chat call creates a log file."""
         mock_completion = self._make_mock_completion()
