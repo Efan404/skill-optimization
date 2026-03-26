@@ -5,7 +5,9 @@ The optimizer NEVER sees test data.
 """
 
 import argparse
+import hashlib
 import json
+import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -39,6 +41,36 @@ console = Console()
 PRE_OPT_CONDITIONS = ["baseline", "generic_scaffold", "v0_self_generated", "v1_curated"]
 ALL_CONDITIONS = ["baseline", "generic_scaffold", "v0_self_generated", "v1_curated", "v2_optimized"]
 
+DATA_DIR = Path(__file__).parent.parent / "data" / "orqa"
+
+
+def _get_git_commit() -> str:
+    """Return current git HEAD hash, or 'unknown' if not in a git repo."""
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            capture_output=True, text=True, timeout=5,
+        )
+        return result.stdout.strip() if result.returncode == 0 else "unknown"
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return "unknown"
+
+
+def _compute_data_digest() -> str:
+    """Compute SHA-256 hex digest of data/orqa/questions.json."""
+    questions_path = DATA_DIR / "questions.json"
+    sha = hashlib.sha256(questions_path.read_bytes()).hexdigest()
+    return f"sha256:{sha}"
+
+
+def _compute_split_counts(questions: list[dict]) -> dict:
+    """Count questions per split."""
+    counts: dict[str, int] = {}
+    for q in questions:
+        split = q.get("split", "unknown")
+        counts[split] = counts.get(split, 0) + 1
+    return counts
+
 
 def _save_results(results: dict, split: str, run_id: str):
     """Save evaluation results to results/runs/{run_id}/evaluations/{split}/."""
@@ -69,6 +101,30 @@ def run_pipeline(model_name: str = "deepseek", run_id: str = None):
 
     # Derive task types dynamically from data
     all_data_questions = load_questions()
+
+    # ─── Write run metadata.json ───────────────────────────────────────
+    git_commit = _get_git_commit()
+    data_digest = _compute_data_digest()
+    split_counts = _compute_split_counts(all_data_questions)
+    conditions_run = list(ALL_CONDITIONS)
+    dataset_label = get_dataset_label()
+
+    metadata = {
+        "run_id": run_id,
+        "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+        "model": model_name,
+        "git_commit": git_commit,
+        "data_digest": data_digest,
+        "conditions_run": conditions_run,
+        "split_counts": split_counts,
+        "dataset_label": dataset_label,
+    }
+
+    run_dir = Path(f"results/runs/{run_id}")
+    run_dir.mkdir(parents=True, exist_ok=True)
+    with open(run_dir / "metadata.json", "w") as f:
+        json.dump(metadata, f, indent=2)
+    console.print(f"[green]Metadata written to {run_dir / 'metadata.json'}")
     TASK_TYPES = sorted(set(q["task_type"] for q in all_data_questions))
     console.print(f"Task types: {TASK_TYPES}")
 
@@ -97,7 +153,6 @@ def run_pipeline(model_name: str = "deepseek", run_id: str = None):
             console.print(f"[red]Missing skill file: {e}")
             sys.exit(1)
 
-    dataset_label = get_dataset_label()
     console.print(f"Dataset label: {dataset_label}")
 
     # Initialize LLM client
@@ -282,6 +337,14 @@ def run_pipeline(model_name: str = "deepseek", run_id: str = None):
         "v2_optimized": v2_skills,
     }
 
+    # Build provenance block for artifacts
+    provenance = {
+        "run_id": metadata["run_id"],
+        "timestamp": metadata["timestamp"],
+        "model": metadata["model"],
+        "git_commit": metadata["git_commit"],
+    }
+
     report = generate_report(
         dev_results=dev_results,
         test_results=test_results,
@@ -292,6 +355,7 @@ def run_pipeline(model_name: str = "deepseek", run_id: str = None):
         run_id=run_id,
         model_name=client.config["model"],
         questions=all_questions,
+        provenance=provenance,
     )
     console.print("[green]Report saved to docs/03_results_and_analysis.md")
 
@@ -304,6 +368,7 @@ def run_pipeline(model_name: str = "deepseek", run_id: str = None):
         model_name=client.config["model"],
         questions=all_questions,
         run_id=run_id,
+        provenance=provenance,
     )
     console.print(f"[green]Marketplace cards saved to results/runs/{run_id}/marketplace_cards/")
 
