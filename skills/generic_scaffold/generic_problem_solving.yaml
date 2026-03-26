@@ -24,188 +24,315 @@ preconditions:
   - "Enough contextual detail exists in the problem description to distinguish the correct answer from plausible distractors, meaning the answer can be derived through careful analysis rather than guesswork."
 
 procedure:
-  # Step 1 -- Read the problem; identify the CENTRAL QUESTION and GOAL
+  # =========================================================================
+  # Stage A -- Determine Question Target
+  # =========================================================================
+  # Before analyzing the scenario, first establish exactly what the
+  # question is asking about. This focuses all downstream reasoning on
+  # the specific aspect being queried rather than performing unfocused
+  # general analysis.
+  # =========================================================================
   - step: >
-      Read the entire problem description before attempting to answer.
-      Identify WHO or WHAT the scenario is about and WHAT specific
-      question is being asked. Find the sentence(s) that define what
-      you need to determine -- look for phrasing like "which of the
-      following," "what is the," "identify the," or "select the best."
-      Restate the question in precise terms: what specific aspect of
-      the scenario is being queried? Be alert to subtle phrasing --
-      negations ("which is NOT"), superlatives ("which is MOST"), or
-      qualifiers ("which BEST describes") each require different
-      reasoning.
+      Read the question stem carefully before analyzing the problem
+      description. Determine what specific aspect of the scenario the
+      question asks about. The target will be one of:
+      (a) Active elements -- things that can be chosen, controlled,
+          decided, or selected within the scenario;
+      (b) Given information -- fixed facts, stated values, known
+          quantities, background conditions that are established as true;
+      (c) Goal or purpose -- what the scenario aims to achieve, what
+          outcome is desired, what quantity is being evaluated;
+      (d) Restrictions or conditions -- limits, requirements, rules,
+          dependencies, boundaries that constrain what is possible;
+      (e) Categories or groupings -- the collections of entities, types,
+          classes, or groups that structure the scenario;
+      (f) Classification -- what type or category the scenario itself
+          belongs to based on its features;
+      (g) Structure or pattern -- what overall approach or framework
+          characterizes the scenario;
+      (h) Relationships -- how specific elements of the scenario connect
+          to or depend on each other.
+      Note any qualifiers in the question: negations ("which is NOT"),
+      superlatives ("which BEST describes"), specificity requirements
+      ("which of the following conditions" vs. "what type of condition"),
+      or scope limiters ("in this particular case"). These qualifiers
+      fundamentally change what counts as a correct answer and must be
+      tracked throughout your analysis.
     check: >
-      Can you quote the exact sentence(s) that define the question?
-      Have you identified whether it asks you to find, classify,
-      identify, compare, or evaluate something? Have you noted any
-      negations or qualifiers? Does your restatement match the actual
-      question, not your assumption?
+      Can you state in one sentence what specific aspect of the scenario
+      the question targets? Have you noted any negations, qualifiers,
+      superlatives, or scope limiters in the question stem? Is your
+      identified target one of the eight categories listed above? Have
+      you avoided jumping to analyze the problem description before
+      fully understanding what the question asks?
 
-  # Step 2 -- Extract KEY ENTITIES and their ROLES
+  # =========================================================================
+  # Stage B -- Analyze Scenario Context and Structure
+  # =========================================================================
+  # Read the full problem description and understand the overall
+  # structure of the scenario. Identify the type of situation described,
+  # the key relationships, and what kind of reasoning will be needed.
+  # This contextual understanding guides more precise extraction in the
+  # next stage.
+  # =========================================================================
   - step: >
-      Identify the KEY ENTITIES in the scenario -- the named items,
-      categories, people, groups, processes, or concepts described.
-      For each entity, determine its ROLE: is it something that can
-      be chosen or controlled (an active element), something fixed and
-      given (background information), or something that results from
-      interactions (a derived outcome)? For each candidate entity in
-      the answer options, ask: "Does the problem text explicitly
-      describe this entity and its role?" Only accept entities with
-      direct textual support. Classify each as active, fixed, or
-      derived. Note which entities participate directly in the aspect
-      the question asks about versus which are peripheral context.
-    check: >
-      For every identified entity, can you point to a specific span
-      in the problem text? Have you rejected plausible-sounding
-      entities not actually described or playing a different role?
-      Have you classified each entity as active, fixed, or derived?
-      Have you distinguished central entities from peripheral context?
+      Read the full problem description. Understand the overall scenario
+      by identifying:
 
-  # Step 3 -- Identify CATEGORIES and GIVEN INFORMATION
-  - step: >
-      Identify the CATEGORIES or GROUPINGS in the problem -- the
-      collections of things that the scenario describes. Categories are
-      groups of similar entities: types of items, time periods, named
-      groups, locations, stages in a process, or classes of outcomes.
-      They are not individual facts or numbers.
-      Then identify the GIVEN INFORMATION -- the specific facts, values,
-      properties, and stated conditions. Given information includes
-      quantities, rates, capacities, requirements, qualities, costs,
-      durations, and any other specific data. For each piece of given
-      information, note which category or entity it describes (e.g.,
-      "processing time" describes a task within a set of tasks).
-      Distinguish given facts from aspects that are the subject of
-      the question: if a value is stated as known, it is given
-      information; if determining it is the point of the question,
-      it is what you need to derive.
-    check: >
-      Are your categories truly collections of entities (not single
-      values or facts)? For each piece of given information, can you
-      trace it to a specific statement in the problem text? Have you
-      avoided listing aspects that are actually the focus of the
-      question as "given" information? Can you state which category
-      each piece of information relates to?
+      (1) THE SITUATION -- What is happening? Who is involved? What is
+          the setting or context? What challenge or task is described?
+          Identify the central actor or decision-maker and what they are
+          trying to accomplish. Look for explicit goal statements using
+          phrases like "your goal is to", "the aim is to", "you want to",
+          "your task is to", "the challenge is to", "you are looking for".
 
-  # Step 4 -- Analyze the CORE RELATIONSHIP or STRUCTURE
-  - step: >
-      Determine the CORE RELATIONSHIP or STRUCTURE connecting the
-      given information to the answer. Specify:
-      (a) its nature -- quantitative (values combine via arithmetic),
-          logical (conditions that must jointly hold), classificatory
-          (features determine category membership), or causal (actions
-          produce outcomes);
-      (b) which entities and given information participate -- express
-          it as a connection between elements identified earlier;
-      (c) the direction or logic -- does a larger value of X lead to
-          more or less of Y? Does condition A imply or exclude B?
-      (d) any special structure -- interactions between elements,
-          thresholds that change behavior, or hierarchical dependencies
-          where one determination depends on another?
-      Cross-check against the question from Step 1 to confirm you are
-      analyzing the right structure.
-    check: >
-      Does the relationship actually connect given information to what
-      the question asks? Are ALL elements present in the problem (not
-      assumed)? Are ALL stated relationships included? If the question
-      asks about specific elements, have you analyzed precisely those?
-      Does the structure account for special conditions mentioned?
+      (2) THE STRUCTURE -- How is the scenario organized? What are the
+          main categories, groups, or collections of things involved?
+          How do different elements relate to each other? Is there a
+          hierarchical structure (groups containing items), a network
+          structure (things connected to other things), a temporal
+          structure (things happening over time periods), or a matching
+          structure (things paired or assigned to other things)?
 
-  # Step 5 -- Identify ALL CONDITIONS and RESTRICTIONS
-  - step: >
-      Identify ALL CONDITIONS and RESTRICTIONS from the problem
-      description. Re-read the text sentence by sentence. For each
-      condition, determine:
-      (a) TYPE -- is it a limit (something cannot exceed a value), a
-          requirement (something must meet or exceed a threshold), an
-          equality (something must be exactly a specific value), an
-          exclusion (certain combinations are forbidden), or a logical
-          dependency (one thing is required only if another holds);
-      (b) WHAT IT CONSTRAINS -- which entities, quantities, or
-          relationships does this condition apply to;
-      (c) THE THRESHOLD OR RULE -- what specific value, property, or
-          logical rule defines the boundary;
-      (d) SCOPE -- does this condition apply universally, to a specific
-          subset, or conditionally based on other factors;
-      (e) DIRECTION -- is the condition an upper bound (at most), a
-          lower bound (at least), or an exact match (exactly).
-      Pay special attention to implicit conditions: default assumptions,
-      logical necessities (you cannot select more items than exist),
-      mutual exclusivity (selecting one option may preclude another),
-      and boundary conditions (what happens at the limits of the
-      described ranges).
-    check: >
-      Have you re-read the problem to catch implicit conditions? For
-      each condition, can you state what it restricts, what the
-      threshold is, and what scope it applies to? Have you captured
-      logical dependencies between conditions? Have you included
-      boundary conditions and mutual exclusivity constraints? Does
-      each condition reference elements that are actually described
-      in the problem?
+      (3) KEY RELATIONSHIPS -- What connections, dependencies, or
+          interactions does the description establish between elements?
+          Which elements affect or constrain other elements? Are there
+          cause-and-effect relationships, compatibility relationships,
+          containment relationships, or flow relationships?
 
-  # Step 6 -- CLASSIFY, VERIFY, and SELECT the answer
-  - step: >
-      Classify the SCENARIO TYPE on two dimensions:
-      (1) Reasoning type -- quantitative calculation, logical deduction,
-          pattern matching, causal reasoning, classification, or
-          comparison?
-      (2) Complexity -- does the answer depend on a single determination
-          or on multiple interacting determinations?
-      Then evaluate EACH ANSWER OPTION against your complete analysis.
-      For each option: does it match all entities, relationships,
-      conditions, and given information? Does it contradict any stated
-      fact? Eliminate options conflicting with the problem text. If
-      multiple seem consistent, re-examine the distinguishing details
-      -- the correct answer matches the text precisely, not
-      approximately. Select the option with the strongest textual
-      support.
+      (4) ACTIVE vs. FIXED ELEMENTS -- Distinguish between elements that
+          are subject to choice or determination (things the actor decides,
+          selects, or controls) versus elements that are stated as given,
+          known, or fixed (background facts, established data, known
+          quantities). This distinction is critical: the problem text
+          must explicitly indicate something is a choice or decision for
+          it to be an active element. If the text presents something as
+          established fact ("each item has a weight", "the cost is known",
+          "you have data on durations"), it is fixed information, not an
+          active element.
+
+      (5) THE GOAL -- What outcome does the scenario aim to achieve?
+          Is it maximizing something, minimizing something, finding the
+          best arrangement, satisfying a set of requirements, or reaching
+          a specific target? Identify the direction (more is better vs.
+          less is better) and the specific quantity or quality being
+          evaluated. Quote the exact sentence(s) that state the goal.
+
+      (6) CONDITIONS AND LIMITS -- What restrictions, rules, or
+          requirements does the problem impose? Look for phrases like
+          "must not exceed", "at least", "at most", "exactly", "no more
+          than", "cannot", "is required", "must be", "ensuring that",
+          "subject to". Also identify implicit conditions: things that
+          are logically necessary even if not explicitly stated (e.g.,
+          you cannot use more of something than exists, you cannot be
+          in two places at once, quantities cannot be negative).
+
+      After this analysis, summarize the scenario type in one sentence
+      describing the core task structure.
     check: >
-      Have you checked every option against every condition and
-      relationship? Is the selected answer consistent with ALL stated
-      facts, not just some? If the answer required multiple
-      determinations, have you verified each independently? Have you
-      confirmed eliminated options genuinely conflict with the text?
+      Have you identified the central actor and their goal? Can you
+      quote the goal sentence from the problem text? Have you distinguished
+      active elements from fixed information using explicit textual
+      evidence? Have you identified the key structural relationships?
+      Have you noted both explicit and implicit conditions? Can you
+      summarize the scenario type in one sentence? Have you avoided
+      making assumptions beyond what the text states?
+
+  # =========================================================================
+  # Stage C -- Extract and Organize Relevant Information
+  # =========================================================================
+  # Systematically extract the specific information needed to answer
+  # the question. Use the scenario understanding from Stage B to guide
+  # extraction, but verify every extracted element against the text.
+  # =========================================================================
+  - step: >
+      Using your understanding of the scenario from Stage B, now
+      systematically extract and organize the information relevant to
+      answering the question identified in Stage A:
+
+      (1) CATEGORIES AND GROUPS -- List every collection of entities
+          described in the problem. These are the groups you would
+          iterate over or enumerate: types of items, time periods, named
+          locations, people or roles, stages in a process, classes of
+          outcomes, or any other structured collection. A category is a
+          group of similar things, not a single fact or number. For each
+          category, cite the text that establishes it.
+
+      (2) ACTIVE ELEMENTS -- For each element that the actor can choose
+          or control, verify: "Does the problem text explicitly say this
+          is something that is decided, chosen, or determined?" Only
+          accept elements with direct textual support. Classify each
+          by its nature: is it a yes/no choice (whether to do something),
+          a continuous quantity (how much of something), a discrete count
+          (how many of something), or a selection (which option to pick)?
+          Note which active elements participate directly in the stated
+          goal versus which are auxiliary.
+
+      (3) FIXED INFORMATION -- List the given facts, values, properties,
+          rates, capacities, requirements, durations, scores, and any
+          other specific data stated in the problem. For each piece of
+          fixed information, note which category or element it describes
+          and cite the relevant text. Distinguish fixed information from
+          active elements: if the value is stated as known or given, it
+          is fixed; if determining it is part of the task, it is active.
+
+      (4) GOAL SPECIFICATION -- Restate the goal precisely: what quantity
+          or quality is being evaluated, and in what direction (more is
+          better, less is better, or a specific target)? Identify which
+          active elements and which fixed information participate in the
+          goal statement. If the goal involves no explicit fixed data
+          (e.g., achieving the best arrangement by some abstract measure),
+          note that clearly.
+
+      (5) CONDITIONS AND RESTRICTIONS -- For each condition, determine:
+          (a) What it constrains -- which elements, quantities, or
+              relationships does this condition apply to?
+          (b) The nature of the restriction -- is it an upper bound (at
+              most), a lower bound (at least), an exact requirement
+              (exactly), a prohibition (cannot), or a logical dependency
+              (if X then Y)?
+          (c) The threshold or rule -- what specific value, property, or
+              logic defines the boundary?
+          (d) The scope -- does this condition apply to every member of
+              a category (universally), to specific members, or only
+              when certain other conditions hold?
+          Re-read the problem text sentence by sentence to catch
+          conditions embedded in subordinate clauses, parenthetical
+          remarks, or phrased as background context. Look especially for
+          implicit conditions: non-negativity (quantities cannot be
+          negative), mutual exclusivity (selecting one option precludes
+          another), capacity limits, and logical necessities.
+
+      (6) CLASSIFICATION -- Based on the active elements and the
+          structure of the scenario, classify the problem along two
+          dimensions: (a) What type of reasoning is required -- is it
+          quantitative, logical, classificatory, causal, or comparative?
+          (b) What is the complexity -- does the answer depend on a
+          single determination or on multiple interacting determinations?
+    check: >
+      For every extracted element, can you point to a specific span in
+      the problem text that supports it? Have you rejected plausible-
+      sounding elements that are not actually described in the problem?
+      Have you correctly distinguished active elements from fixed
+      information? Have you captured implicit conditions by re-reading
+      the problem sentence by sentence? Does your goal specification
+      match the exact goal statement in the text? Have you classified
+      each active element by its nature?
+
+  # =========================================================================
+  # Stage D -- Answer Against Options
+  # =========================================================================
+  # Evaluate each answer option against the extracted and organized
+  # information. Focus narrowly on the aspect the question asks about.
+  # Eliminate options that contradict the text or lack support.
+  # =========================================================================
+  - step: >
+      Focus narrowly on the aspect identified in Stage A. Using your
+      organized information from Stage C, evaluate each answer option:
+
+      (a) For each option, check: does this match what you found in
+          Stage C for the targeted aspect? Can you cite specific textual
+          evidence supporting or contradicting this option?
+
+      (b) Eliminate options that:
+          - Contradict the problem text in any way (e.g., listing a
+            fixed fact as an active element, reversing a stated
+            relationship, misstating a condition's direction)
+          - Include elements with no textual reference in the problem
+            description, even if they sound plausible or related to the
+            scenario (plausibility is not evidence)
+          - Mischaracterize a relationship, condition, or classification
+            that you established in your analysis
+
+      (c) Among remaining options, prefer the one with the most direct
+          and complete textual support. If an option partially matches
+          your analysis but includes an unsupported or incorrect element,
+          it is less preferable than an option where every element has
+          textual grounding. The correct answer is the one that most
+          precisely and completely matches the problem text.
+
+      (d) If the question asks about classification or type, verify your
+          determination against the full scenario analysis: check that
+          your classification accounts for all relevant features, not
+          just the most prominent one.
+
+      (e) Handle special question types carefully:
+          - Negation questions ("which is NOT"): identify the options
+            that DO match, then select the one that does not
+          - Superlative questions ("which BEST"): all options may
+            partially match, but select the most accurate or complete
+          - Relationship questions: trace the specific connection the
+            question asks about through your analysis
+
+      State your final answer with explicit justification referencing
+      the problem text. For each eliminated option, briefly note why
+      it was rejected.
+    check: >
+      Have you evaluated every answer option against the problem text?
+      Have you eliminated options with elements that lack textual support?
+      Is your selected answer consistent with ALL extracted information
+      from Stage C? If the question has a negation ("which is NOT"),
+      have you inverted your reasoning correctly? If the question has
+      a superlative ("which BEST"), have you compared the precision of
+      remaining options? Can you justify your answer with a direct quote
+      or paraphrase from the problem description? Have you provided a
+      brief reason for rejecting each eliminated option?
 
 common_failures:
   - >
     Accepting an answer option that sounds plausible but has no direct
     textual support in the problem description. Careful analysis
     consistently rejects options that lack a specific reference in the
-    text, even when they are semantically related to the scenario. Always
-    demand that every element of your chosen answer can be traced to an
-    explicit statement in the problem.
+    text, even when they are semantically related to the scenario. For
+    example, an option may describe something that commonly occurs in
+    similar scenarios but is never mentioned in this specific problem
+    description. Always demand that every element of your chosen answer
+    can be traced to an explicit statement in the problem text. If you
+    cannot point to a specific sentence or phrase that supports an
+    element, that element lacks textual grounding.
   - >
-    Confusing given information with aspects that are the focus of the
-    question, or vice versa. Given information consists of stated facts,
-    values, and conditions that are presented as established; the focus
-    of the question is what you need to determine or classify. If the
-    problem states something as known, it is given information. If
-    determining it is the point, it is not given -- it is what you must
-    derive.
+    Confusing fixed information with active elements, or vice versa.
+    Fixed information consists of stated facts, known values, established
+    conditions, and given data that are presented as true in the problem.
+    Active elements are things the actor decides, chooses, controls, or
+    determines. A reliable test: if the problem says "you know X" or
+    "X is given" or "each item has X," then X is fixed information. If
+    the problem says "you must decide X" or "determine which X" or
+    "your task is to find X," then X is an active element. Misclassifying
+    these leads to fundamental errors in analysis. When in doubt, check
+    whether the text frames the element as something established or
+    something to be determined.
   - >
-    Misidentifying the question's precise requirement -- for example,
+    Misidentifying what the question precisely asks for -- for example,
     reading "which is NOT" as "which IS," overlooking a qualifier like
-    "BEST describes" or "MOST likely," or confusing two similar but
-    distinct question phrasings. Always re-read the question stem and
-    confirm you are answering exactly what was asked, including any
-    negations, superlatives, or qualifying words.
+    "BEST describes" or "MOST likely," confusing two similar but distinct
+    question phrasings, or answering about a different aspect than what
+    was asked. Always re-read the question stem after completing your
+    analysis and confirm you are answering exactly what was asked,
+    including any negations, superlatives, scope limiters, or qualifying
+    words. A correct analysis of the scenario is worthless if applied to
+    the wrong question.
   - >
-    Overlooking implicit conditions such as logical dependencies between
-    stated facts, mutual exclusivity of options, boundary conditions at
-    the limits of described ranges, or default assumptions that are not
-    explicitly stated but are logically required. Re-read the full
-    problem description to catch conditions embedded in subordinate
-    clauses, parenthetical remarks, or phrased as background context
-    rather than explicit rules.
+    Overlooking implicit conditions and restrictions that are logically
+    necessary but not explicitly stated as rules. Common examples:
+    quantities cannot be negative, you cannot use more of a resource
+    than exists, selecting one option may preclude selecting another,
+    things cannot be in two places simultaneously, dependencies between
+    conditions mean satisfying one may require satisfying another, and
+    boundary conditions at the limits of described ranges may have
+    special properties. Re-read the full problem description specifically
+    looking for conditions embedded in subordinate clauses, parenthetical
+    remarks, background descriptions, or phrased as obvious facts rather
+    than explicit rules.
 
 verification: >
   Cross-check every identified element against the original problem
-  text. For each key entity, confirm a supporting text span exists.
-  For each piece of given information, confirm it is stated in the
+  text. For each active element, confirm a supporting text span exists.
+  For each piece of fixed information, confirm it is stated in the
   problem. For each condition, confirm the threshold, scope, and
-  direction match. Verify the core relationship connects given
-  information to the question correctly. Compare your analysis against
-  each answer option and eliminate those contradicting any element of
-  the problem text. Confirm your selected answer is the ONLY option
-  fully consistent with all stated information and conditions.
+  direction match. Verify the goal direction and quantity match the
+  goal sentence. Confirm your classification accounts for all relevant
+  features of the scenario. Compare your analysis against each answer
+  option and eliminate those contradicting any element of the problem
+  text. Confirm your selected answer is the ONLY option fully
+  consistent with all stated information and conditions.
