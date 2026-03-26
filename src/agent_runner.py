@@ -15,9 +15,12 @@ from src.skill_manager import skill_to_yaml_string
 # Prompt templates
 # ---------------------------------------------------------------------------
 
-BASELINE_PROMPT = """You are an expert in operations research. Solve the following multiple-choice problem.
+BASELINE_PROMPT = """You are an expert in operations research. Read the following optimization problem description and answer the question.
 
-**Problem:**
+**Problem Description:**
+{context}
+
+**Question:**
 {question}
 
 **Options:**
@@ -35,7 +38,10 @@ SCAFFOLD_PROMPT = """You are an expert in operations research. You have been giv
 **GUIDE:**
 {scaffold_yaml}
 
-**Problem:**
+**Problem Description:**
+{context}
+
+**Question:**
 {question}
 
 **Options:**
@@ -53,7 +59,10 @@ SKILL_PROMPT = """You are an expert in operations research. You have been given 
 **SKILL:**
 {skill_yaml}
 
-**Problem:**
+**Problem Description:**
+{context}
+
+**Question:**
 {question}
 
 **Options:**
@@ -103,6 +112,7 @@ def build_prompt(
 
     choices = question["choices"]
     fmt_kwargs = {
+        "context": question.get("context", ""),
         "question": question["question"],
         "choice_a": choices["A"],
         "choice_b": choices["B"],
