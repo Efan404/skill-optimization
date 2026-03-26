@@ -153,49 +153,73 @@ v1_curated is grounded in three published sources (cite in the skill's metadata)
 2. **LLMOPT five-element formulation** (ICLR 2025) — universal decomposition: Sets → Parameters → Variables → Objective → Constraints
 3. **SkillsBench SKILL.md format** — structured markdown with procedure steps, checks, and common failures
 
-### Skill Structure (6 steps, matching scaffold)
+### Skill Internal Architecture: Three-Layer Design
 
-```yaml
-name: "or-model-identification"
-version: "v1_curated"
-source: "curated"
-domain: "operations_research"
-task_type: "or_model_identification"
+The v1 skill must go beyond a sequential checklist. A pure checklist (read → find variables → find constraints → classify) is structurally similar to the generic scaffold and won't differentiate enough to pass Gate 1. The key value of a domain-specific skill is **archetype priors** — knowing that "assign workers to tasks" triggers an assignment model skeleton.
 
-when_to_use: "When identifying components of an optimization model from a natural language problem description"
-when_not_to_use: "When asked to numerically solve an optimization problem or generate solver code"
+**Design principle:** One unified YAML skill, internally organized in three layers. NOT a multi-skill router — that would introduce a prompt-architecture confound.
 
-preconditions:
-  - "A natural language description of an optimization/decision-making scenario is provided"
-  - "The question asks about model components, structure, or type — not numerical answers"
-  - "Multiple choice options are available"
+**Layer 1: Meta Framework (short)**
+- Determine what the question is asking about (variables? constraints? model type?)
+- Map the scenario to an OR archetype
+- Keep this layer brief — it overlaps with scaffold and shouldn't be the differentiator
 
-procedure:
-  - step: "Read the problem description and identify the DECISION-MAKER and their GOAL"
-    check: "Can you state who is making decisions and what they want to achieve?"
-  - step: "Identify all DECISION ACTIVITIES (variables the decision-maker controls)"
-    check: "For each activity: what can be changed? What are its possible values (continuous, integer, binary)?"
-  - step: "Identify all DATA PARAMETERS (given constants, known quantities)"
-    check: "Which numbers/values are fixed inputs, not decisions?"
-  - step: "Identify the OBJECTIVE (what to optimize) and its DIRECTION (max or min)"
-    check: "Is the objective a function of the decision variables? Is the direction explicit?"
-  - step: "Identify all CONSTRAINTS and SPECIFICATIONS (rules, limits, requirements)"
-    check: "Re-read the problem. Are there capacity limits, balance equations, logical conditions, or bounds you missed?"
-  - step: "Classify the MODEL TYPE based on variable types and function linearity"
-    check: "Are variables continuous → LP? Integer → IP? Mixed → MILP? Nonlinear terms → NLP?"
+**Layer 2: Archetype Library (main body — this is where v1's value lives)**
+- Embedded within the unified skill as a reference section
+- Covers common OR problem archetypes with trigger cues and expected model skeletons:
+  - **Assignment/Matching:** "assign X to Y", binary variables, one-to-one constraints
+  - **Routing/Network:** "route through", "shortest path", flow variables, flow conservation
+  - **Scheduling/Timetabling:** "schedule tasks", "time slots", sequencing variables, precedence constraints
+  - **Blending/Mixing:** "mix ingredients", "blend", continuous proportions, quality specifications
+  - **Facility Location:** "open/close", binary location decisions + continuous allocation
+  - **Production Planning/Lot-sizing:** "produce over periods", inventory balance equations
+  - **Transportation:** "ship from... to...", supply/demand balance, flow capacity
+- For each archetype: trigger cues, likely variable types, likely objective family, likely constraint families, common confusions
 
-common_failures:
-  - "Confusing decision variables with data parameters"
-  - "Missing implicit constraints stated indirectly in the problem"
-  - "Misclassifying model type due to overlooking integer or nonlinear requirements"
-  - "Treating calculated quantities as decision variables"
+**Layer 3: High-Precision Local Rules (few, precise, high-confidence)**
+- Only a small number of very reliable patterns:
+  - "assign ... to ..." → assignment archetype
+  - "maximize profit / minimize cost" → objective direction
+  - "at most / at least / exactly" → constraint polarity (≤, ≥, =)
+  - Binary indicators ("whether to open/close") → model has integer variables → MILP
+- Must be few, precise, and explainable — not keyword tricks
 
-verification: "Re-read the question. Does your answer specifically address what was asked (variables, constraints, objective, model type, etc.)? Cross-check against the options."
+**Research constraint:** The skill's external structure (number of procedure steps, common_failures, preconditions) must still match the scaffold for fair comparison. The layered organization is in the **content** of the steps, not the structure.
+
+### Skill Procedure (4 stages, internally layered)
+
 ```
+Stage A: Determine Question Target
+  → What component is the question asking about?
+  → (variables / parameters / objective / constraints / model type / relationship)
+
+Stage B: Map Scenario to Archetype (Layer 2 — core value)
+  → Read context, identify trigger cues
+  → Match to OR archetype (assignment, routing, scheduling, blending, etc.)
+  → Activate archetype-specific priors for expected variables, objective, constraints
+
+Stage C: Instantiate Model Skeleton (using archetype priors)
+  → Elements/entities (sets)
+  → Decision variables (guided by archetype expectations)
+  → Parameters (given constants)
+  → Objective (direction + participating variables/parameters)
+  → Constraints (type, LHS meaning, RHS, applied-on)
+
+Stage D: Answer Against Options
+  → Focus only on the component the question asks about
+  → Eliminate options that contradict the problem text
+  → Prefer options with direct textual support over plausible-sounding alternatives
+```
+
+### Why This Matters for the Experiment
+
+- If v1 is just a checklist → v1 ≈ scaffold → Gate 1 fails → no autoresearch
+- If v1 has archetype priors → v1 provides genuinely different guidance than scaffold → measurable signal possible
+- The scaffold has the SAME structure (4 stages) but NO archetype content → this isolates whether the improvement comes from domain-specific priors
 
 ### Generic Scaffold
 
-Same structure: 6 steps, 4 common_failures, 3 preconditions. Generic problem-solving content, no OR terms. Token count within +/-15% of v1. Validated before experiments.
+Same external structure: same number of procedure steps, same number of common_failures, same number of preconditions. Token count within +/-15% of v1. Content is purely generic problem-solving — same 4-stage flow (determine target → analyze context → extract information → answer against options) but with NO OR terminology, NO archetype library, NO domain-specific trigger cues. Validated before experiments.
 
 ---
 
