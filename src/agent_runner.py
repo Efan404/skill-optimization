@@ -8,6 +8,8 @@ Supports five experimental conditions:
   - v2_optimized: iteratively refined skill
 """
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 from tqdm import tqdm
 
 from src.llm_client import LLMClient
@@ -189,30 +191,28 @@ def run_condition(
     questions: list[dict],
     condition: str,
     skill: dict | None = None,
+    max_workers: int = 5,
 ) -> dict:
-    """Run all questions for a single condition.
-
-    Iterates over the list of questions, calling :func:`run_single` for each.
+    """Run all questions for a single condition, with concurrent API calls.
 
     Args:
         client: An initialised LLMClient instance.
         questions: A list of question dicts.
         condition: The experimental condition name.
         skill: Optional skill/scaffold dict.
+        max_workers: Number of concurrent threads for API calls (default 5).
 
     Returns:
         A dict mapping ``question_id -> run_single result``.
     """
     results: dict[str, dict] = {}
-    for question in tqdm(questions, desc=f"  {condition}", unit="q", leave=False):
+
+    def _run_one(question: dict) -> dict:
         try:
-            result = run_single(client, question, condition, skill=skill)
-            results[result["question_id"]] = result
+            return run_single(client, question, condition, skill=skill)
         except Exception as e:
-            # Log failure but continue with remaining questions.
-            # A transient API error should not abort the entire condition.
             qid = question.get("id", "unknown")
-            results[qid] = {
+            return {
                 "question_id": qid,
                 "condition": condition,
                 "response": "",
@@ -220,4 +220,13 @@ def run_condition(
                 "tokens_used": 0,
                 "error": str(e),
             }
+
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {executor.submit(_run_one, q): q for q in questions}
+        with tqdm(total=len(questions), desc=f"  {condition}", unit="q", leave=False) as pbar:
+            for future in as_completed(futures):
+                result = future.result()
+                results[result["question_id"]] = result
+                pbar.update(1)
+
     return results
