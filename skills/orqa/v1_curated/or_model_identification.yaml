@@ -2,7 +2,7 @@ name: "or-model-identification"
 version: "v1_curated"
 source: "curated"
 domain: "operations_research"
-task_type: "model_identification"
+task_type: "or_model_identification"
 
 # Metadata & citations
 # ---------------------------------------------------------------------------
@@ -15,6 +15,11 @@ task_type: "model_identification"
 #      Sets -> Parameters -> Variables -> Objective -> Constraints.
 #   3. SkillsBench SKILL.md format (Didolkar et al., 2024) --
 #      procedure/check/common_failures structure.
+#
+# Architecture: Three-layer design (meta framework / archetype library /
+# high-precision local rules) expressed as a 4-stage procedure. Layer 2
+# (archetype library) is embedded inline in Stage B and constitutes the
+# core differentiator from the generic scaffold.
 # ---------------------------------------------------------------------------
 
 when_to_use: >
@@ -36,197 +41,314 @@ preconditions:
 
 procedure:
   # =========================================================================
-  # Step 1 -- Read context; identify DECISION-MAKER and GOAL
+  # Stage A -- Determine Question Target (Layer 1 — brief)
   # =========================================================================
-  # ORQA expert pattern (Q1): locate the sentence that states the goal,
-  # e.g. "Your goal is to minimize total cost" or "maximize the total
-  # viewer rating score." Distinguish the true objective from side
-  # information. Watch for subtle phrasings such as min-max fairness
-  # ("no one heir benefits significantly more than the others") which
-  # imply minimizing the gap between best and worst outcomes, not simply
-  # maximizing a total.
+  # ORQA expert pattern: before analyzing the full model, first determine
+  # what specific component the question asks about (Q1 -> objective,
+  # Q2/Q7 -> constraints, Q5 -> sets, Q6 -> decision variables, Q8 ->
+  # parameters, Q9 -> objective components, Q3 -> problem category,
+  # Q4 -> model type, Q10/Q11 -> constraint semantics/relationships).
+  # This focuses downstream reasoning on the relevant component.
   # =========================================================================
   - step: >
-      Read the entire problem description. Identify WHO is the
-      decision-maker and WHAT is their overarching goal. Find the
-      sentence(s) that state the objective (look for "goal is to,"
-      "aim is to," "objective is to," "you want to," "challenge is to").
-      Restate the goal in precise terms: what quantity, and is it
-      maximized or minimized? Be alert to implicit objective forms --
-      a fairness goal ("no one benefits significantly more") means
-      minimize the max-min gap, not maximize a total.
+      Read the question stem carefully before analyzing the problem
+      description. Determine what specific model component the question
+      asks about. The target will be one of:
+      (a) Decision variables / decision activities -- what the decision-maker
+          controls or chooses;
+      (b) Parameters / given data -- fixed constants, coefficients, costs,
+          capacities, demands;
+      (c) Objective function -- what is maximized or minimized, and which
+          variables and parameters participate;
+      (d) Constraints / restrictions -- limits, requirements, balance
+          equations, logical conditions;
+      (e) Sets -- indexing collections (time periods, locations, products,
+          people, machines);
+      (f) Model type -- LP, ILP, MILP, NLP classification;
+      (g) Problem category -- assignment, routing, scheduling, blending,
+          facility location, etc.;
+      (h) Relationships -- how specific components relate to each other
+          (e.g., which parameter appears in which constraint).
+      Note any qualifiers in the question: negations ("which is NOT"),
+      superlatives ("which BEST"), or specificity ("which of the following
+      constraints" vs. "which constraint type").
     check: >
-      Can you quote the exact sentence(s) from the description that
-      define the goal? Have you correctly identified whether the
-      objective is maximize or minimize? Have you captured the correct
-      quantity (e.g., total cost vs. total profit vs. min-max
-      difference)? Does your restatement match the description, not
-      your assumption?
+      Can you state in one sentence what model component the question
+      targets? Have you noted any negations, qualifiers, or specificity
+      in the question stem? Is your identified target one of the eight
+      categories listed above? Have you avoided jumping to the problem
+      description before understanding the question?
 
   # =========================================================================
-  # Step 2 -- Identify DECISION ACTIVITIES (variables)
+  # Stage B -- Map Scenario to Archetype (Layer 2 — THIS IS THE CORE VALUE)
   # =========================================================================
-  # ORQA expert pattern (Q6, Q9): enumerate every candidate decision
-  # from the answer options, then verify each against the problem text.
-  # A valid decision variable must have an explicit textual reference
-  # showing the decision-maker can CONTROL or CHOOSE it. Reject
-  # candidates that sound plausible but lack textual grounding.
-  # Decision variables can be continuous (amounts, quantities),
-  # binary (yes/no indicators, open/close), or integer (counts).
+  # ORQA expert pattern: expert reasoning traces consistently show that
+  # recognizing the problem archetype early (Q3 -> "this is an assignment
+  # problem", Q6 -> "the decisions are about allocating X to Y") provides
+  # strong priors about which variables, constraints, and objective forms
+  # to expect. This archetype-first approach prevents common errors like
+  # treating parameters as decisions or missing implicit constraints.
+  #
+  # The archetype library below covers 7 common OR problem families. Each
+  # entry provides: trigger cues (phrases that signal this archetype),
+  # expected variable types, typical objective, typical constraints, and
+  # common confusions specific to that archetype.
   # =========================================================================
   - step: >
-      Identify the DECISION ACTIVITIES -- what the decision-maker can
-      control or choose. For each candidate, ask: "Does the problem
-      text explicitly say this is something the decision-maker decides?"
-      Only accept decisions with direct textual support. Classify each
-      variable by type: continuous (e.g., amount to ship), binary
-      (e.g., whether to open a facility), or integer (e.g., number of
-      workers assigned). Note which variables participate directly in
-      the objective function versus only in constraints.
+      Read the full problem description. Identify trigger cues and match
+      the scenario to one of the following OR archetypes. Use the matched
+      archetype to activate priors about expected model components.
+
+      --- ARCHETYPE LIBRARY ---
+
+      **Assignment/Matching:**
+      - Trigger cues: "assign X to Y", "allocate workers to tasks",
+        "match patients to rooms", "select which items to include"
+      - Variables: binary x_ij indicating whether entity i is assigned
+        to entity j (or binary selection indicators)
+      - Objective: minimize total cost or distance, maximize total
+        satisfaction or value or rating score
+      - Constraints: each task assigned exactly once, each worker or
+        resource has a capacity limit, assignment feasibility (not every
+        pair is valid)
+      - Common confusion: treating demand or capacity (a parameter) as a
+        decision variable; mistaking "broadcast order" for a decision
+        when only "broadcast indicator" (whether to air) is decided
+
+      **Routing/Network:**
+      - Trigger cues: "route through", "ship from...to...", "network
+        flow", "shortest path", "deliver along routes", "distribute
+        through a network"
+      - Variables: flow quantities on arcs (continuous), binary route
+        selections, number of items on each route
+      - Objective: minimize total transportation cost or distance,
+        maximize total flow or throughput
+      - Constraints: flow conservation at each node (inflow = outflow),
+        arc capacity limits, supply limits at sources, demand satisfaction
+        at destinations
+      - Common confusion: confusing node capacity with arc capacity;
+        listing "number of sources" or "number of destinations" as
+        decisions when they are given data (sets)
+
+      **Scheduling/Timetabling:**
+      - Trigger cues: "schedule tasks", "time slots", "sequence jobs",
+        "due dates", "broadcasting lineup", "shift scheduling",
+        "assign sessions to rooms"
+      - Variables: start times (continuous), binary assignment of tasks
+        to slots or machines, completion times, sequencing indicators
+      - Objective: minimize makespan or total tardiness or completion
+        time, maximize utilization or total value of completed tasks
+      - Constraints: precedence relations (task A before task B), no
+        overlap on a single machine, resource capacity per period,
+        deadline satisfaction, transition or setup times between tasks
+      - Common confusion: treating processing time or duration (a
+        parameter) as a decision variable; confusing "task order" with
+        "task selection" when the problem only decides which tasks to do
+
+      **Blending/Mixing:**
+      - Trigger cues: "blend", "mix ingredients", "recipe", "meet
+        quality specifications", "combine raw materials"
+      - Variables: continuous proportions or quantities of each
+        ingredient in the blend
+      - Objective: minimize total cost of the blend or mixture
+      - Constraints: quality specification bounds (minimum and maximum
+        for each attribute like protein content, fat percentage),
+        total quantity or volume requirement, availability limits
+        for each ingredient
+      - Common confusion: treating a quality specification threshold
+        (a parameter) as a decision; confusing the blend ratio
+        (decision) with the ingredient quality score (parameter)
+
+      **Facility Location:**
+      - Trigger cues: "open or close facilities", "locate warehouses",
+        "decide which plants to build", "select sites", "which
+        hospitals to close"
+      - Variables: binary open/close indicators for each facility +
+        continuous allocation of demand to open facilities
+      - Objective: minimize total fixed cost (opening) + variable cost
+        (shipping or assignment), or maximize coverage or efficiency
+      - Constraints: demand satisfaction (each customer served), capacity
+        limit if facility is open, logical linking (cannot ship from or
+        assign to a closed facility), cardinality limit (at most k
+        facilities open)
+      - Common confusion: missing the binary nature of open/close
+        decisions, leading to MILP misclassified as LP; forgetting the
+        linking constraint between binary open/close and continuous flow
+
+      **Production Planning/Lot-sizing:**
+      - Trigger cues: "produce over multiple periods", "inventory
+        levels", "holding cost", "setup cost per period", "multi-period
+        production"
+      - Variables: production quantities per period (continuous or
+        integer), inventory levels at end of each period, binary setup
+        indicators (whether to produce in a given period)
+      - Objective: minimize total production cost + holding cost +
+        setup cost over all periods
+      - Constraints: inventory balance equation (inventory_end =
+        inventory_begin + production - demand), production capacity per
+        period, storage capacity limit, non-negativity of inventory
+      - Common confusion: missing the inventory balance equation as a
+        constraint; treating demand per period (a parameter) as a
+        decision variable; confusing "number of periods" (a set) with a
+        decision
+
+      **Transportation:**
+      - Trigger cues: "transport from sources to destinations", "supply
+        and demand", "shipping cost from factory to customer", "delivery
+        from warehouses to stores"
+      - Variables: quantity shipped on each source-destination route
+        (continuous)
+      - Objective: minimize total shipping or transportation cost
+      - Constraints: supply limits at each source (total shipped out
+        does not exceed supply), demand satisfaction at each destination
+        (total received meets or exceeds demand), non-negativity of
+        shipment quantities
+      - Common confusion: confusing total supply or total demand (an
+        aggregate parameter) with per-route capacity; treating shipping
+        cost (a parameter) as a decision variable
+
+      --- END ARCHETYPE LIBRARY ---
+
+      After identifying the archetype, also apply these high-precision
+      local rules (Layer 3):
+      - "assign...to..." or "allocate...to..." => assignment archetype
+      - "maximize profit" or "minimize cost" => confirms objective direction
+      - "at most" => upper bound constraint (<=)
+      - "at least" => lower bound constraint (>=)
+      - "exactly" => equality constraint (=)
+      - "whether to open/close" or "decide which to build" => binary
+        variable present => model is MILP or ILP, not pure LP
+      - "for each" or "per" => signals the constraint or parameter is
+        indexed over a set
+
+      If the scenario does not clearly match a single archetype, identify
+      the closest one and note the deviation. Some problems blend two
+      archetypes (e.g., facility location with transportation).
     check: >
-      For every identified decision variable, can you point to a
-      specific span in the problem text that supports it? Have you
-      rejected plausible-sounding decisions that are actually given
-      data or consequences, not choices? Have you classified each
-      variable as continuous, binary, or integer?
+      Have you identified the primary archetype for this problem? Can you
+      cite at least two trigger cues from the problem text that support
+      your archetype choice? Have you activated the archetype-specific
+      priors for variables, objective, and constraints? If the problem
+      blends archetypes, have you noted which elements come from which
+      archetype? Have you applied any relevant high-precision local rules?
 
   # =========================================================================
-  # Step 3 -- Identify SETS and DATA PARAMETERS
+  # Stage C -- Instantiate Model Skeleton (using archetype priors)
   # =========================================================================
-  # ORQA expert pattern (Q5): sets are indexing collections that
-  # parameterize the model -- time periods, locations, products, people,
-  # machines. They are NOT individual numbers or costs. A set is
-  # "the collection you iterate over."
-  # ORQA expert pattern (Q8): data parameters are given constants that
-  # appear as coefficients or right-hand-side values. They are NOT
-  # decisions. Distinguish "cost per unit" (parameter) from "number of
-  # units to ship" (decision variable).
+  # ORQA expert pattern (Q5, Q6, Q8, Q1, Q2, Q7): after recognizing the
+  # archetype, systematically fill in each model component. For every
+  # component, require textual evidence from the problem description.
+  # The archetype priors tell you WHAT TO LOOK FOR; the problem text
+  # tells you WHAT ACTUALLY EXISTS. Accept only components with direct
+  # textual support. Reject archetype-expected components that have no
+  # textual grounding in this specific problem.
   # =========================================================================
   - step: >
-      Identify the SETS -- the indexing collections over which the
-      model is defined. Sets are groups of entities you iterate over:
-      time periods, locations, products, customers, machines, workers,
-      routes. They are not individual numbers or costs.
-      Then identify the DATA PARAMETERS -- the given constants, fixed
-      inputs, and coefficients. Parameters include costs per unit,
-      capacities, demands, distances, durations, and quality scores.
-      For each parameter, note which sets it is indexed over (e.g.,
-      "shipping cost" is indexed over factories x customers).
-      Distinguish parameters from decision variables: if the value is
-      given and fixed, it is a parameter; if the decision-maker
-      chooses it, it is a variable.
+      Using the archetype priors from Stage B as guidance for what to
+      look for, systematically instantiate the model skeleton by filling
+      in each component with evidence from the problem text:
+
+      (1) SETS -- Identify the indexing collections. These are groups of
+          entities you iterate over: time periods, locations, products,
+          customers, machines, workers, routes. A set is "the collection
+          you iterate over," NOT an individual number or cost. For each
+          set, cite the text that establishes it.
+
+      (2) DECISION VARIABLES -- Identify what the decision-maker can
+          control or choose. For each candidate variable, verify: "Does
+          the problem text explicitly say this is something the decision-
+          maker decides?" The archetype priors suggest likely variable
+          types (binary for assignment, continuous for blending, etc.)
+          but only accept variables with direct textual support. Classify
+          each as continuous, binary, or integer.
+
+      (3) PARAMETERS -- Identify given constants and fixed data: costs,
+          capacities, demands, distances, durations, quality scores. For
+          each parameter, note which sets it is indexed over (e.g.,
+          "shipping cost" indexed over factories x customers). If the
+          value is given and fixed, it is a parameter; if the decision-
+          maker chooses it, it is a variable.
+
+      (4) OBJECTIVE -- State the direction (maximize or minimize) and
+          the quantity being optimized. Identify which decision variables
+          and which parameters participate as coefficients. Cross-check
+          against the archetype's expected objective form. If the
+          objective involves no explicit data parameters (e.g., minimizing
+          makespan), state that clearly.
+
+      (5) CONSTRAINTS -- For each constraint, determine:
+          (a) Type: capacity limit, demand satisfaction, balance equation,
+              assignment, cardinality bound, logical/linking, non-negativity
+          (b) Left-hand side: what is aggregated and over which index
+          (c) Relation: <=, >=, or =
+          (d) Right-hand side: what given data or value
+          (e) Applied on: which set element ("for each customer", "for
+              each period")
+          Pay special attention to implicit constraints suggested by the
+          archetype: inventory balance equations for lot-sizing, linking
+          constraints for facility location, flow conservation for
+          networks, non-negativity and binary restrictions.
+
+      (6) MODEL TYPE -- Based on variables and function forms:
+          All continuous + linear => LP.
+          All integer/binary + linear => ILP.
+          Mix of continuous and integer/binary + linear => MILP.
+          Any nonlinear function => NLP or MINLP.
     check: >
-      Are your sets truly collections of entities (not single values)?
-      For each parameter, can you trace it to a specific piece of given
-      data in the problem text? Have you avoided listing decision
-      variables as parameters? Can you state the index sets for each
-      parameter?
+      For every identified component, can you point to a specific span
+      in the problem text that supports it? Have you rejected archetype-
+      expected components that lack textual grounding in this particular
+      problem? Have you distinguished parameters from variables correctly?
+      Have you captured implicit constraints suggested by the archetype?
+      Does your model type classification match the variable types and
+      function linearity you identified?
 
   # =========================================================================
-  # Step 4 -- Formulate the OBJECTIVE function
+  # Stage D -- Answer Against Options
   # =========================================================================
-  # ORQA expert pattern (Q1, Q8, Q9): the objective is a function of
-  # decision variables and parameters. Identify which parameters appear
-  # as coefficients and which variables are summed or aggregated. Note
-  # that sometimes NO data parameters appear directly in the objective
-  # (e.g., minimizing a deviation variable). The direction (max/min)
-  # must match the goal sentence from Step 1.
+  # ORQA expert pattern (across all Q types): the final step focuses
+  # narrowly on the specific component the question asks about. Expert
+  # reasoning traces consistently: (a) enumerate candidate answers from
+  # the options, (b) check each against the problem text, (c) eliminate
+  # options that contradict the text or lack textual support, and
+  # (d) prefer the option with the most direct textual evidence.
   # =========================================================================
   - step: >
-      Write the OBJECTIVE FUNCTION in words or symbolic form. Specify:
-      (a) the direction -- maximize or minimize;
-      (b) the quantity being optimized -- express it as a function of
-          decision variables and parameters identified earlier;
-      (c) which data parameters serve as coefficients in the objective;
-      (d) which decision variables appear directly in the objective.
-      If the objective involves no explicit data parameters (e.g.,
-      minimizing a derived variable like makespan or deviation), state
-      that clearly. Cross-check against the goal sentence from Step 1.
-    check: >
-      Does the objective direction match the goal sentence? Are ALL
-      variables in the objective actually decision variables (not
-      parameters misclassified)? Are ALL coefficients actually given
-      data (not decisions)? If the question asks specifically about
-      parameters or variables in the objective, have you answered
-      precisely which ones participate?
+      Focus narrowly on the component identified in Stage A. Using your
+      model skeleton from Stage C, evaluate each answer option:
 
-  # =========================================================================
-  # Step 5 -- Identify CONSTRAINTS and their semantics
-  # =========================================================================
-  # ORQA expert pattern (Q2, Q7, Q10, Q11): for each constraint,
-  # identify (a) what it limits, (b) its left-hand side meaning
-  # (what is being summed and over which index), (c) which set
-  # element it is applied "for each" of, and (d) the right-hand side.
-  # Key constraint types seen in ORQA: capacity limits (total assigned
-  # to a resource <= capacity), demand satisfaction (supply >= demand),
-  # balance equations (ending inventory = beginning + inflow - outflow),
-  # assignment constraints (each task assigned to exactly one resource),
-  # cardinality limits (at most k facilities open), and logical
-  # constraints (if facility closed, no shipment from it).
-  # =========================================================================
-  - step: >
-      Identify ALL CONSTRAINTS from the problem description. Re-read
-      the text sentence by sentence. For each constraint, determine:
-      (a) TYPE -- capacity limit, demand satisfaction, balance equation,
-          assignment, cardinality bound, logical/linking, or
-          non-negativity/bound;
-      (b) LEFT-HAND SIDE -- what quantity is aggregated (e.g., "total
-          amount shipped to customer j from all factories"), and over
-          which set index it is summed;
-      (c) RELATION -- <=, >=, or =;
-      (d) RIGHT-HAND SIDE -- what given data or value it is compared to;
-      (e) APPLIED ON -- which set element this constraint is "for each"
-          of (e.g., "for each customer," "for each time period").
-      Pay special attention to implicit constraints: non-negativity,
-      binary restrictions, "a factory that cannot produce an item ships
-      zero," and balance equations where inflow minus outflow equals
-      net change.
-    check: >
-      Have you re-read the problem to catch implicit constraints? For
-      each constraint, can you state its LHS meaning, its RHS, and
-      which set element it applies to? Have you captured balance
-      equations (stock_end = stock_begin + in - out)? Have you included
-      non-negativity and variable-type restrictions? Does each
-      constraint reference the correct variables and parameters?
+      (a) For each option, check: does this match what you found in
+          Stage C for the targeted component? Can you cite specific
+          textual evidence supporting or contradicting this option?
 
-  # =========================================================================
-  # Step 6 -- Classify MODEL TYPE and PROBLEM CATEGORY
-  # =========================================================================
-  # ORQA expert pattern (Q4): classify based on variable types and
-  # linearity. If all variables continuous and all functions linear -> LP.
-  # If all variables integer/binary and functions linear -> ILP.
-  # If mix of continuous and integer/binary with linear functions -> MILP.
-  # If any function is nonlinear (quadratic interactions, products of
-  # variables, nonlinear costs) -> NLP or MINLP.
-  # ORQA expert pattern (Q3): classify the problem category by its
-  # structure: assignment, blending, vehicle routing, scheduling/
-  # timetabling, network flow, lot-sizing, facility location, etc.
-  # Match the decision structure (what is assigned to what) to the
-  # standard OR problem category.
-  # =========================================================================
-  - step: >
-      Classify the MODEL TYPE based on two axes:
-      (1) Variable types -- are all decision variables continuous (LP),
-          all integer/binary (ILP), or a mix (MILP)?
-      (2) Function linearity -- are the objective and all constraints
-          linear in the decision variables? If any involve products of
-          variables, powers, or other nonlinear terms, the model is
-          NLP (or MINLP if also mixed-integer).
-      Then classify the PROBLEM CATEGORY by matching the decision
-      structure to standard OR archetypes: assignment (match entities
-      one-to-one), blending (mix ingredients to meet specs),
-      scheduling/timetabling (assign tasks to time slots or resources),
-      vehicle routing (determine paths for vehicles), network flow
-      (route commodities through a network), facility location
-      (open/close sites and assign demand), lot-sizing/production
-      planning (decide production quantities over time), or other.
+      (b) Eliminate options that:
+          - Contradict the problem text (e.g., listing a parameter as a
+            decision variable)
+          - Include elements with no textual reference in the problem
+            description (even if semantically plausible)
+          - Mischaracterize the relationship (e.g., wrong constraint
+            direction, wrong objective quantity)
+
+      (c) Among remaining options, prefer the one with the most direct
+          and complete textual support. If an option partially matches
+          but includes an unsupported element, it is less preferable
+          than an option where every element has textual grounding.
+
+      (d) If the question asks about model type or problem category,
+          verify your classification against the full model skeleton:
+          check variable types for LP/ILP/MILP and function linearity
+          for NLP. Match the decision structure to standard OR archetypes
+          for the problem category.
+
+      State your final answer with explicit justification referencing
+      the problem text.
     check: >
-      Have you checked every decision variable's type (continuous,
-      integer, binary) to determine LP vs. ILP vs. MILP? Have you
-      verified that the objective and constraints are truly linear
-      (no variable products, no powers, no nonlinear functions)? Does
-      your problem category label match the core decision structure
-      described in the problem text?
+      Have you evaluated every answer option against the problem text?
+      Have you eliminated options with elements that lack textual support?
+      Is your selected answer consistent with ALL components of your model
+      skeleton? If the question has a negation ("which is NOT"), have you
+      inverted your reasoning correctly? Can you justify your answer with
+      a direct quote or paraphrase from the problem description?
 
 common_failures:
   - >
@@ -234,21 +356,34 @@ common_failures:
     explicit textual support in the problem description. ORQA expert
     reasoning consistently rejects options that lack a direct reference
     in the text, even when they are semantically related to the problem.
+    For example, "broadcast order" may sound like a scheduling decision,
+    but if the problem only says "decide which shows to broadcast," the
+    decision is a broadcast indicator (binary), not ordering.
   - >
     Confusing a data parameter with a decision variable, or vice versa.
-    Parameters are given constants (costs, capacities, demands); variables
-    are quantities the decision-maker chooses. If the problem says "you
-    know the cost," that cost is a parameter, not a decision.
+    Parameters are given constants (costs, capacities, demands, durations,
+    quality scores); variables are quantities the decision-maker chooses.
+    A reliable test: if the problem says "you know the cost" or "each task
+    has a duration," those are parameters. If it says "you must decide how
+    many" or "determine which to select," those are variables. Archetype
+    priors help: in transportation, shipping cost is always a parameter;
+    quantity shipped is always a variable.
   - >
     Misidentifying the objective direction or quantity -- for example,
     reading "minimize cost" as "maximize profit," or missing a min-max
-    fairness objective (minimize the gap between best and worst) and
-    treating it as a simple total maximization.
+    fairness objective ("no one benefits significantly more") which implies
+    minimizing the gap between best and worst outcomes, not simply
+    maximizing a total. Always quote the exact goal sentence from the
+    problem text and verify the direction and quantity match.
   - >
-    Overlooking implicit constraints such as non-negativity, binary
-    restrictions on facility open/close decisions, balance equations
-    (inventory_end = inventory_start + inflow - outflow), or logical
-    linking constraints (if a facility is closed, nothing ships from it).
+    Overlooking implicit constraints that the archetype predicts. Common
+    examples: inventory balance equations in production planning
+    (inventory_end = inventory_start + production - demand), logical
+    linking constraints in facility location (if facility is closed,
+    no shipment from it), flow conservation in network problems
+    (inflow = outflow at each node), binary restrictions on open/close
+    decisions, and non-negativity of continuous variables. Re-read the
+    problem specifically looking for these archetype-predicted constraints.
 
 verification: >
   After completing the analysis, cross-check every identified component
@@ -257,6 +392,7 @@ verification: >
   data. For each constraint, confirm the LHS meaning, RHS value, and
   the set element it applies to. Verify the objective direction and
   quantity match the goal sentence. Confirm the model type is consistent
-  with the variable types and function linearity you identified. If the
-  question offers answer choices, compare your analysis against each
-  option and eliminate those that contradict the problem text.
+  with the variable types and function linearity you identified. Verify
+  your archetype choice is supported by at least two trigger cues from
+  the text. If the question offers answer choices, compare your analysis
+  against each option and eliminate those that contradict the problem text.

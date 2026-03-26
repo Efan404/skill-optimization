@@ -39,8 +39,7 @@ SAMPLE_SKILL = {
     "verification": "All tests pass",
 }
 
-V1_LP_PATH = PROJECT_ROOT / "skills" / "orqa" / "v1_curated" / "linear_programming.yaml"
-V1_CO_PATH = PROJECT_ROOT / "skills" / "orqa" / "v1_curated" / "combinatorial_optimization.yaml"
+V1_ORMI_PATH = PROJECT_ROOT / "skills" / "orqa" / "v1_curated" / "or_model_identification.yaml"
 SCAFFOLD_PATH = PROJECT_ROOT / "skills" / "generic_scaffold" / "generic_problem_solving.yaml"
 
 
@@ -74,13 +73,10 @@ def test_count_skill_tokens():
 
 
 def test_count_skill_tokens_real_skills():
-    """Real v1 skills have reasonable token counts (> 100 tokens)."""
-    lp = load_skill(str(V1_LP_PATH))
-    co = load_skill(str(V1_CO_PATH))
-    lp_tokens = count_skill_tokens(lp)
-    co_tokens = count_skill_tokens(co)
-    assert lp_tokens > 100, f"LP tokens unexpectedly low: {lp_tokens}"
-    assert co_tokens > 100, f"CO tokens unexpectedly low: {co_tokens}"
+    """Real v1 skill has reasonable token count (> 100 tokens)."""
+    ormi = load_skill(str(V1_ORMI_PATH))
+    ormi_tokens = count_skill_tokens(ormi)
+    assert ormi_tokens > 100, f"ORMI tokens unexpectedly low: {ormi_tokens}"
 
 
 # ---------------------------------------------------------------------------
@@ -130,23 +126,16 @@ def test_validate_scaffold_length_fail():
 
 
 def test_validate_scaffold_real_skills():
-    """Real scaffold is within 15% of both real v1 skills."""
-    lp = load_skill(str(V1_LP_PATH))
-    co = load_skill(str(V1_CO_PATH))
+    """Real scaffold is within 15% of the real v1 skill."""
+    ormi = load_skill(str(V1_ORMI_PATH))
     scaffold = load_skill(str(SCAFFOLD_PATH))
 
-    valid_lp, info_lp = validate_scaffold_length(lp, scaffold)
-    valid_co, info_co = validate_scaffold_length(co, scaffold)
+    valid_ormi, info_ormi = validate_scaffold_length(ormi, scaffold)
 
-    assert valid_lp, (
-        f"Scaffold not within 15% of LP: "
-        f"LP={info_lp['v1_tokens']}, scaffold={info_lp['scaffold_tokens']}, "
-        f"ratio={info_lp['ratio']:.3f}"
-    )
-    assert valid_co, (
-        f"Scaffold not within 15% of CO: "
-        f"CO={info_co['v1_tokens']}, scaffold={info_co['scaffold_tokens']}, "
-        f"ratio={info_co['ratio']:.3f}"
+    assert valid_ormi, (
+        f"Scaffold not within 15% of ORMI: "
+        f"ORMI={info_ormi['v1_tokens']}, scaffold={info_ormi['scaffold_tokens']}, "
+        f"ratio={info_ormi['ratio']:.3f}"
     )
 
 
@@ -167,16 +156,11 @@ def test_get_skill_for_baseline_any_task_type():
 
 
 def test_get_skill_for_curated():
-    """v1_curated returns the correct skill file for each task type."""
-    lp = get_skill_for_condition("v1_curated", "linear_programming")
-    assert lp is not None
-    assert lp["name"] == "linear-programming-solving"
-    assert lp["task_type"] == "linear_programming"
-
-    co = get_skill_for_condition("v1_curated", "combinatorial_optimization")
-    assert co is not None
-    assert co["name"] == "combinatorial-optimization-solving"
-    assert co["task_type"] == "combinatorial_optimization"
+    """v1_curated returns the correct skill file for the task type."""
+    ormi = get_skill_for_condition("v1_curated", "or_model_identification")
+    assert ormi is not None
+    assert ormi["name"] == "or-model-identification"
+    assert ormi["task_type"] == "or_model_identification"
 
 
 def test_get_skill_for_generic_scaffold():
