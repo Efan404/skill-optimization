@@ -10,6 +10,8 @@ from datetime import datetime
 from pathlib import Path
 from collections import Counter
 
+from src.evaluator import compute_outcome_labels
+
 
 CONDITIONS = ["baseline", "generic_scaffold", "v0_self_generated", "v1_curated", "v2_optimized"]
 
@@ -259,15 +261,31 @@ Observed: {observed}
 
 
 def _build_per_question_table(test_results: dict, questions: list[dict]) -> str:
-    """Build per-question test results table."""
+    """Build per-question test results table with outcome labels vs baseline."""
     test_qs = sorted(
         [q for q in questions if q["split"] == "test"],
         key=lambda q: q["id"]
     )
 
+    # Compute outcome labels for each non-baseline condition vs baseline
+    baseline_results = test_results.get("baseline", {})
+    non_baseline = [c for c in CONDITIONS if c != "baseline"]
+    outcome_labels = {}
+    for cond in non_baseline:
+        if cond in test_results:
+            outcome_labels[cond] = compute_outcome_labels(baseline_results, test_results[cond])
+
+    # Short display names for the outcome label columns
+    label_short = {
+        "improved": "+",
+        "degraded": "-",
+        "no_change_correct": "=ok",
+        "no_change_incorrect": "=fail",
+    }
+
     header = "## Per-Question Test Results\n\n"
-    header += "| QID | Type | Baseline | Scaffold | v0 | v1 | v2 | Correct |\n"
-    header += "|-----|------|----------|----------|----|----|----|---------|\n"
+    header += "| QID | Type | Baseline | Scaffold | v0 | v1 | v2 | Correct | vs_base(scaffold) | vs_base(v0) | vs_base(v1) | vs_base(v2) |\n"
+    header += "|-----|------|----------|----------|----|----|----|---------|--------------------|-------------|-------------|-------------|\n"
 
     rows = []
     for q in test_qs:
@@ -287,6 +305,12 @@ def _build_per_question_table(test_results: dict, questions: list[dict]) -> str:
             else:
                 cells.append("—")
         cells.append(correct)
+
+        # Append outcome labels vs baseline for each non-baseline condition
+        for cond in non_baseline:
+            label = outcome_labels.get(cond, {}).get(qid, "—")
+            cells.append(label_short.get(label, label))
+
         rows.append("| " + " | ".join(cells) + " |")
 
     return header + "\n".join(rows) + "\n"
