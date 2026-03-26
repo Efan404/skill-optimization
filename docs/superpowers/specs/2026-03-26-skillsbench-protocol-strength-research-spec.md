@@ -6,6 +6,8 @@ This is the **primary research narrative spec** for the next stage of the projec
 
 It supersedes the earlier ORQA-centered Phase 2 framing as the main claim-bearing direction. ORQA remains important, but its role is narrower: **method validation**, not the final source of evidence for the main paper claim.
 
+For the concrete execution plan, task selection rules, condition matrix, and pilot design, see [2026-03-26-skillsbench-experiment-design.md](/Users/efan404/Codes/research/skill-optimization/docs/superpowers/specs/2026-03-26-skillsbench-experiment-design.md).
+
 ---
 
 ## Core Research Question
