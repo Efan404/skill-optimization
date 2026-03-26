@@ -41,8 +41,8 @@ ALL_CONDITIONS = ["baseline", "generic_scaffold", "v0_self_generated", "v1_curat
 
 
 def _save_results(results: dict, split: str, run_id: str):
-    """Save evaluation results to results/evaluations/{split}/."""
-    output_dir = Path(f"results/evaluations/{split}")
+    """Save evaluation results to results/runs/{run_id}/evaluations/{split}/."""
+    output_dir = Path(f"results/runs/{run_id}/evaluations/{split}")
     output_dir.mkdir(parents=True, exist_ok=True)
     for condition, cond_results in results.items():
         path = output_dir / f"{condition}.json"
@@ -157,11 +157,11 @@ def run_pipeline(model_name: str = "deepseek", run_id: str = None):
     dev_analysis = analyze_dev_failures(client, dev_questions, dev_results)
 
     # Save analysis
-    analysis_dir = Path("results/analysis")
+    analysis_dir = Path(f"results/runs/{run_id}/analysis")
     analysis_dir.mkdir(parents=True, exist_ok=True)
     with open(analysis_dir / "dev_error_analysis.json", "w") as f:
         json.dump(dev_analysis, f, indent=2, default=str)
-    console.print("[green]Dev error analysis saved to results/analysis/")
+    console.print(f"[green]Dev error analysis saved to results/runs/{run_id}/analysis/")
 
     # ─── Phase 3: Optimize v1 -> v2 (DEV evidence ONLY) ────────────────
     console.rule("[bold yellow]Phase 3: Skill Optimization (v1 -> v2)")
@@ -303,8 +303,9 @@ def run_pipeline(model_name: str = "deepseek", run_id: str = None):
         dataset_label=dataset_label,
         model_name=client.config["model"],
         questions=all_questions,
+        run_id=run_id,
     )
-    console.print("[green]Marketplace cards saved to results/marketplace_cards/")
+    console.print(f"[green]Marketplace cards saved to results/runs/{run_id}/marketplace_cards/")
 
     # ─── Summary ────────────────────────────────────────────────────────
     console.rule("[bold green]Pipeline Complete")

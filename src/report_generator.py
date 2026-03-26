@@ -404,10 +404,15 @@ def generate_report(
 
     report = "\n".join(sections)
 
-    # Save report
-    report_path = Path("docs/03_results_and_analysis.md")
-    report_path.parent.mkdir(parents=True, exist_ok=True)
-    report_path.write_text(report)
+    # Save report to run-scoped directory
+    run_report_path = Path(f"results/runs/{run_id}/report.md")
+    run_report_path.parent.mkdir(parents=True, exist_ok=True)
+    run_report_path.write_text(report)
+
+    # Also save to docs/ as the canonical latest report
+    docs_path = Path("docs/03_results_and_analysis.md")
+    docs_path.parent.mkdir(parents=True, exist_ok=True)
+    docs_path.write_text(report)
 
     return report
 
@@ -420,12 +425,13 @@ def generate_marketplace_cards(
     dataset_label: str,
     model_name: str,
     questions: list[dict],
+    run_id: str = "latest",
 ) -> None:
     """Generate demo marketplace cards for each task type.
 
-    Saves to results/marketplace_cards/{task_type}.yaml.
+    Saves to results/runs/{run_id}/marketplace_cards/{task_type}.yaml.
     """
-    output_dir = Path("results/marketplace_cards")
+    output_dir = Path(f"results/runs/{run_id}/marketplace_cards")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     dev_qs = [q for q in questions if q["split"] == "dev"]
