@@ -1,0 +1,331 @@
+name: "or-model-identification"
+version: "v1_component_enriched"
+source: "curated"
+domain: "operations_research"
+task_type: "or_model_identification"
+
+# Metadata
+# ---------------------------------------------------------------------------
+# Phase 2 Track A — A2 Enriched Component-Semantics Skill
+#
+# Hypothesis: A skill targeting ORQA's actual difficulty gradient (component-
+# level disambiguation) will outperform the archetype-prior skill (v1_curated)
+# and the generic scaffold, because it addresses the specific failure modes
+# identified in Phase 1 error analysis (Q4, Q8, Q9).
+#
+# This skill builds on A1 (minimal) by adding:
+#   - Constraint-side semantics (LHS/RHS/applied-on analysis)
+#   - Set vs parameter vs variable disambiguation
+#   - High-confidence local disambiguation rules
+#
+# Target: approximately same token length as v1_curated (+/-15%), to control
+# for prompt length and isolate the effect of content type (component-semantics
+# vs archetype-prior).
+#
+# No archetype library, no trigger cues for assignment/routing/scheduling.
+# ---------------------------------------------------------------------------
+
+when_to_use: >
+  When answering questions that require identifying components of an
+  optimization model from a natural-language problem description --
+  including decision variables, parameters, sets, objective function,
+  constraints, or model type (LP/ILP/MILP/NLP). Especially useful for
+  questions requiring fine-grained disambiguation between parameters and
+  variables, identification of objective participants, constraint
+  semantics, or model type classification.
+
+when_not_to_use: >
+  When asked to numerically solve an optimization model, generate code,
+  prove optimality, or apply advanced solution techniques such as
+  decomposition, column generation, or metaheuristics. This skill covers
+  model component identification only, not solution procedures.
+
+preconditions:
+  - "A natural-language description of an optimization scenario is provided, containing a decision-maker, a goal, controllable choices, given data, and restrictions."
+  - "The question asks about one or more model components: objective criterion, constraints, sets, parameters, decision variables, or model type."
+  - "Enough contextual detail exists in the problem description to distinguish the requested component from plausible distractors."
+
+procedure:
+  # =========================================================================
+  # Stage A -- Determine Question Target and Read the Problem
+  # =========================================================================
+  # Before analyzing the scenario, determine exactly what the question
+  # asks about. This focuses downstream reasoning on the relevant
+  # component rather than performing unfocused general analysis.
+  # =========================================================================
+  - step: >
+      Read the question stem carefully before analyzing the problem
+      description. Determine which component-semantics question this is:
+      (a) Parameter vs Variable — asks what is given data vs what the
+          decision-maker chooses or controls;
+      (b) Objective participants — asks which variables or parameters
+          appear in the objective function expression;
+      (c) Model type — asks whether the model is LP, ILP, MILP, NLP,
+          or MINLP based on variable types and function forms;
+      (d) Constraint semantics — asks about constraint structure, what
+          a constraint limits, or how components relate within constraints;
+      (e) Sets — asks about the indexing collections in the problem;
+      (f) Other — problem category, general relationships, or objective
+          direction.
+      Note any qualifiers in the question: negations ("which is NOT"),
+      superlatives ("which BEST describes"), specificity requirements
+      ("which of the following parameters" vs "what type of parameter"),
+      or scope limiters. These qualifiers fundamentally change what
+      counts as a correct answer and must be tracked throughout.
+    check: >
+      Can you state in one sentence what specific component the question
+      targets? Have you noted any negations, qualifiers, or specificity
+      in the question stem? Have you identified which of the six
+      question categories above applies? Have you avoided jumping to
+      the problem description before understanding the question?
+
+  # =========================================================================
+  # Stage B -- Set, Parameter, and Variable Disambiguation
+  # =========================================================================
+  # Phase 1 error analysis showed that confusing parameters with variables
+  # is the primary failure mode on Q8 and Q9. This stage provides
+  # systematic disambiguation using concrete textual cues, and adds set
+  # identification as a prerequisite for correct parameter indexing.
+  # =========================================================================
+  - step: >
+      Read the full problem description. For every quantity, collection,
+      or entity mentioned, classify it into exactly one of three
+      categories: SET, PARAMETER, or DECISION VARIABLE.
+
+      SETS — collections you iterate over:
+        - Sets are groups of similar entities: time periods, locations,
+          products, customers, machines, workers, routes, shifts, types.
+        - A set is the collection itself, not an individual value or cost.
+        - Textual cues for sets:
+          - "for each" / "for all" / "for every" → the noun that follows
+            names a set (e.g., "for each warehouse" → set of warehouses)
+          - "there are N types/locations/periods" → a set of size N
+          - Enumerated lists of named entities → a set
+          - "indexed by" / "over all" → set reference
+        - For each set, record: set name, what it contains, how many
+          elements (if stated), and the supporting text.
+
+      PARAMETERS — given data, fixed constants, known quantities:
+        - "you know the cost" / "the cost is" → parameter
+        - "given that" / "it is known that" → parameter
+        - "capacity of" / "demand of" / "budget of" → parameter
+        - "rated at" / "costs $X" / "takes Y hours" → parameter
+        - "each [item] has a [property] of [value]" → parameter
+        - Any numeric value stated in the problem → parameter
+        - "distance between" / "time required" → parameter
+        - For each parameter, record: name, value or description, which
+          sets it is indexed over (e.g., cost indexed over products x
+          factories), and the supporting text quote.
+
+      DECISION VARIABLES — quantities chosen by the decision-maker:
+        - "you decide how many" / "determine which" → variable
+        - "allocate" / "assign" / "select" / "choose" → variable
+        - "how much to produce" / "whether to open" → variable
+        - "the decision is" / "your task is to find" → variable
+
+      HIGH-CONFIDENCE LOCAL DISAMBIGUATION RULES:
+        - "assign X to Y" → binary variable (x_ij = 1 if i assigned to j)
+        - "capacity of" / "demand of" → parameter, never a variable
+        - "for each" / "for all" → indicates a set index, not a parameter
+        - "at most K" / "exactly K" → cardinality constraint value K is a
+          parameter; the constrained quantity involves variables; the
+          presence of "at most K" with K integer suggests integer variables
+        - "whether to" / "open or close" / "yes or no" → binary variable
+        - "integer number of" / "whole units only" → integer variable
+
+      For each classified quantity, cite the specific text phrase that
+      supports your classification. If the problem says "you know X" or
+      states a numeric value, X is a parameter — even if it sounds like
+      something that could be decided. If the problem says "decide X" or
+      "determine X," X is a variable — even if it sounds like fixed data.
+
+      Build three lists:
+        SETS: [name, contents, size, supporting text]
+        PARAMETERS: [name, description/value, indexed over, supporting text]
+        VARIABLES: [name, description, type (continuous/binary/integer), supporting text]
+    check: >
+      For every classified quantity, can you cite a specific phrase from
+      the problem text? Have you identified all sets before classifying
+      parameters and variables? Have you applied the local disambiguation
+      rules where relevant? Have you correctly distinguished sets (which
+      you iterate over) from parameters (individual values)? Have you
+      checked each quantity against all three categories before committing
+      to a classification?
+
+  # =========================================================================
+  # Stage C -- Objective and Constraint Semantics
+  # =========================================================================
+  # This stage combines objective participant identification (for Q8/Q9)
+  # with constraint-side semantics (for Q2/Q7/Q10/Q11) and model type
+  # classification (for Q4).
+  # =========================================================================
+  - step: >
+      Analyze the objective function and constraints in detail:
+
+      OBJECTIVE PARTICIPANTS:
+      (1) Find the goal sentence — look for "minimize", "maximize", "the
+          goal is to", "the aim is to", "your objective is to", "you want
+          to achieve the lowest/highest". Quote it exactly.
+      (2) Identify what quantity is being optimized (e.g., "total cost",
+          "total profit", "makespan", "total distance").
+      (3) Trace which quantities this objective depends on:
+          - Parameters in the objective are coefficients: unit costs,
+            distances, weights, ratings that multiply decision variables.
+            Example: in "minimize total shipping cost", the per-unit
+            shipping cost is a parameter; the quantity shipped is a variable.
+          - Variables in the objective are the quantities being optimized
+            over: amounts produced, items selected, routes chosen.
+      (4) A parameter that appears only in a constraint but not in the
+          objective does NOT participate in the objective. Be precise:
+          check whether each parameter actually multiplies or otherwise
+          enters the objective expression, versus only appearing in
+          constraint bounds.
+
+      CONSTRAINT-SIDE SEMANTICS:
+      For each constraint identified in the problem, analyze its structure:
+        (a) LEFT-HAND SIDE (LHS) — what is being summed or aggregated,
+            and over which index? Example: "total items assigned to
+            worker j" → sum of x_ij over index i, for each j.
+        (b) RELATION — is it <= (at most), >= (at least), or = (exactly)?
+            Map "cannot exceed" → <=, "must meet" → >=, "exactly" → =.
+        (c) RIGHT-HAND SIDE (RHS) — what bound or limit? This is typically
+            a parameter (capacity, demand, budget) or a constant.
+        (d) APPLIED ON — which set element does this constraint apply to?
+            "for each customer" → one constraint per element of the
+            customer set. "in total" → a single aggregate constraint.
+        (e) IMPLICIT CONSTRAINTS — non-negativity of continuous variables,
+            binary restrictions (0 or 1) on indicator variables, and
+            logical linking constraints (e.g., cannot ship from a closed
+            facility). These are often not stated explicitly but are
+            necessary for a correct model.
+
+      MODEL TYPE CLASSIFICATION:
+      Based on all variables from Stage B and all functions from the
+      objective and constraints:
+        - All variables continuous + all functions linear → LP
+        - All variables integer or binary + all functions linear → ILP
+        - Mix of continuous and integer/binary + all linear → MILP
+        - Any product of two decision variables, or any nonlinear
+          function of variables (quadratic, exponential, ratio) → NLP
+        - Nonlinear with some integer/binary variables → MINLP
+      Key signals:
+        - Binary "whether to" decisions → at minimum ILP, possibly MILP
+        - "integer number of" → ILP or MILP
+        - "at most K" with integer K as a cardinality bound → suggests
+          integer or binary variables are present
+        - Products of two variables in objective or constraints → NLP
+    check: >
+      Have you found and quoted the exact goal sentence? Have you traced
+      which specific parameters and variables participate in the objective,
+      distinguishing objective participants from constraint-only quantities?
+      For each constraint, have you identified the LHS aggregation, the
+      relation, the RHS bound, and the set it applies to? Does your model
+      type match all variable types and function forms? Have you checked
+      for implicit constraints?
+
+  # =========================================================================
+  # Stage D -- Answer Against Options
+  # =========================================================================
+  # Evaluate each option against the extracted component analysis.
+  # =========================================================================
+  - step: >
+      Focus narrowly on the component identified in Stage A. Using your
+      analysis from Stages B and C, evaluate each answer option:
+
+      (a) For each option, check: does it match your set/parameter/variable
+          classification, objective analysis, constraint semantics, or
+          model type determination? Cite specific textual evidence from
+          the problem description.
+
+      (b) Eliminate options that:
+          - List a parameter as a variable, or vice versa
+          - Confuse a set with a parameter (a set is a collection; a
+            parameter is a specific value)
+          - Include quantities not mentioned in the problem text
+          - Misidentify the objective direction or participants
+          - Mischaracterize a constraint's LHS, relation, or RHS
+          - Give the wrong model type for the variable types present
+
+      (c) Among remaining options, prefer the one with the most direct
+          and complete textual support. If an option partially matches
+          your analysis but includes an unsupported or incorrect element,
+          it is less preferable than an option where every element has
+          textual grounding. The correct answer is the one that most
+          precisely matches the problem text.
+
+      (d) Special handling by question type:
+          - Model type: verify every variable's domain and every
+            function's linearity before committing
+          - Objective participants: confirm each claimed participant
+            actually enters the objective expression, not just a constraint
+          - Parameter vs variable: re-check the textual cue that
+            classifies each quantity
+          - Constraint questions: verify LHS, relation, RHS, and scope
+          - Negation questions ("which is NOT"): identify options that
+            DO match, then select the one that does not
+
+      State your final answer with explicit justification referencing
+      the problem text. For each eliminated option, briefly note why
+      it was rejected.
+    check: >
+      Have you evaluated every answer option against the problem text?
+      Have you eliminated options with elements that lack textual support?
+      Is your selected answer consistent with ALL components from your
+      analysis in Stages B and C? If the question has a negation ("which
+      is NOT"), have you inverted your reasoning correctly? If the
+      question has a superlative ("which BEST"), have you compared the
+      precision of remaining options? Can you justify your answer with
+      a direct quote or paraphrase from the problem description?
+
+common_failures:
+  - >
+    Confusing a parameter with a decision variable, or vice versa. The
+    most reliable test: if the problem says "you know X", "X is given",
+    "each item has X", or states a numeric value for X, then X is a
+    parameter. If the problem says "decide X", "determine X", "choose X",
+    or "how much X to allocate", then X is a variable. Apply the high-
+    confidence rules: "capacity of" and "demand of" are always parameters;
+    "assign X to Y" implies a binary decision variable. Do not rely on
+    what sounds like a decision — rely only on explicit textual framing.
+  - >
+    Misidentifying which quantities participate in the objective function.
+    Parameters in the objective are coefficients (unit costs, distances,
+    values) that multiply variables. Variables in the objective are the
+    quantities being optimized over. A parameter that appears only in a
+    constraint bound (e.g., capacity limit) does NOT participate in the
+    objective — it participates in a constraint. Carefully trace the
+    objective expression: "minimize sum of cost_ij * x_ij" means cost_ij
+    is a parameter in the objective AND x_ij is a variable in the
+    objective; a capacity limit C_j appears only in a constraint.
+  - >
+    Classifying the model type incorrectly by missing binary or integer
+    variables. If any variable is restricted to binary (0/1) or integer
+    values, the model cannot be a pure LP. Common signals for non-LP:
+    "whether to open/close" (binary), "assign X to Y" (binary),
+    "integer number of" (integer), "at most K facilities" where K is
+    small and integer (suggests binary selection variables). Also check
+    for nonlinearity: products of two decision variables or ratios
+    involving variables make the model NLP regardless of variable types.
+  - >
+    Confusing a set with a parameter. A set is a collection of entities
+    you iterate over (the factories, the time periods, the products).
+    A parameter is a specific numeric value or property indexed over
+    sets (the cost at factory i, the demand in period t). If the text
+    says "there are 5 factories," the factories form a set of size 5;
+    the number 5 is a parameter describing the set's cardinality; and
+    neither is a decision variable. Misclassifying "the set of products"
+    as a parameter leads to incorrect analysis of constraint indexing
+    and objective summation.
+
+verification: >
+  Cross-check every identified component against the original problem
+  text. For each set, confirm it is a collection of entities the model
+  iterates over. For each parameter, confirm it is stated as given data
+  and note its indexing. For each variable, confirm the text says it is
+  decided or chosen, and verify its type (continuous/binary/integer).
+  Verify the objective direction and participants match the goal sentence.
+  For each constraint, confirm the LHS aggregation, relation, RHS bound,
+  and scope match the problem text. Confirm the model type is consistent
+  with all variable types and all function forms. Compare your complete
+  analysis against each answer option and select the one fully supported
+  by textual evidence.
