@@ -43,7 +43,7 @@ The universally-failed questions by subtype:
 | orqa_0047 | Q8 | "Which data parameters participate in the objective?" (objective parameter identification) |
 | orqa_0050 | Q9 | "Which decision activities participate in the objective?" (objective variable identification) |
 
-### Why the archetype skill didn't help
+### Leading hypothesis: why the archetype skill didn't help
 
 The v1_curated skill was designed around a **top-down archetype matching** approach: identify the problem category (assignment, routing, scheduling, etc.) then instantiate a model skeleton. But the hard questions in ORQA are not about global archetype recognition — they're about **fine-grained component semantics**:
 
@@ -51,9 +51,9 @@ The v1_curated skill was designed around a **top-down archetype matching** appro
 - Q8 (parameters in objective): Requires tracing which specific data constants appear as coefficients in the objective function — a local parsing task, not a global structural one
 - Q9 (variables in objective): Same — which specific decision variables participate in the objective expression
 
-**The archetype-prior skill is misaligned with ORQA's actual difficulty gradient.** ORQA's hard questions test "local component semantics" (which specific parameters/variables are in the objective, what type of model emerges from the variable types), not "global archetype identification" (is this an assignment problem or a scheduling problem).
+**Best current interpretation:** the archetype-prior skill may be misaligned with ORQA's actual difficulty gradient. ORQA's hard questions appear to test "local component semantics" (which specific parameters/variables are in the objective, what type of model emerges from the variable types), more than "global archetype identification" (is this an assignment problem or a scheduling problem).
 
-The generic scaffold and v0 skill don't have this misalignment because they don't claim domain specificity — they just provide general problem-solving structure.
+The generic scaffold and v0 skill may avoid this misalignment because they do not lean as heavily on domain-specific archetype priors; they mainly provide general structure.
 
 ### Why scaffold/v0 marginally helped on orqa_0039
 
@@ -63,11 +63,11 @@ orqa_0039 is a Q3 subtype ("Under which category does this problem fall?"). This
 
 ### For the research
 
-1. **DeepSeek Chat is too strong a model for this experiment.** At 80% baseline on ORQA, there's limited room for skill injection to help. A weaker model (tested next) may show more differentiation.
+1. **DeepSeek Chat may already be relatively strong on this split.** At 80% baseline on ORQA, there is limited headroom for skill injection to help. A weaker model may show more differentiation.
 
 2. **Archetype-level priors may be the wrong abstraction for ORQA.** The benchmark's difficulty is concentrated at the component-semantics level (Q4, Q8, Q9), not the archetype level (Q3, Q6). A skill designed around component disambiguation (parameter vs variable, LP vs MILP cues) might be more effective.
 
-3. **The scaffold control was valuable.** Without it, we might have attributed the marginal 85% to domain content. The scaffold proves that any benefit comes from structure, not domain knowledge.
+3. **The scaffold control was valuable.** Without it, we might have attributed the marginal 85% to domain content. The current evidence is more consistent with structure helping slightly than with domain-specific content helping.
 
 ### For next steps
 
@@ -81,5 +81,5 @@ Per the spec's gating logic:
 - **Run ID:** 20260326_132128
 - **Model:** deepseek-chat (DeepSeek API)
 - **Data:** ORQA subset, internal 25-dev/20-test split
-- **Full results:** `results/runs/20260326_132128/`
-- **Git commit:** See `results/runs/20260326_132128/metadata.json`
+- **Primary report:** `docs/03_results_and_analysis.md`
+- **Note:** run-scoped artifact paths are still being stabilized; use the run ID above as the primary provenance handle for now
