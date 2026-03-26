@@ -102,7 +102,7 @@ class LLMClient:
         self._backoff_seconds = retry_config.get("backoff_seconds", 5)
 
         # Set up log directory
-        self.log_dir = Path("results") / "logs" / run_id
+        self.log_dir = Path("results") / "runs" / run_id / "logs"
         self.log_dir.mkdir(parents=True, exist_ok=True)
 
     def _enforce_rate_limit(self):
