@@ -1,5 +1,9 @@
 # Phase 2: Skill-Difficulty Alignment and Model Sensitivity
 
+**Status:** superseded as the **primary research narrative** by [2026-03-26-skillsbench-protocol-strength-research-spec.md](/Users/efan404/Codes/research/skill-optimization/docs/superpowers/specs/2026-03-26-skillsbench-protocol-strength-research-spec.md).
+
+This document is still useful as an ORQA-centered ablation spec. It should now be read as an `ORQA workstream / methodology-extension` document, not as the top-level research framing for the project.
+
 ## Research Question
 
 **Do skills need to be aligned with a benchmark's actual difficulty gradient, and is this alignment modulated by model capability?**

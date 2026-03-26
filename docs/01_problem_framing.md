@@ -1,5 +1,7 @@
 # Problem Framing: Skill Optimization for LLM Reasoning
 
+**Status:** this document captures the original ORQA-centered project framing. For the current top-level research narrative, see [2026-03-26-skillsbench-protocol-strength-research-spec.md](/Users/efan404/Codes/research/skill-optimization/docs/superpowers/specs/2026-03-26-skillsbench-protocol-strength-research-spec.md). ORQA should now be read primarily as a methodology-validation workstream, while SkillsBench carries the main claim-bearing study.
+
 ## Background
 
 LLMs often fail not because of weak general capability, but because they lack stable, reusable procedural knowledge for task completion. A **skill** is an explicit, structured behavioral prior that guides how an LLM interprets, decomposes, executes, and verifies a task.
