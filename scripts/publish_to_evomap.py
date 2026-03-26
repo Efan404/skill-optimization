@@ -19,8 +19,10 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.evomap_publisher import (
     hello,
+    register_node,
     publish_skill,
     DEFAULT_SENDER_ID,
+    get_sender_id,
 )
 
 
@@ -42,6 +44,7 @@ def list_skills():
 
 
 def main():
+    sender_id = get_sender_id()
     parser = argparse.ArgumentParser(description="Publish a skill to EvoMap")
     parser.add_argument(
         "skill_name",
@@ -50,16 +53,17 @@ def main():
     )
     parser.add_argument("--list", action="store_true", help="List available skills and exit")
     parser.add_argument("--hello", action="store_true", help="Register node only, don't publish")
+    parser.add_argument("--rotate", action="store_true", help="Rotate node secret and re-register")
     args = parser.parse_args()
 
     if args.list:
         list_skills()
         return
 
-    if args.hello:
-        print(f"[evomap] Registering node '{DEFAULT_SENDER_ID}' with EvoMap hub...")
+    if args.hello or args.rotate:
+        print(f"[evomap] Registering node '{sender_id}' with EvoMap hub...")
         try:
-            resp = hello()
+            resp = register_node(sender_id, rotate=args.rotate)
             print(f"[evomap] Node registered. Response:\n{resp}")
         except Exception as e:
             print(f"[evomap] ERROR during hello: {e}")
@@ -85,11 +89,11 @@ def main():
 
     print(f"[evomap] Publishing skill: {args.skill_name}")
     print(f"[evomap] Skill file: {skill_path}")
-    print(f"[evomap] Sender ID: {DEFAULT_SENDER_ID}")
+    print(f"[evomap] Sender ID: {sender_id}")
     print()
 
     try:
-        resp = publish_skill(str(skill_path), sender_id=DEFAULT_SENDER_ID)
+        resp = publish_skill(str(skill_path), sender_id=sender_id)
         print(f"\n[evomap] Publish response:\n{resp}")
         # Extract asset_id from response if present
         if isinstance(resp, dict):

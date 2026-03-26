@@ -1,0 +1,310 @@
+name: "db-wal-recovery"
+version: "1.0"
+source: "curated"
+domain: "database_forensics"
+task_type: "database_forensics"
+
+# This skill encodes procedural knowledge for recovering data from a SQLite
+# database whose WAL (Write-Ahead Logging) file has been XOR-encrypted. It
+# covers WAL file format fundamentals, encryption detection heuristics,
+# single-byte XOR decryption strategy, and the JSON extraction workflow.
+#
+# Description: Guides an agent through recovering data from a SQLite database
+# that appears to have a corrupted or encrypted WAL (Write-Ahead Logging)
+# file. The database has two layers of data: the base records stored in the
+# main .db file, and additional records (inserts and updates) stored in the
+# WAL file. When the WAL file is corrupted or encrypted, SQLite cannot replay
+# those pending changes, so queries against the database only return the base
+# records. The recovery procedure involves: diagnosing why the WAL is
+# unreadable, identifying and reversing the encryption, and then querying
+# the database with a valid WAL to extract all records.
+
+when_to_use: >
+  When recovering data from a SQLite database in WAL mode where the WAL
+  file appears corrupted or encrypted, and querying the database returns
+  fewer records than expected because SQLite cannot replay pending WAL
+  transactions.
+
+when_not_to_use: >
+  When the SQLite database itself (the main .db file) is corrupted, when
+  the issue is a schema problem rather than WAL corruption, or when the
+  task involves a different database engine (PostgreSQL, MySQL, etc.).
+  This skill is specific to SQLite WAL recovery with XOR encryption.
+
+preconditions:
+  - "A SQLite database file exists along with an associated WAL file (e.g., main.db and main.db-wal) where the WAL file appears corrupted or encrypted."
+  - "Querying the database returns fewer records than expected, indicating that additional records are locked in the unreadable WAL file."
+  - "Tools for hex inspection (xxd, hexdump) and scripting (Python) are available in the environment."
+
+procedure:
+  # =========================================================================
+  # Step 1 -- Assess the database and identify the problem
+  # =========================================================================
+  # Domain knowledge: SQLite WAL (Write-Ahead Logging) mode writes changes
+  # to a separate WAL file before committing to the main database. When
+  # the WAL is unreadable, SQLite falls back to the data in the main .db
+  # file only, resulting in missing records (new inserts) and stale values
+  # (old values before WAL updates). To inspect without modifying the WAL,
+  # use read-only mode: sqlite3 "file:/path/to/db?mode=ro" "SELECT ..."
+  # =========================================================================
+  - step: >
+      Start by understanding the current state of the database:
+
+      (a) List the files in the working directory. Look for the main
+          database file (e.g., main.db) and its associated WAL file
+          (e.g., main.db-wal). Note the file sizes -- a non-empty WAL
+          file means there are pending changes.
+
+      (b) Query the database in read-only mode to see what records are
+          currently visible. Use the "file:" URI with "?mode=ro" to
+          prevent SQLite from modifying the WAL:
+            sqlite3 "file:/path/to/main.db?mode=ro"
+          List all tables (.tables) and then SELECT all records from
+          the relevant table(s). Count how many records you see.
+
+      (c) Compare the visible record count against the expected count
+          (from the task description). If you see fewer records than
+          expected, the missing records are in the WAL file.
+
+      (d) Also note the schema: what columns exist, what types they are,
+          and what the primary key is. You will need this for the JSON
+          output.
+    check: >
+      Did you find both the main .db file and the .db-wal file? How
+      many records are visible with read-only access? How many records
+      are expected but missing? Do you know the table schema (column
+      names and types)?
+
+  # =========================================================================
+  # Step 2 -- Diagnose the WAL file corruption
+  # =========================================================================
+  # Domain knowledge: A valid SQLite WAL file begins with a 32-byte header.
+  # The first 4 bytes are the magic number: 0x377f0682 (big-endian) or
+  # 0x377f0683 (little-endian). If the first 4 bytes do not match either
+  # magic number, the file is either corrupted, encrypted, or not a valid
+  # WAL. The main .db file starts with "SQLite format 3\000".
+  # =========================================================================
+  - step: >
+      Inspect the raw bytes of the WAL file to determine why SQLite
+      cannot read it:
+
+      (a) Use a hex dump tool to examine the first 32 bytes of the WAL
+          file. Tools like xxd, hexdump, or od work well:
+            xxd -l 32 /path/to/main.db-wal
+
+      (b) Check the first 4 bytes against the expected SQLite WAL magic:
+          - Expected: 37 7f 06 82 (big-endian) or 37 7f 06 83 (little-endian)
+          - If the first 4 bytes are DIFFERENT, the WAL is corrupted or
+            encrypted.
+
+      (c) If the bytes do not match, suspect single-byte XOR encryption.
+          This is the most common simple encryption used to obfuscate
+          binary file formats.
+
+      (d) Extract the first byte of the encrypted WAL file. You can use:
+            xxd -l 1 -p /path/to/main.db-wal
+          This gives you the hex value of byte 0.
+    check: >
+      Did you examine the raw bytes of the WAL file? Do the first 4
+      bytes match the expected SQLite WAL magic? If not, have you
+      identified this as a potential encryption issue?
+
+  # =========================================================================
+  # Step 3 -- Derive the XOR key
+  # =========================================================================
+  # Domain knowledge: Single-byte XOR encryption XORs every byte with the
+  # same key byte (0x00 to 0xFF). XOR is its own inverse: A ^ K ^ K = A.
+  # If you know the expected first bytes (the magic bytes), you can
+  # recover the key: key = actual_byte[0] XOR expected_byte[0]. Common
+  # single-byte XOR keys include values like 0x00, 0xFF, and printable
+  # ASCII characters. Test systematically by XOR-ing the first few bytes
+  # of the encrypted file with the expected magic bytes to derive the
+  # candidate key.
+  # =========================================================================
+  - step: >
+      Derive the XOR key by comparing the actual first byte of the
+      encrypted WAL file against the expected first byte of a valid WAL:
+
+      (a) The expected first byte of a SQLite WAL is 0x37.
+
+      (b) Read the actual first byte of the encrypted file (from Step 2).
+
+      (c) Compute the key: key = actual_byte XOR 0x37
+
+      (d) Verify the key by checking additional bytes:
+          - Byte 1: (actual_byte_1 XOR key) should equal 0x7f
+          - Byte 2: (actual_byte_2 XOR key) should equal 0x06
+          - Byte 3: (actual_byte_3 XOR key) should equal 0x82 or 0x83
+          If all match, you have the correct single-byte XOR key.
+
+      (e) If the verification fails, the encryption may not be simple
+          single-byte XOR. Consider multi-byte XOR keys or other schemes.
+          But for most forensics recovery tasks, single-byte XOR is the
+          most common approach.
+    check: >
+      Did you compute the XOR key from the expected vs actual magic
+      bytes? Did you verify the key against multiple byte positions?
+      Does the key consistently produce expected values for the WAL
+      header?
+
+  # =========================================================================
+  # Step 4 -- Decrypt the WAL file
+  # =========================================================================
+  - step: >
+      Decrypt the entire WAL file by XORing every byte with the key:
+
+      (a) IMPORTANT: Before modifying anything, make a backup of the
+          encrypted WAL file. Copy it to a safe location in case you
+          need to retry:
+            cp /path/to/main.db-wal /path/to/main.db-wal.encrypted.bak
+
+      (b) Write a decryption script (Python is typically available) that:
+          - Reads the entire encrypted WAL file as binary
+          - XORs every byte with the key
+          - Writes the result to a new file
+
+      (c) Verify the decrypted file by checking its first 4 bytes. They
+          should now match the SQLite WAL magic (0x377f0682 or 0x377f0683).
+
+      (d) Replace the encrypted WAL file with the decrypted version.
+          The WAL file must be at the exact path SQLite expects (same
+          directory as the .db file, same name with -wal suffix).
+
+      (e) Verify the replacement by hex-dumping the first bytes of the
+          now-replaced WAL file to confirm the magic bytes are correct.
+    check: >
+      Did you back up the encrypted WAL file before modifying it? Does
+      the decrypted file start with the correct WAL magic bytes? Is the
+      decrypted WAL file in the correct location for SQLite?
+
+  # =========================================================================
+  # Step 5 -- Extract all records from the recovered database
+  # =========================================================================
+  # Domain knowledge: After decryption, open the database in normal
+  # (read-write) mode so SQLite can replay the WAL. In read-only mode
+  # SQLite may not fully replay the WAL. The recovered data typically
+  # needs to be written as a JSON array of objects, sorted by primary
+  # key. Use a proper JSON serialization library (e.g., Python's json
+  # module) rather than string formatting.
+  # =========================================================================
+  - step: >
+      Now that the WAL file is decrypted and in place, SQLite should be
+      able to replay the WAL and make all records visible:
+
+      (a) Open the database in normal (read-write) mode. This allows
+          SQLite to replay the WAL:
+            sqlite3 /path/to/main.db
+
+      (b) Query for all records, ordered by the primary key:
+            SELECT * FROM <table_name> ORDER BY id;
+
+      (c) Verify the record count matches the expected total. You should
+          now see all records, including those that were only in the WAL.
+
+      (d) Check that previously-missing records are now present, and that
+          any records that had WAL updates show their updated values
+          (not the stale base-table values).
+
+      (e) Export the data as JSON. Write a small script to:
+          - Query all records sorted by id
+          - Convert each row to a dictionary with the correct field names
+          - Serialize as a JSON array
+          - Write to the required output file path
+
+      Be precise about the JSON format. Each record should be an object
+      with the exact field names from the table schema. The array should
+      be sorted by id. Use proper JSON types (integers for numeric fields,
+      strings for text fields).
+    check: >
+      Do you now see the expected total number of records? Are the
+      WAL-only records (inserts) present? Do WAL-updated records show
+      their new values, not the old ones? Is the JSON output correctly
+      formatted and sorted by id?
+
+  # =========================================================================
+  # Step 6 -- Final validation
+  # =========================================================================
+  - step: >
+      Before declaring the task complete, validate the output:
+
+      (a) Read back the JSON file you wrote and verify it parses as valid
+          JSON.
+
+      (b) Confirm the array contains exactly the expected number of
+          records.
+
+      (c) Confirm all IDs from 1 to N are present with no gaps and no
+          duplicates.
+
+      (d) Confirm the records are sorted by id in ascending order.
+
+      (e) Confirm each record has all required fields (typically id, name,
+          and value) with correct types (id as integer, name as string,
+          value as integer).
+
+      (f) Spot-check a few specific values if the task provides expected
+          values for verification.
+    check: >
+      Is the JSON file valid and parseable? Does it contain exactly the
+      expected number of records? Are all IDs present, with no gaps or
+      duplicates? Are records sorted by id? Do field names and types
+      match the schema?
+
+common_failures:
+  - >
+    Only querying the base database without fixing the WAL: The agent
+    queries the database, sees fewer records than expected, and either
+    reports partial results or tries to reconstruct the missing data by
+    guessing. Without fixing the WAL file, the agent cannot access the
+    complete dataset. If the record count is lower than expected,
+    immediately investigate the WAL file. The missing records are there --
+    they just need to be made readable. Do not try to fabricate or guess
+    the missing data.
+  - >
+    Not recognizing XOR encryption: The agent sees that the WAL file is
+    "corrupted" but does not examine the raw bytes to identify the
+    encryption pattern. Instead it tries generic database repair tools,
+    SQLite vacuum, or copying the database, none of which help with an
+    encrypted WAL. Always examine the raw hex bytes of the WAL file header
+    first. Compare against known SQLite WAL magic bytes. If they do not
+    match, the most likely cause is encryption, not random corruption.
+  - >
+    Using the wrong XOR key or wrong decryption scope: The agent attempts
+    XOR decryption but uses an incorrect key (e.g., guessing instead of
+    deriving from the magic bytes), or only decrypts part of the file
+    (e.g., just the header). Derive the key mathematically:
+    key = actual_first_byte XOR 0x37. Verify the key against multiple
+    header positions before applying it to the full file. Decrypt the
+    ENTIRE file, not just the header.
+  - >
+    Not backing up before modifying files: The agent directly overwrites
+    the WAL file with a decryption attempt. If the decryption is wrong,
+    the original encrypted data is lost and cannot be retried. Always
+    copy the original encrypted WAL to a backup location before any
+    modification. Write the decrypted output to a temporary file first,
+    verify its header, and only then replace the original.
+  - >
+    Opening the database in read-only mode after decryption: After
+    decrypting the WAL, the agent opens the database in read-only mode.
+    In read-only mode, SQLite may not fully replay the WAL, resulting in
+    the same incomplete data as before. After replacing the encrypted WAL
+    with the decrypted version, open the database in normal (read-write)
+    mode so SQLite can replay the WAL transactions.
+  - >
+    Incorrect JSON format: The agent extracts the data correctly but
+    writes it in a format that does not match the expected JSON structure.
+    Use a proper JSON serialization library (e.g., Python's json module)
+    rather than string formatting. Query with explicit column names to
+    ensure field names match. Cast values to the correct types. Sort by
+    id before serialization. Validate the output by reading it back with
+    a JSON parser.
+
+verification: >
+  Read the output JSON file and parse it with a JSON library to confirm
+  it is valid. Verify the array contains exactly the expected number of
+  records, all IDs from 1 to N are present with no gaps or duplicates,
+  and records are sorted by id in ascending order. Confirm that records
+  which were only in the WAL (new inserts) are present, and that records
+  updated by WAL transactions show their updated values. Verify each
+  record has the required fields (e.g., id, name, value) with correct
+  types (id as integer, name as string, value as integer).

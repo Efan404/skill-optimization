@@ -1,0 +1,384 @@
+name: "feal-differential-cryptanalysis"
+version: "1.0"
+source: "curated"
+domain: "cryptography"
+task_type: "cryptanalysis"
+
+# This skill encodes procedural knowledge for performing a differential
+# cryptanalysis attack on a FEAL-like block cipher. It covers the
+# fundamental theory of differential cryptanalysis, the specific structure
+# of the FEAL cipher (Feistel network, G function, F function), attack
+# strategy (chosen-plaintext pairs with a specific input differential),
+# and the statistical filtering procedure to recover the last round key.
+#
+# Description: Guides an agent through implementing a chosen-plaintext
+# differential cryptanalysis attack on a FEAL-like block cipher to recover
+# a specific round subkey. Differential cryptanalysis exploits the fact that
+# certain input differences (differentials) propagate through a cipher in
+# predictable ways. By encrypting many carefully chosen plaintext pairs and
+# analyzing how the output differences behave, the attacker can statistically
+# determine the value of secret key material.
+
+when_to_use: >
+  When implementing a differential cryptanalysis attack against a FEAL-like
+  block cipher to recover a round key (typically key[5], the last round
+  key). The cipher uses a Feistel network structure with addition-based
+  round functions, and each round key is derived from a 16-bit seed making
+  the search space tractable (65536 candidates per key).
+
+when_not_to_use: >
+  When the target cipher uses S-boxes instead of addition-based round
+  functions, when the key schedule has full entropy (not derived from
+  small seeds), when a different attack technique is more appropriate
+  (e.g., linear cryptanalysis, algebraic attacks), or when the task
+  requires recovering all round keys simultaneously rather than one at
+  a time.
+
+preconditions:
+  - "A FEAL-like cipher implementation is provided (e.g., feal.py) with an encrypt function that takes a 64-bit plaintext and returns a 64-bit ciphertext."
+  - "The cipher uses a Feistel network with addition-based round functions (G function) and round keys derived from 16-bit seeds."
+  - "The attack must complete within 30 seconds and return the recovered key[5] as a uint32 value."
+
+procedure:
+  # =========================================================================
+  # Step 1 -- Understand the cipher implementation
+  # =========================================================================
+  # Domain knowledge: The FEAL cipher follows a Feistel network design.
+  # A 64-bit plaintext is split into two 32-bit halves (left, right).
+  # The cipher applies: (1) initial key whitening with key[0] and key[1],
+  # (2) pre-round mixing: right XOR= left, (3) four Feistel rounds using
+  # key[2] through key[5], (4) post-round mixing: left XOR= right,
+  # (5) swap and combine: merge(right, left). Each key is derived from a
+  # 16-bit seed: key[i] = (seed_i * 1234567) & 0xFFFFFFFF. The G function
+  # computes: G(a, b, x) = ROL2((a + b + x) mod 256), where ROL2 is a
+  # left rotation by 2 bits within an 8-bit byte.
+  # =========================================================================
+  - step: >
+      Before writing any attack code, thoroughly understand the target
+      cipher by reading its source code:
+
+      (a) Read the cipher implementation file (e.g., feal.py). Identify:
+          - The encrypt function signature and how it takes/returns data
+          - How the 64-bit plaintext is split into 32-bit halves
+          - The key schedule: how many keys, how they are derived from
+            seeds (each seed is 16 bits, key = seed * 1234567 mod 2^32)
+          - The number of Feistel rounds (typically 4)
+          - Which keys are used where: key[0] and key[1] for whitening,
+            key[2] through key[5] for the four rounds
+
+      (b) Understand the round function F and the G function. Pay careful
+          attention to:
+          - Byte extraction order (big-endian vs little-endian)
+          - The G function formula: ROL2((a + b + x) mod 256)
+          - How F combines four G function calls
+          - The byte recombination at the end of F
+
+      (c) Trace through one round of the Feistel network by hand (with
+          small example values) to verify your understanding matches the
+          code. Getting the byte order or XOR structure wrong will cause
+          the entire attack to fail silently.
+
+      (d) Understand the output format: the encrypt function returns a
+          64-bit integer where merge(right, left) packs right into the
+          upper 32 bits and left into the lower 32 bits. This swap is
+          important for correctly peeling the last round.
+    check: >
+      Can you state the exact encrypt function signature? Do you
+      understand how 64-bit values are split and merged? Can you
+      reproduce the F function and G function in your own code? Do you
+      know which key index is the target (key[5])? Do you understand
+      the seed-to-key derivation formula?
+
+  # =========================================================================
+  # Step 2 -- Implement helper functions
+  # =========================================================================
+  # Domain knowledge: The F function takes a 32-bit input and produces a
+  # 32-bit output. It extracts 4 bytes (byte 0 = least significant,
+  # byte 3 = most significant) and computes:
+  #   y[2] = G(x[3] XOR x[2], x[1] XOR x[0], 1)
+  #   y[3] = G(x[3], y[2], 0)
+  #   y[1] = G(x[1] XOR x[0], y[2], 0)
+  #   y[0] = G(x[0], y[1], 1)
+  # The four output bytes y[0..3] are recombined into a 32-bit value.
+  # The last round can be "peeled off" by guessing the last round key
+  # and reversing the Feistel transformation.
+  # =========================================================================
+  - step: >
+      Your attack code needs several helper functions that mirror parts
+      of the cipher:
+
+      (a) Bit manipulation helpers:
+          - getleft(x): extract upper 32 bits of a 64-bit value
+          - getright(x): extract lower 32 bits of a 64-bit value
+          - merge(left, right): combine two 32-bit values into 64-bit
+
+      (b) The G function: replicate it exactly from the cipher code.
+          G(a, b, x) = ROL2((a + b + x) & 0xFF)
+          The rotation is: ((temp << 2) | (temp >> 6)) & 0xFF
+
+      (c) The F function: replicate it exactly from the cipher code.
+          This is the round function that you will use to peel off the
+          last round. It must be IDENTICAL to the cipher's F function --
+          any discrepancy will cause the attack to fail.
+
+      (d) A function to peel the last round: given a ciphertext and a
+          candidate key, reverse the last Feistel round to recover the
+          state before round 4. This involves:
+          - Splitting the ciphertext into left and right halves
+          - Computing the input to the last round's F function
+            (accounting for the post-round XOR)
+          - Computing F of that input
+          - XORing to recover the pre-round state
+
+      CRITICAL: The F and G functions in your attack code must be
+      byte-for-byte identical to the cipher implementation. Copy them
+      directly if needed, then verify.
+    check: >
+      Do your G and F functions match the cipher implementation exactly?
+      Can you correctly split and merge 64-bit values? Does your
+      last-round peel function correctly reverse one round?
+
+  # =========================================================================
+  # Step 3 -- Implement the differential filtering attack
+  # =========================================================================
+  # Domain knowledge: The chosen input differential 0x8080000080800000
+  # means the left half has difference 0x80800000 and the right half has
+  # difference 0x80800000. This is chosen because 0x80 + 0x80 = 0x00
+  # mod 256, which zeroes out certain internal differences, creating a
+  # high-probability characteristic. After correctly peeling the last
+  # round with the true key[5], the differential at the output of round 3
+  # should be 0x02000000 for the left half. This serves as the
+  # discriminator.
+  # =========================================================================
+  - step: >
+      Implement the main attack function that uses differential
+      cryptanalysis to recover the last round key:
+
+      (a) Define the input differential: 0x8080000080800000 (64-bit).
+          This is the XOR difference between plaintext pairs.
+
+      (b) Initialize the candidate set: all 65536 possible seed values
+          (0 to 0xFFFF). Each seed maps to a candidate key via
+          (seed * 1234567) & 0xFFFFFFFF.
+
+      (c) Implement the filtering loop (repeat ~10 times or until one
+          candidate remains):
+          For each iteration:
+            i.   Generate a random 64-bit plaintext P
+            ii.  Compute P' = P XOR 0x8080000080800000
+            iii. Encrypt both: C1 = encrypt(P), C2 = encrypt(P')
+            iv.  For each surviving candidate seed:
+                 - Compute candidate_key = (seed * 1234567) & 0xFFFFFFFF
+                 - Peel the last round from C1 using candidate_key
+                 - Peel the last round from C2 using candidate_key
+                 - Compute the differential between the peeled states
+                 - If the differential matches 0x02000000 (for the
+                   appropriate half), keep this candidate
+                 - Otherwise, eliminate it
+            v.   Replace the candidate list with survivors
+
+      (d) After filtering, exactly one seed candidate should remain.
+          Compute the final key: (surviving_seed * 1234567) & 0xFFFFFFFF.
+          This is the recovered key[5].
+
+      (e) Return this uint32 value from the attack function.
+    check: >
+      Is the input differential set to 0x8080000080800000? Does the
+      filtering start with all 65536 seed candidates? Does each
+      filtering round use a fresh random plaintext pair? Does the
+      last-round peel correctly undo the cipher structure? Is the
+      expected output differential 0x02000000? Does the attack return
+      (surviving_seed * 1234567) & 0xFFFFFFFF?
+
+  # =========================================================================
+  # Step 4 -- Handle the last-round peel correctly
+  # =========================================================================
+  # Domain knowledge: The ciphertext is merge(right, left), so
+  # cipher_left = getleft(ciphertext) is the Feistel "right" output, and
+  # cipher_right = getright(ciphertext) is the Feistel "left" output (with
+  # post-round mixing applied). The post-round mixing was: left XOR= right.
+  # The F function input for the last round was:
+  # cipher_left XOR cipher_right XOR candidate_key. Getting the
+  # cipher_left vs cipher_right assignment from the merge/swap wrong is
+  # the most common source of attack failure.
+  # =========================================================================
+  - step: >
+      The most error-prone part of the attack is correctly reversing the
+      last round. Here is the precise procedure for peeling the last round
+      from a ciphertext:
+
+      (a) The ciphertext is a 64-bit value from merge(right, left).
+          So: cipher_left = getleft(ciphertext) is the Feistel "right"
+          output, and cipher_right = getright(ciphertext) is the Feistel
+          "left" output (with post-round mixing applied).
+
+      (b) The post-round mixing was: left XOR= right. To undo this:
+          the value before the post-round mixing for the "left" side
+          is: cipher_right XOR cipher_left (since cipher_right already
+          has the XOR baked in, and cipher_left is the right side).
+          This gives us the intermediate value after round 4.
+
+      (c) The last round (round 4, using key[5]) computed:
+          - F_input = right_before_round XOR key[5]
+          - mixed = F(F_input)
+          - new_right = left_before_round XOR mixed
+          - new_left = right_before_round (swap)
+
+          After the round, the "left" side became the old "right", and
+          the "right" side became (old left XOR F(old right XOR key)).
+
+      (d) From the ciphertext perspective (accounting for the swap and
+          post-round mixing), the F function input for the last round
+          was: cipher_left XOR cipher_right XOR candidate_key.
+          (cipher_left XOR cipher_right undoes the post-round mixing to
+          get the right-side value entering the swap.)
+
+      (e) Compute: mixed = F(cipher_left XOR cipher_right XOR candidate_key)
+
+      (f) Recover the left half before the last round:
+          pre_round_left = cipher_left XOR mixed
+
+      (g) For the differential check, compute pre_round_left for both C1
+          and C2, then check if (pre_round_left_C1 XOR pre_round_left_C2)
+          equals 0x02000000.
+
+      Getting any of these XOR operations wrong (especially the
+      cipher_left vs cipher_right assignment from the merge/swap) is the
+      most common source of attack failure.
+    check: >
+      Did you correctly account for the merge(right, left) output swap?
+      Did you correctly undo the post-round XOR mixing? Is the F
+      function input: cipher_left XOR cipher_right XOR key? Are you
+      comparing the correct half's differential against 0x02000000?
+
+  # =========================================================================
+  # Step 5 -- Test and validate the attack
+  # =========================================================================
+  # Domain knowledge: With 65536 initial candidates and ~10 filtering
+  # rounds, you are doing roughly 655,360 trial decryptions. This is
+  # computationally light and should complete well within 30 seconds,
+  # even in Python. The test environment may use a C-compiled version
+  # of the cipher, but the attack receives the same encrypt function
+  # signature.
+  # =========================================================================
+  - step: >
+      Before submitting, verify the attack works:
+
+      (a) Run the attack using the Python FEAL implementation's encrypt
+          function. The attack module should be importable and its attack()
+          function should accept an encrypt function as its argument.
+
+      (b) The attack function should:
+          - Accept a single argument: an encrypt function that takes a
+            64-bit integer and returns a 64-bit integer
+          - Return a uint32 integer (the recovered key[5])
+
+      (c) Verify the returned value matches key[5] from the cipher. You
+          can check this by importing the cipher module, calling
+          create_random_keys(), running your attack, and comparing the
+          result against the key array.
+
+      (d) Verify the attack completes in under 30 seconds. With 65536
+          candidates and ~10 filtering rounds, this should be fast even
+          in pure Python.
+
+      (e) Run the attack multiple times with different random keys to
+          confirm it works reliably, not just for one key instance.
+    check: >
+      Does the attack function have the correct signature:
+      attack(encrypt_fn)? Does it return a uint32 value? Does the
+      returned value match the actual key[5]? Does the attack complete
+      in under 30 seconds? Does the attack work with different random
+      key instances?
+
+  # =========================================================================
+  # Step 6 -- Ensure the output file is correct
+  # =========================================================================
+  - step: >
+      The attack must be in a file that can be imported as a Python module:
+
+      (a) The file should be named attack.py and placed in the correct
+          directory (typically /app/attack.py).
+
+      (b) The file must define a function called "attack" that takes one
+          argument (the encrypt function) and returns a uint32 integer.
+
+      (c) The file should NOT call create_random_keys() or access the
+          cipher's key array directly. The attack must work solely through
+          the encrypt function interface (chosen-plaintext model).
+
+      (d) The file may have a __main__ block for testing, but the attack()
+          function must be importable and callable independently.
+
+      (e) Ensure no hardcoded key values or seed values are in the attack
+          function. The attack must work against any randomly generated
+          key set, not just a specific test case.
+    check: >
+      Is the file at the correct path and importable as a module? Does
+      it define attack(encrypt_fn) with the correct signature? Does the
+      attack work without accessing the cipher's internal state? Are
+      there no hardcoded keys or seeds in the attack logic?
+
+common_failures:
+  - >
+    Wrong byte ordering in the F function: The agent implements the F
+    function with a different byte extraction order (e.g., byte 0 as most
+    significant instead of least significant) or a different byte
+    recombination order. Even a single byte swap causes the F function
+    output to differ from the cipher's, making every differential check
+    fail. Copy the F and G functions directly from the cipher source code.
+    Do not reimplement from description -- match the exact code. Test
+    your F function against the cipher's F function with several random
+    inputs to verify they produce identical outputs.
+  - >
+    Incorrect ciphertext half assignment: The agent confuses which half of
+    the ciphertext corresponds to the Feistel left vs right output. The
+    cipher uses merge(right, left), meaning the UPPER 32 bits are the
+    Feistel right and the LOWER 32 bits are the Feistel left. Getting this
+    backwards inverts the entire last-round peel. Read the cipher's
+    encrypt function carefully and note the final line: merge(right, left).
+  - >
+    Not accounting for the post-round XOR mixing: The FEAL cipher applies
+    "left XOR= right" after the last round but before the final swap. The
+    agent forgets this step when peeling the last round, producing
+    incorrect intermediate values. The intermediate value fed into the F
+    function is cipher_left XOR cipher_right, then XOR with the candidate
+    key.
+  - >
+    Wrong input differential: The agent uses an arbitrary or theoretically-
+    derived differential that does not produce a high-probability
+    characteristic through this specific FEAL implementation. Use the
+    specific input differential 0x8080000080800000 which exploits the
+    arithmetic properties of the G function (0x80 + 0x80 = 0x00 mod 256).
+    Combined with the expected output differential of 0x02000000, this
+    forms a usable characteristic.
+  - >
+    Not enough filtering rounds: The agent runs only 1-2 filtering rounds,
+    leaving many false positive candidates. Run at least 10 filtering
+    rounds. Each round with a fresh random plaintext pair eliminates
+    roughly half or more of the wrong candidates. After 10 rounds, the
+    probability of a false positive surviving is negligible.
+  - >
+    Hardcoding the key or seed value: The agent tests with a specific key,
+    gets the right answer for that case, and accidentally hardcodes the
+    result. The test harness uses randomly generated keys, so a hardcoded
+    answer will fail. The attack function must work solely through the
+    encrypt function interface.
+  - >
+    Exceeding the 30-second time limit: The agent implements an inefficient
+    attack that tries to brute-force multiple round keys simultaneously.
+    The straightforward differential attack on 65536 candidates with ~10
+    filtering rounds should take only a few seconds. If your approach takes
+    longer, you are likely doing something unnecessary.
+
+verification: >
+  Verify that the attack module defines a function called "attack" that
+  accepts a single argument (an encrypt function) and returns an integer
+  (uint32). Run the attack against the cipher with known random keys and
+  confirm the returned value matches key[5]. Test multiple times with
+  different random keys to confirm reliability. Verify the attack completes
+  in under 30 seconds. Confirm the attack function does not import or
+  access the cipher's key array directly -- it should work purely through
+  chosen-plaintext queries to the provided encrypt function. Verify the
+  attack works with alternative encrypt implementations that follow the
+  same interface.
