@@ -33,7 +33,9 @@ Output a JSON object with this structure:
 }
 """
 
-SKILL_GEN_PROMPT = """You are an expert in operations research and problem-solving methodology.
+def _build_gen_prompt(task_type_description: str, n: int, seed_examples_block: str) -> str:
+    """Build the skill generation prompt without .format() brace conflicts."""
+    return f"""You are an expert in operations research and problem-solving methodology.
 
 I need you to create a structured problem-solving skill for the following type of OR problem: {task_type_description}
 
@@ -45,7 +47,7 @@ NOTE: These examples are provided only to illustrate the problem format. Your sk
 
 Create a general-purpose skill as a step-by-step procedure with verification checks.
 
-""" + SKILL_SCHEMA_FOR_PROMPT.strip()
+{SKILL_SCHEMA_FOR_PROMPT.strip()}"""
 
 TASK_TYPE_DESCRIPTIONS = {
     "or_model_identification": (
@@ -134,7 +136,7 @@ def generate_skill(
         f"Example {i + 1}:\n{_format_example(ex)}"
         for i, ex in enumerate(seed_examples)
     )
-    prompt_text = SKILL_GEN_PROMPT.format(
+    prompt_text = _build_gen_prompt(
         task_type_description=TASK_TYPE_DESCRIPTIONS[task_type],
         n=len(seed_examples),
         seed_examples_block=seed_examples_block,

@@ -26,7 +26,11 @@ Output a JSON object with this structure:
 }
 """
 
-OPTIMIZER_PROMPT = """You are a skill optimization expert. You are given:
+def _build_optimizer_prompt(n: int, n_success: int, n_fail: int,
+                            current_skill_yaml: str, dev_failure_details: str,
+                            dev_success_summaries: str) -> str:
+    """Build the optimizer prompt without .format() brace conflicts."""
+    return f"""You are a skill optimization expert. You are given:
 
 1. A problem-solving skill that was tested on {n} development tasks
 2. It succeeded on {n_success} tasks and failed on {n_fail} tasks
@@ -48,7 +52,7 @@ Your job: produce an IMPROVED version of the skill that:
 3. Stays concise — do not make the skill longer than necessary
 4. Produces GENERAL improvements — not fixes targeted at specific questions
 
-""" + OPTIMIZER_SCHEMA_FOR_PROMPT.strip()
+{OPTIMIZER_SCHEMA_FOR_PROMPT.strip()}"""
 
 
 def _assert_dev_split(item: dict, label: str) -> None:
@@ -169,7 +173,7 @@ def optimize_skill(
     n_success = len(dev_successes)
     n_fail = len(dev_failures)
 
-    prompt = OPTIMIZER_PROMPT.format(
+    prompt = _build_optimizer_prompt(
         n=n_total,
         n_success=n_success,
         n_fail=n_fail,
