@@ -36,7 +36,6 @@ from src.report_generator import generate_report, generate_marketplace_cards
 
 console = Console()
 
-TASK_TYPES = ["linear_programming", "combinatorial_optimization"]
 PRE_OPT_CONDITIONS = ["baseline", "generic_scaffold", "v0_self_generated", "v1_curated"]
 ALL_CONDITIONS = ["baseline", "generic_scaffold", "v0_self_generated", "v1_curated", "v2_optimized"]
 
@@ -67,6 +66,11 @@ def run_pipeline(model_name: str = "deepseek", run_id: str = None):
     console.rule("[bold blue]Skill Optimization Pipeline")
     console.print(f"Run ID: {run_id}")
     console.print(f"Model: {model_name}")
+
+    # Derive task types dynamically from data
+    all_data_questions = load_questions()
+    TASK_TYPES = sorted(set(q["task_type"] for q in all_data_questions))
+    console.print(f"Task types: {TASK_TYPES}")
 
     # ─── Phase 0: Validation ───────────────────────────────────────────
     console.rule("[bold yellow]Phase 0: Validation")

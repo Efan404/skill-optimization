@@ -12,7 +12,6 @@ from collections import Counter
 
 
 CONDITIONS = ["baseline", "generic_scaffold", "v0_self_generated", "v1_curated", "v2_optimized"]
-TASK_TYPES = ["linear_programming", "combinatorial_optimization"]
 
 
 def compute_accuracy(results: dict, questions: list[dict], task_type: str = None) -> float:
@@ -132,20 +131,23 @@ def _build_overview(run_id: str, model_name: str, dataset_label: str, questions:
 
 def _build_accuracy_table(results: dict, questions: list[dict], split_name: str) -> str:
     """Build an accuracy summary table for a given split."""
+    task_types = sorted(set(q["task_type"] for q in questions))
+
     header = f"### {split_name} Accuracy Summary\n\n"
-    header += "| Condition | LP Accuracy | CO Accuracy | Overall |\n"
-    header += "|-----------|------------|------------|--------|\n"
+    col_headers = " | ".join(tt for tt in task_types)
+    header += f"| Condition | {col_headers} | Overall |\n"
+    header += "|-----------|" + "|".join(["----------"] * len(task_types)) + "|--------|\n"
 
     rows = []
     for cond in CONDITIONS:
         if cond not in results:
-            rows.append(f"| {cond} | — | — | — |")
+            dashes = " | ".join("—" for _ in task_types)
+            rows.append(f"| {cond} | {dashes} | — |")
             continue
         cond_results = results[cond]
-        lp_acc = compute_accuracy(cond_results, questions, "linear_programming")
-        co_acc = compute_accuracy(cond_results, questions, "combinatorial_optimization")
+        tt_accs = [_accuracy_str(compute_accuracy(cond_results, questions, tt)) for tt in task_types]
         overall = compute_accuracy(cond_results, questions)
-        rows.append(f"| {cond} | {_accuracy_str(lp_acc)} | {_accuracy_str(co_acc)} | {_accuracy_str(overall)} |")
+        rows.append(f"| {cond} | {' | '.join(tt_accs)} | {_accuracy_str(overall)} |")
 
     return header + "\n".join(rows) + "\n"
 
@@ -270,7 +272,7 @@ def _build_per_question_table(test_results: dict, questions: list[dict]) -> str:
     rows = []
     for q in test_qs:
         qid = q["id"]
-        qtype = "LP" if q["task_type"] == "linear_programming" else "CO"
+        qtype = q["task_type"]
         correct = q["correct_answer"]
 
         cells = [qid, qtype]
@@ -428,8 +430,9 @@ def generate_marketplace_cards(
 
     dev_qs = [q for q in questions if q["split"] == "dev"]
     test_qs = [q for q in questions if q["split"] == "test"]
+    task_types = sorted(set(q["task_type"] for q in questions))
 
-    for task_type in TASK_TYPES:
+    for task_type in task_types:
         dev_accs = {}
         test_accs = {}
         for cond in CONDITIONS:
