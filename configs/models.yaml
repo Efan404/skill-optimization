@@ -50,3 +50,29 @@ models:
       max_retries: 5
       backoff_seconds: 10
     min_delay_between_calls: 3.0
+
+  step_2_mini:
+    provider: "openai_compatible"
+    base_url: "https://api.stepfun.com/v1"
+    model: "step-2-mini"
+    api_key_env: "STEPFUN_API_KEY"
+    temperature: 0
+    max_tokens: 8192
+    timeout: 600
+    retry:
+      max_retries: 3
+      backoff_seconds: 5
+    min_delay_between_calls: 0.0
+
+  step_1_8k:
+    provider: "openai_compatible"
+    base_url: "https://api.stepfun.com/v1"
+    model: "step-1-8k"
+    api_key_env: "STEPFUN_API_KEY"
+    temperature: 0
+    max_tokens: 8192
+    timeout: 600
+    retry:
+      max_retries: 3
+      backoff_seconds: 5
+    min_delay_between_calls: 0.0
