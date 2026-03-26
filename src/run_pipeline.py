@@ -257,13 +257,23 @@ def run_pipeline(model_name: str = "deepseek", run_id: str = None):
         console.print(f"  v1 on dev: {len(dev_successes)} correct, {len(dev_failures)} failed")
 
         if dev_failures:
-            v2_skill, changelog = optimize_skill(
-                client, v1_skill, dev_failures, dev_successes, task_type
-            )
-            v2_skills[task_type] = v2_skill
-            changelogs[task_type] = changelog
-            console.print(f"  [green]v2 optimized skill saved for {task_type}")
-            console.print(f"  Changelog: {changelog[:200]}")
+            try:
+                v2_skill, changelog = optimize_skill(
+                    client, v1_skill, dev_failures, dev_successes, task_type
+                )
+                v2_skills[task_type] = v2_skill
+                changelogs[task_type] = changelog
+                console.print(f"  [green]v2 optimized skill saved for {task_type}")
+                console.print(f"  Changelog: {changelog[:200]}")
+            except (ValueError, Exception) as e:
+                console.print(f"  [yellow]Optimization failed: {e}")
+                console.print(f"  [yellow]Falling back to v1 as v2")
+                from src.skill_manager import save_skill
+                v2_path = f"skills/orqa/v2_optimized/{task_type}.yaml"
+                Path(v2_path).parent.mkdir(parents=True, exist_ok=True)
+                save_skill(v1_skill, v2_path)
+                v2_skills[task_type] = v1_skill
+                changelogs[task_type] = f"Optimization failed ({e}); v2 = v1 copy."
         else:
             console.print(f"  [yellow]No failures on dev — v1 is already perfect, skipping optimization")
             # Copy v1 as v2
