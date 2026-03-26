@@ -96,10 +96,24 @@ Once the held-out StepFun test finishes, the next action should be determined by
 
 In both cases, the next best Phase 2 experiment remains the same: test whether a **component-semantics** skill aligns better with ORQA's real difficulty than the archetype-oriented skill.
 
+## Note on Second DeepSeek Run
+
+A Step 3 sub-agent independently ran a second DeepSeek pipeline (run `20260326_135533`) that produced different test results from the first run:
+
+| Condition | Run 1 (132128) | Run 2 (135533) |
+|-----------|:-:|:-:|
+| baseline | 80% | 80% |
+| generic_scaffold | 85% | 75% |
+| v0_self_generated | 85% | 85% |
+| v1_curated | 80% | 85% |
+| v2_optimized | 80% | 85% |
+
+Run 2 shows Gate 1 passing (v1=85% > baseline=80% > scaffold=75%), contradicting Run 1 where Gate 1 failed. This demonstrates that **at 20 test questions, results are unstable** — 1-2 questions flipping changes the conclusion. This reinforces why the StepFun test result matters: if the effect size is larger (+24pp on dev vs +0pp on DeepSeek), it should be more robust to question-level noise.
+
 ## Immediate Next Steps
 
 1. Let the current StepFun run finish and record the held-out test table.
-2. Merge the Track A skill variants (`component_minimal`, `component_enriched`).
+2. Track A skill variants (`component_minimal`, `component_enriched`) are already merged (commits `01a41b5`, `450bc5d`).
 3. Run Track A on StepFun first, because StepFun currently shows the clearest skill sensitivity.
 4. Run the same Track A conditions on DeepSeek for comparison.
 5. Write a final multi-model, multi-skill comparison after both the StepFun test and Track A ablations are complete.
