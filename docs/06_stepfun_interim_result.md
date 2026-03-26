@@ -64,6 +64,16 @@ The following would be premature until the held-out test finishes:
 
 The `v2_optimized` condition in particular should be treated cautiously in this run, because graceful fallback preserves pipeline continuity but weakens interpretability if optimization fails and reuses `v1_curated`.
 
+## Operational Note On The Active Run
+
+The current run directory already contains `metadata.json` and many per-question logs, which is enough to confirm that the StepFun pipeline is actively progressing. However, the run is still operationally incomplete from a reporting perspective:
+
+- the held-out evaluation summaries are not yet finalized
+- at least one failed per-question log has appeared during execution
+- the final memo should reconcile any failed calls before treating the run as clean evidence
+
+This matters because an apparent accuracy difference is only publishable once the artifact set is complete and any failures are understood. A strong dev trend is useful, but a report should still distinguish between **model behavior** and **pipeline execution stability**.
+
 ## Reporting Recommendation
 
 The main report should **not** be rewritten yet. Instead:
@@ -93,3 +103,13 @@ In both cases, the next best Phase 2 experiment remains the same: test whether a
 3. Run Track A on StepFun first, because StepFun currently shows the clearest skill sensitivity.
 4. Run the same Track A conditions on DeepSeek for comparison.
 5. Write a final multi-model, multi-skill comparison after both the StepFun test and Track A ablations are complete.
+
+## Finalization Checklist
+
+Before this memo is promoted into the main results narrative, verify all of the following:
+
+- `results/runs/20260326_154918/evaluations/dev/*.json` and `results/runs/20260326_154918/evaluations/test/*.json` exist
+- the final StepFun test table is copied into the report verbatim
+- Gate 1 is computed from held-out test, not dev
+- any `FAILED_*.json` logs are explained or excluded consistently
+- the interpretation of `v2_optimized` states clearly whether true optimization happened or fallback was used
