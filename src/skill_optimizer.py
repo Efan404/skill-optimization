@@ -53,20 +53,46 @@ def _try_parse_yaml(text: str) -> dict | None:
         pass
 
     # Repair: quote values that contain unquoted colons
-    # Pattern: lines like "    key: value with: colon" → "    key: 'value with: colon'"
+    # Handle any key: value lines where value contains colons
     repaired_lines = []
     for line in text.split("\n"):
         stripped = line.lstrip()
-        if stripped.startswith("- step:") or stripped.startswith("- check:") or stripped.startswith("check:") or stripped.startswith("step:"):
-            # Find the key: value boundary
-            match = re.match(r"^(\s*(?:-\s+)?(?:step|check):\s*)(.*)", line)
-            if match:
-                prefix, value = match.group(1), match.group(2)
-                # If value contains a colon and isn't already quoted
-                if ":" in value and not (value.startswith("'") or value.startswith('"')):
-                    value = "'" + value.replace("'", "''") + "'"
-                    repaired_lines.append(prefix + value)
+        indent = line[:len(line) - len(stripped)]
+
+        # Skip empty lines, comments, block scalar indicators
+        if not stripped or stripped.startswith("#"):
+            repaired_lines.append(line)
+            continue
+
+        # Handle list items: "- key: value with: colon"
+        if stripped.startswith("- "):
+            inner = stripped[2:].strip()
+            if ":" in inner:
+                key_part, _, val_part = inner.partition(":")
+                val_stripped = val_part.strip()
+                if val_stripped and ":" in val_stripped and not (
+                    val_stripped.startswith("'") or val_stripped.startswith('"') or
+                    val_stripped.startswith(">") or val_stripped.startswith("|")
+                ):
+                    val_escaped = val_stripped.replace("'", "''")
+                    repaired_lines.append(f"{indent}- {key_part}: '{val_escaped}'")
                     continue
+            repaired_lines.append(line)
+            continue
+
+        # Handle regular key: value lines
+        if ":" in stripped:
+            key_part, _, val_part = stripped.partition(":")
+            val_stripped = val_part.strip()
+            if val_stripped and ":" in val_stripped and not (
+                val_stripped.startswith("'") or val_stripped.startswith('"') or
+                val_stripped.startswith("[") or val_stripped.startswith(">") or
+                val_stripped.startswith("|")
+            ):
+                val_escaped = val_stripped.replace("'", "''")
+                repaired_lines.append(f"{indent}{key_part}: '{val_escaped}'")
+                continue
+
         repaired_lines.append(line)
 
     repaired_text = "\n".join(repaired_lines)
@@ -289,20 +315,39 @@ def optimize_skill(
         dev_success_summaries=_format_success_summaries(dev_successes),
     )
 
-    messages = [{"role": "user", "content": prompt}]
-    result = client.chat(
-        messages,
-        purpose=f"optimize_skill_{task_type}",
+    last_error = None
+    for attempt in range(3):
+        messages = [{"role": "user", "content": prompt}]
+        result = client.chat(
+            messages,
+            purpose=f"optimize_skill_{task_type}",
+        )
+
+        response_text = result["response"]
+
+        try:
+            # Extract YAML skill and changelog from the response
+            optimized_skill = extract_yaml_from_response(response_text)
+            changelog = _extract_changelog(response_text)
+
+            # Save the optimized skill
+            output_path = f"skills/orqa/v2_optimized/{task_type}.yaml"
+            save_skill(optimized_skill, output_path)
+
+            return optimized_skill, changelog
+
+        except (ValueError, yaml.YAMLError) as e:
+            last_error = e
+            if attempt < 2:
+                # Add instruction for cleaner YAML on retry
+                prompt += (
+                    "\n\nIMPORTANT: Your previous response had YAML formatting errors. "
+                    "Ensure ALL string values containing colons are properly quoted "
+                    "with single quotes. Use > or | YAML block scalar syntax for long text."
+                )
+                continue
+
+    raise ValueError(
+        f"Failed to extract optimized skill after 3 attempts. "
+        f"Last error: {last_error}"
     )
-
-    response_text = result["response"]
-
-    # Extract YAML skill and changelog from the response
-    optimized_skill = extract_yaml_from_response(response_text)
-    changelog = _extract_changelog(response_text)
-
-    # Save the optimized skill
-    output_path = f"skills/orqa/v2_optimized/{task_type}.yaml"
-    save_skill(optimized_skill, output_path)
-
-    return optimized_skill, changelog

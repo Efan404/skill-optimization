@@ -137,6 +137,85 @@ def extract_yaml_from_response(response: str) -> str:
 # ---------------------------------------------------------------------------
 
 
+def _parse_yaml_robust(yaml_text: str) -> dict:
+    """Try to parse YAML with fallback sanitization for LLM-generated content.
+
+    Handles common issues like unquoted values containing colons.
+
+    Args:
+        yaml_text: Raw YAML text extracted from LLM response.
+
+    Returns:
+        Parsed YAML as a dict.
+
+    Raises:
+        ValueError: If all parsing strategies fail.
+    """
+    # Strategy 1: direct parse
+    try:
+        result = yaml.safe_load(yaml_text)
+        if isinstance(result, dict):
+            return result
+    except yaml.YAMLError:
+        pass
+
+    # Strategy 2: fix unquoted values containing colons
+    lines = yaml_text.split("\n")
+    fixed_lines = []
+    for line in lines:
+        stripped = line.rstrip()
+        if not stripped or stripped.lstrip().startswith("#"):
+            fixed_lines.append(stripped)
+            continue
+
+        content = stripped.lstrip()
+        indent = " " * (len(stripped) - len(content))
+
+        # Handle "- key: value" list items where value has unquoted colons
+        if content.startswith("- "):
+            inner = content[2:].strip()
+            if ":" in inner:
+                key_part, _, val_part = inner.partition(":")
+                val_stripped = val_part.strip()
+                if val_stripped and ":" in val_stripped and not (
+                    val_stripped.startswith('"') or val_stripped.startswith("'") or
+                    val_stripped.startswith(">") or val_stripped.startswith("|")
+                ):
+                    val_escaped = val_stripped.replace('"', '\\"')
+                    fixed_lines.append(f'{indent}- {key_part}: "{val_escaped}"')
+                    continue
+            fixed_lines.append(stripped)
+            continue
+
+        # Handle "key: value" lines where value has unquoted colons
+        if ":" in content:
+            key_part, _, val_part = content.partition(":")
+            val_stripped = val_part.strip()
+            if val_stripped and ":" in val_stripped and not (
+                val_stripped.startswith('"') or val_stripped.startswith("'") or
+                val_stripped.startswith("[") or val_stripped.startswith(">") or
+                val_stripped.startswith("|")
+            ):
+                val_escaped = val_stripped.replace('"', '\\"')
+                fixed_lines.append(f'{indent}{key_part}: "{val_escaped}"')
+                continue
+
+        fixed_lines.append(stripped)
+
+    fixed_yaml = "\n".join(fixed_lines)
+    try:
+        result = yaml.safe_load(fixed_yaml)
+        if isinstance(result, dict):
+            return result
+    except yaml.YAMLError:
+        pass
+
+    raise ValueError(
+        f"Could not parse YAML after sanitization. "
+        f"Preview:\n{yaml_text[:500]}"
+    )
+
+
 def generate_skill(
     client: LLMClient,
     task_type: str,
@@ -180,21 +259,41 @@ def generate_skill(
         task_type=task_type,
     )
 
-    messages = [{"role": "user", "content": prompt_text}]
-    result = client.chat(messages, purpose=f"skill_gen_{task_type}")
+    last_error = None
+    for attempt in range(3):
+        messages = [{"role": "user", "content": prompt_text}]
+        result = client.chat(messages, purpose=f"skill_gen_{task_type}")
 
-    # Parse the YAML from the response
-    yaml_text = extract_yaml_from_response(result["response"])
-    skill = yaml.safe_load(yaml_text)
+        # Parse the YAML from the response
+        try:
+            yaml_text = extract_yaml_from_response(result["response"])
+            skill = _parse_yaml_robust(yaml_text)
 
-    if not isinstance(skill, dict):
-        raise ValueError(
-            f"Parsed YAML is not a dict (got {type(skill).__name__}). "
-            f"Raw YAML:\n{yaml_text}"
-        )
+            if not isinstance(skill, dict):
+                raise ValueError(
+                    f"Parsed YAML is not a dict (got {type(skill).__name__}). "
+                    f"Raw YAML:\n{yaml_text}"
+                )
 
-    # Save to the v0 skill directory
-    save_path = _V0_SKILL_DIR / f"{task_type}.yaml"
-    save_skill(skill, str(save_path))
+            # Save to the v0 skill directory
+            save_path = _V0_SKILL_DIR / f"{task_type}.yaml"
+            save_skill(skill, str(save_path))
 
-    return skill
+            return skill
+
+        except (ValueError, yaml.YAMLError) as e:
+            last_error = e
+            if attempt < 2:
+                # Retry with cleaner YAML instructions
+                prompt_text += (
+                    "\n\nIMPORTANT: Your previous YAML had formatting errors. "
+                    "Ensure ALL string values containing colons, commas, or "
+                    "special characters are properly quoted with double quotes. "
+                    "Use the > or | YAML block scalar syntax for long text."
+                )
+                continue
+
+    raise ValueError(
+        f"Failed to generate valid YAML skill after 3 attempts. "
+        f"Last error: {last_error}"
+    )
