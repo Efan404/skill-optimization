@@ -113,7 +113,7 @@ class LLMClient:
             time.sleep(self._min_delay - elapsed)
         self._last_call_time = time.time()
 
-    def _log_request(self, request_id: str, purpose: str, messages: list, response_data: dict):
+    def _log_request(self, request_id: str, purpose: str, messages: list, response_data: dict, response_format: dict | None = None):
         """Log request and response as JSON to the run's log directory.
 
         Args:
@@ -121,12 +121,14 @@ class LLMClient:
             purpose: Short label for the log filename.
             messages: The messages sent to the API.
             response_data: The parsed response data.
+            response_format: The response_format used in the request, if any.
         """
         log_entry = {
             "request_id": request_id,
             "model_name": self.model_name,
             "model": self.config["model"],
             "purpose": purpose,
+            "response_format": response_format,
             "messages": messages,
             "response": response_data,
             "timestamp": time.time(),
@@ -141,12 +143,14 @@ class LLMClient:
         with open(log_path, "w") as f:
             json.dump(log_entry, f, indent=2, default=str)
 
-    def chat(self, messages: list[dict], purpose: str = "") -> dict:
+    def chat(self, messages: list[dict], purpose: str = "", response_format: dict | None = None) -> dict:
         """Send messages to the LLM, retry on failure, log everything.
 
         Args:
             messages: List of message dicts with 'role' and 'content' keys.
             purpose: Short label for log filenames (e.g. 'baseline_lp_001').
+            response_format: Optional response format dict (e.g. {"type": "json_object"}).
+                Supported by OpenAI-compatible APIs for structured output.
 
         Returns:
             Dict with keys:
@@ -165,12 +169,16 @@ class LLMClient:
             try:
                 self._enforce_rate_limit()
 
-                completion = self.client.chat.completions.create(
-                    model=self.config["model"],
-                    messages=messages,
-                    temperature=self.config.get("temperature", 0),
-                    max_tokens=self.config.get("max_tokens", 2048),
-                )
+                create_kwargs = {
+                    "model": self.config["model"],
+                    "messages": messages,
+                    "temperature": self.config.get("temperature", 0),
+                    "max_tokens": self.config.get("max_tokens", 2048),
+                }
+                if response_format:
+                    create_kwargs["response_format"] = response_format
+
+                completion = self.client.chat.completions.create(**create_kwargs)
 
                 # Extract response data
                 response_text = completion.choices[0].message.content or ""
@@ -185,7 +193,7 @@ class LLMClient:
                 }
 
                 # Log successful request
-                self._log_request(request_id, purpose, messages, result)
+                self._log_request(request_id, purpose, messages, result, response_format)
 
                 return result
 
@@ -206,7 +214,7 @@ class LLMClient:
                     "error": str(e),
                     "attempts": attempt + 1,
                 }
-                self._log_request(request_id, f"FAILED_{purpose}", messages, error_data)
+                self._log_request(request_id, f"FAILED_{purpose}", messages, error_data, response_format)
                 raise
 
             except Exception as e:
@@ -217,7 +225,7 @@ class LLMClient:
                     "error_type": type(e).__name__,
                     "attempts": attempt + 1,
                 }
-                self._log_request(request_id, f"FAILED_{purpose}", messages, error_data)
+                self._log_request(request_id, f"FAILED_{purpose}", messages, error_data, response_format)
                 raise
 
         # Should not reach here, but just in case
