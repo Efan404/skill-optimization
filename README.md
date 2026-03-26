@@ -22,7 +22,7 @@ python -m src.run_pipeline --model deepseek
 
 ## What This Does
 
-Tests 5 prompting conditions on ORQA-derived OR multiple-choice questions:
+Tests 5 prompting conditions on ORQA subset OR multiple-choice questions:
 
 | Condition | Description |
 |-----------|-------------|
@@ -34,7 +34,7 @@ Tests 5 prompting conditions on ORQA-derived OR multiple-choice questions:
 
 ### Methodology
 
-- **Dev/test split**: seed (4), dev (10), test (10) — optimizer never sees test data
+- **Dev/test split**: seed (5), dev (25), test (20) — optimizer never sees test data
 - **Scaffold control**: generic scaffold matches v1 on step count, field density, and token length (+/-15%)
 - **Two-layer classification**: automated outcome labels (Layer 1) + LLM-assisted root causes (Layer 2, dev only)
 - **Error handling**: API failures per-question don't abort entire conditions; missing results count as failures in accuracy
@@ -55,12 +55,12 @@ Phase 5: Generate report + marketplace cards
 ```
 skill-optimization/
 ├── configs/           # Model and experiment configuration
-├── data/orqa/         # 24 ORQA-derived questions with seed/dev/test split
+├── data/orqa/         # 50 real ORQA questions with seed/dev/test split
 ├── docs/              # Problem framing, experiment design, results, marketplace mapping
 ├── results/           # Evaluations, logs, error analysis, marketplace cards
 ├── skills/            # Curated skills, generic scaffold, generated/optimized skills
 ├── src/               # Pipeline modules (10 files)
-└── tests/             # Unit tests (73 tests)
+└── tests/             # Unit tests (111 tests)
 ```
 
 ## Results
@@ -83,7 +83,7 @@ See `docs/03_results_and_analysis.md` for the full report with:
 
 **What this demo cannot claim:**
 - Generalization to agentic task execution (single-turn QA only)
-- Statistical significance (directional evidence from ~10 test questions)
+- Statistical significance (directional evidence from ~20 test questions)
 - Production-ready marketplace assets (demo metadata only)
 
 ## Configuration
