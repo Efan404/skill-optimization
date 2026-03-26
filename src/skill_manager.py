@@ -89,21 +89,22 @@ def get_skill_for_condition(condition: str, task_type: str) -> dict | None:
     return load_skill(str(path))
 
 
-def count_skill_tokens(skill: dict, model: str = "gpt-4") -> int:
+def count_skill_tokens(skill: dict, encoding: str = "cl100k_base") -> int:
     """Count tokens in the YAML string representation of a skill.
 
     Uses tiktoken to count tokens as they would appear when the skill
-    YAML is injected into a prompt for the specified model.
+    YAML is injected into a prompt.  The default ``cl100k_base`` encoding
+    is used by GPT-4 and DeepSeek models.
 
     Args:
         skill: The skill dictionary.
-        model: The model name for tiktoken encoding selection.
+        encoding: The tiktoken encoding name (default ``"cl100k_base"``).
 
     Returns:
         The number of tokens in the YAML string.
     """
     yaml_str = skill_to_yaml_string(skill)
-    enc = tiktoken.encoding_for_model(model)
+    enc = tiktoken.get_encoding(encoding)
     return len(enc.encode(yaml_str))
 
 
