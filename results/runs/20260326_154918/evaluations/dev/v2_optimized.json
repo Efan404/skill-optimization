@@ -1,0 +1,152 @@
+{
+  "orqa_0006": {
+    "extracted": null,
+    "correct": "B",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0007": {
+    "extracted": null,
+    "correct": "A",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0008": {
+    "extracted": null,
+    "correct": "A",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0009": {
+    "extracted": null,
+    "correct": "C",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0010": {
+    "extracted": null,
+    "correct": "B",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0011": {
+    "extracted": null,
+    "correct": "A",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0012": {
+    "extracted": null,
+    "correct": "C",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0013": {
+    "extracted": null,
+    "correct": "A",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0014": {
+    "extracted": null,
+    "correct": "D",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0015": {
+    "extracted": null,
+    "correct": "B",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0016": {
+    "extracted": null,
+    "correct": "D",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0017": {
+    "extracted": null,
+    "correct": "A",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0018": {
+    "extracted": null,
+    "correct": "B",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0019": {
+    "extracted": null,
+    "correct": "C",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0020": {
+    "extracted": null,
+    "correct": "A",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0021": {
+    "extracted": null,
+    "correct": "A",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0022": {
+    "extracted": null,
+    "correct": "B",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0023": {
+    "extracted": null,
+    "correct": "D",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0024": {
+    "extracted": null,
+    "correct": "C",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0025": {
+    "extracted": null,
+    "correct": "A",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0026": {
+    "extracted": null,
+    "correct": "B",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0027": {
+    "extracted": null,
+    "correct": "D",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0028": {
+    "extracted": null,
+    "correct": "C",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0029": {
+    "extracted": null,
+    "correct": "B",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0030": {
+    "extracted": null,
+    "correct": "C",
+    "outcome": "extraction_failed",
+    "response": ""
+  }
+}

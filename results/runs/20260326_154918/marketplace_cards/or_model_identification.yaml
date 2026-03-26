@@ -1,0 +1,61 @@
+_note: This is demo metadata showing the schema format. Evidence strength is demo-level
+  and requires cross-model, larger-sample validation before marketplace publication.
+_provenance:
+  run_id: '20260326_154918'
+  timestamp: '2026-03-26T15:49:18'
+  model: step_2_mini
+  git_commit: e1f10dcd427da29a587b3f48e09c98f436c44172
+asset_name: or-or-model-identification
+asset_type: capsule
+domain: operations_research
+supported_models:
+- step-2-mini
+evidence:
+  benchmark: ORQA subset
+  evidence_level: demo
+  methodology:
+    dev_test_split: true
+    scaffold_controlled: true
+    optimizer_blind_to_test: true
+  dev_set:
+    n_tasks: 25
+    conditions:
+      baseline:
+        accuracy: 0.56
+      generic_scaffold:
+        accuracy: 0.52
+      v0_self_generated:
+        accuracy: 0.6
+      v1_curated:
+        accuracy: 0.84
+      v2_optimized:
+        accuracy: 0.0
+  test_set:
+    n_tasks: 20
+    conditions:
+      baseline:
+        accuracy: 0.0
+      generic_scaffold:
+        accuracy: 0.0
+      v0_self_generated:
+        accuracy: 0.0
+      v1_curated:
+        accuracy: 0.0
+      v2_optimized:
+        accuracy: 0.0
+  dev_test_gap: 'v2 dev: 0%, test: 0%'
+version_history:
+- version: v1_curated
+  author: human
+  note: Initial domain-specific skill design
+- version: v2_optimized
+  author: step-2-mini
+  note: Optimization failed (Connection error.); v2 = v1 copy.
+quality_signals:
+  verification_type: exact_match
+  reproducibility: temperature 0; full determinism not guaranteed on hosted APIs
+limitations:
+- Demo-level sample size (~20 test questions) — directional evidence only
+- Single model validation — cross-model testing required
+- Single-turn QA — agent-level task execution not validated
+- No statistical significance testing at this sample size

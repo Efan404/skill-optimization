@@ -1,0 +1,20 @@
+{
+  "run_id": "20260326_154918",
+  "timestamp": "2026-03-26T15:49:18",
+  "model": "step_2_mini",
+  "git_commit": "e1f10dcd427da29a587b3f48e09c98f436c44172",
+  "data_digest": "sha256:b6ffd0b815701cd505ed477af5e0a445e4c99da0ea70e5c3e1b4b3a6a8075caa",
+  "conditions_run": [
+    "baseline",
+    "generic_scaffold",
+    "v0_self_generated",
+    "v1_curated",
+    "v2_optimized"
+  ],
+  "split_counts": {
+    "seed": 5,
+    "dev": 25,
+    "test": 20
+  },
+  "dataset_label": "ORQA subset"
+}

@@ -1,0 +1,122 @@
+{
+  "orqa_0031": {
+    "extracted": "D",
+    "correct": "D",
+    "outcome": "correct",
+    "response": "ANSWER: D"
+  },
+  "orqa_0032": {
+    "extracted": "C",
+    "correct": "C",
+    "outcome": "correct",
+    "response": "Let's follow the skill procedure step by step:\n\n1. **Read the problem description carefully and identify the context and main goal.**\n   - The context is a ride-sharing company planning an efficient route.\n   - The main goal is to find the most efficient route that visits all locations while respecting the sequence requirements.\n\n2. **Identify the decision variables - what are the choices that need to be made?**\n   - The decision variables could be the order in which the locations are visited.\n\n3. **Identify the parameters - what data is available to use in the model?**\n   - The parameters include the distance between each pair of cities and the sequence number for each city.\n\n4. **Identify the constraints - what limitations or conditions must be met?**\n   - The constraints include the sequence requirement (for every even-numbered location, it must be visited before moving on to the next one).\n\n5. **Identify the objective function - what is the goal we are trying to optimize?**\n   - The objective function is to minimize the total distance traveled.\n\n6. **Determine the model type - what type of optimization problem is this (e.g., linear, nonlinear, integer, etc.)?**\n   - This problem can be modeled as a Vehicle Routing Problem (VRP) with sequence constraints, which is a type of integer programming problem.\n\n7. **Verify the identified components - ensure all parts of the model are present and correctly identified.**\n   - The components include decision variables (visit order), parameters (distances, sequence numbers), constraints (sequence requirement), and an objective function (minimize total distance).\n\nNow, let's focus on the question about the left-hand side of the single visit constraint:\n\n- The single visit constraint ensures that each location is visited exactly once.\n- The left-hand side of this constraint would represent the condition that must be satisfied for each location to be visited exactly once.\n\nGiven the options:\nA) It represents the sequence in which each city is visited - This is incorrect because the sequence is already defined by the problem's requirement.\nB) It represents the number of vehicle load when it visits each city - This is incorrect because the problem does not mention anything about vehicle loads.\nC) It represents the number of times each city is entered - This is correct because the constraint ensures each city is visited exactly once, meaning it is entered once.\nD) It represents the distance between each pair of cities - This is incorrect because the distance is a parameter, not a constraint.\n\nANSWER: C"
+  },
+  "orqa_0033": {
+    "extracted": "C",
+    "correct": "D",
+    "outcome": "incorrect",
+    "response": "ANSWER: C"
+  },
+  "orqa_0034": {
+    "extracted": "B",
+    "correct": "B",
+    "outcome": "correct",
+    "response": "ANSWER: B"
+  },
+  "orqa_0035": {
+    "extracted": "A",
+    "correct": "A",
+    "outcome": "correct",
+    "response": "ANSWER: A"
+  },
+  "orqa_0036": {
+    "extracted": "A",
+    "correct": "A",
+    "outcome": "correct",
+    "response": "1. **Read the problem description carefully and identify the context and main goal.**\n   - Context: Metroville Hospital Consortium (MHC) oversees 12 hospitals.\n   - Main Goal: Determine which three hospitals should be closed or merged to optimize efficiency and accessibility of healthcare.\n\n2. **Identify the decision variables - what are the choices that need to be made?**\n   - Decision variables: Which hospitals to close or merge.\n\n3. **Identify the parameters - what data is available to use in the model?**\n   - Parameters: Financial metrics, patient wait times, travel distances, quality of care, service accessibility, hospital catchment areas.\n\n4. **Identify the constraints - what limitations or conditions must be met?**\n   - Constraints: Ensuring patient care remains excellent, emergency services are accessible, specialized medical treatments are strategically located, and the network's efficiency is optimized.\n\n5. **Identify the objective function - what is the goal we are trying to optimize?**\n   - Objective function: Optimize the overall efficiency and accessibility of healthcare in Metroville.\n\n6. **Determine the model type - what type of optimization problem is this (e.g., linear, nonlinear, integer, etc.)?**\n   - Model type: Integer programming (since we are dealing with discrete decisions on closing or merging hospitals).\n\n7. **Verify the identified components - ensure all parts of the model are present and correctly identified.**\n   - Ensure all components (decision variables, parameters, constraints, objective function, and model type) are correctly identified and fit the problem description.\n\n**Neighborhood Assignment Constraint:**\n- The problem emphasizes that each neighborhood or district must be served by a hospital to ensure accessibility and quality of care. This constraint ensures that no neighborhood is left without healthcare services.\n\n**Options Analysis:**\nA) Every neighborhood or district must be served by a hospital.\n   - This aligns with the requirement to ensure accessibility and quality of care for all neighborhoods.\nB) Each hospital must be assigned only to one neighborhood.\n   - This is not a necessary constraint; hospitals can serve multiple neighborhoods.\nC) All hospitals must offer telemedicine services.\n   - This is not a required constraint; the problem does not mention telemedicine services.\nD) Every neighborhood or district can be assigned to more than one hospital.\n   - This contradicts the need for each neighborhood to have a primary healthcare provider.\n\n**Conclusion:**\nThe correct neighborhood assignment constraint is:\n\nANSWER: A"
+  },
+  "orqa_0037": {
+    "extracted": "D",
+    "correct": "D",
+    "outcome": "correct",
+    "response": "ANSWER: D"
+  },
+  "orqa_0038": {
+    "extracted": "B",
+    "correct": "B",
+    "outcome": "correct",
+    "response": "ANSWER: B"
+  },
+  "orqa_0039": {
+    "extracted": "D",
+    "correct": "D",
+    "outcome": "correct",
+    "response": "ANSWER: D"
+  },
+  "orqa_0040": {
+    "extracted": null,
+    "correct": "A",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0041": {
+    "extracted": "A",
+    "correct": "A",
+    "outcome": "correct",
+    "response": "ANSWER: A"
+  },
+  "orqa_0042": {
+    "extracted": null,
+    "correct": "A",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0043": {
+    "extracted": null,
+    "correct": "A",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0044": {
+    "extracted": "B",
+    "correct": "B",
+    "outcome": "correct",
+    "response": "To solve this problem, we will follow the OR Problem Structure Identification skill step by step.\n\n1. **Read the problem description carefully and identify the context and main goal.**\n   - The context is managing a water reservoir system in the hydroelectric industry.\n   - The main goal is to maximize the electricity generated without exceeding capacity limits.\n\n2. **Identify the decision variables - what are the choices that need to be made?**\n   - The choices involve deciding how much water to release for electricity generation and how much extra water to release if a pool is overfilled.\n\n3. **Identify the parameters - what data is available to use in the model?**\n   - Data includes the value per unit of water used for electricity generation, minimum and maximum capacity of each pool, initial volume of water, maximum generation capacity, inflow of water from external sources, and time for water to travel between pools.\n\n4. **Identify the constraints - what limitations or conditions must be met?**\n   - Constraints include capacity limits, inflows, and connections between pools.\n\n5. **Identify the objective function - what is the goal we are trying to optimize?**\n   - The objective function is to maximize the value of electricity generated.\n\n6. **Determine the model type - what type of optimization problem is this (e.g., linear, nonlinear, integer, etc.)?**\n   - The problem involves managing water releases and inflows, which suggests a linear or integer programming model.\n\n7. **Verify the identified components - ensure all parts of the model are present and correctly identified.**\n   - The decision variables are the amount of water released for power production and extra water discharged due to overfill.\n\nNow, let's analyze the options:\n\nA) Minimum capacity of each pool, Value of electricity generated, Connections between the pools.\n   - This option includes parameters, not decision variables.\n\nB) Water released for power production, Extra water discharged due to overfill, Final water volume in pools.\n   - This option includes decision variables (water released for power production and extra water discharged) and a parameter (final water volume in pools).\n\nC) Water inflow from external sources, Maximum generation capacity of each pool, Time for water to travel between pools.\n   - This option includes parameters, not decision variables.\n\nD) Value per unit of water used for electricity generation, Price to set per unit of water, Maximum capacity of each pool.\n   - This option includes parameters, not decision variables.\n\nBased on the analysis, the correct answer is:\n\nANSWER: B"
+  },
+  "orqa_0045": {
+    "extracted": "C",
+    "correct": "C",
+    "outcome": "correct",
+    "response": "1. **Read the problem description carefully and identify the context and main goal.**\n   - The context is a charitable organization aiming to address hunger and prevent food waste by distributing surplus perishable foods from grocery stores to food banks.\n   - The main goal is to create a distribution plan that aligns supply with demand while minimizing transportation costs.\n\n2. **Identify the decision variables - what are the choices that need to be made?**\n   - The decision variables involve the allocation of perishable goods from grocery stores to food banks.\n\n3. **Identify the parameters - what data is available to use in the model?**\n   - Parameters include the supply capacity of each grocery store, the demand for perishable goods at each food bank, transportation costs and capacities for different routes, and other relevant factors like storage capabilities and community needs.\n\n4. **Identify the constraints - what limitations or conditions must be met?**\n   - Constraints involve ensuring that perishable goods are delivered within their consumption window, adhering to transportation capacities and costs, and meeting the unique needs of each food bank.\n\n5. **Identify the objective function - what is the goal we are trying to optimize?**\n   - The objective function is to minimize transportation costs while satisfying the demands of all food banks.\n\n6. **Determine the model type - what type of optimization problem is this (e.g., linear, nonlinear, integer, etc.)?**\n   - This problem can be modeled as a linear programming problem, as it involves minimizing costs (linear objective function) subject to linear constraints.\n\n7. **Verify the identified components - ensure all parts of the model are present and correctly identified.**\n   - The decision variables are correctly identified as the perishable goods transported from each grocery store to food bank.\n\n**ANSWER: C**"
+  },
+  "orqa_0046": {
+    "extracted": "C",
+    "correct": "B",
+    "outcome": "incorrect",
+    "response": "To solve this problem, we will follow the \"OR Problem Structure Identification\" skill step by step.\n\n1. **Read the problem description carefully and identify the context and main goal.**\n   - The context is a patisserie with perishable products and variable demand.\n   - The main goal is to create an ordering strategy that balances cost reduction, waste minimization, and revenue maximization.\n\n2. **Identify the decision variables - what are the choices that need to be made?**\n   - The decision variables are related to the quantity and timing of ingredient orders.\n\n3. **Identify the parameters - what data is available to use in the model?**\n   - Relevant parameters include shelf life of pastries, fixed cost of ordering ingredients, selling price of each pastry, batch size of ingredients, and daily customer demand.\n\n4. **Identify the constraints - what limitations or conditions must be met?**\n   - Constraints include the need to order ingredients in batches, the perishable nature of products, and the variable demand.\n\n5. **Identify the objective function - what is the goal we are trying to optimize?**\n   - The objective function is to minimize costs (ordering and waste) while maximizing revenue.\n\n6. **Determine the model type - what type of optimization problem is this (e.g., linear, nonlinear, integer, etc.)?**\n   - The problem involves integer decisions (ordering whole batches) and can be modeled as an integer programming problem.\n\n7. **Verify the identified components - ensure all parts of the model are present and correctly identified.**\n   - Check for completeness and accuracy of the identified components.\n\nNow, we need to identify which data parameters are participating in the objective criterion for this problem. The objective is to minimize costs and maximize revenue, which involves:\n- Fixed cost of ordering ingredients (to minimize)\n- Selling price of each pastry (to maximize revenue)\n- Shelf life of pastries (to ensure products are sold before they spoil)\n\nThese parameters directly impact the objective function of minimizing costs and maximizing revenue.\n\n**ANSWER: C**"
+  },
+  "orqa_0047": {
+    "extracted": "D",
+    "correct": "B",
+    "outcome": "incorrect",
+    "response": "Let's follow the skill procedure step by step:\n\n1. **Read the problem description carefully and identify the context and main goal.**\n   - The context is an airline company that needs to assign aircrafts to flights.\n   - The main goal is to maximize the company's profit by effectively assigning aircrafts to flight routes.\n\n2. **Identify the decision variables - what are the choices that need to be made?**\n   - The decision variables are the assignments of specific types of aircraft to each flight route.\n\n3. **Identify the parameters - what data is available to use in the model?**\n   - Parameters include flight schedules (departure and arrival times), fleet composition (types of aircraft and their operational costs), maximum number of each aircraft type, and profit generated from pairing each type of aircraft with specific flight routes.\n\n4. **Identify the constraints - what limitations or conditions must be met?**\n   - Constraints include operational costs, maximum number of each aircraft type available, and ensuring that aircrafts are available for their assigned flights within their operational capabilities.\n\n5. **Identify the objective function - what is the goal we are trying to optimize?**\n   - The objective function is to maximize the total profit generated from assigning aircrafts to flight routes.\n\n6. **Determine the model type - what type of optimization problem is this (e.g., linear, nonlinear, integer, etc.)?**\n   - This problem can be modeled as a linear programming problem since it involves maximizing a linear objective function subject to linear constraints.\n\n7. **Verify the identified components - ensure all parts of the model are present and correctly identified.**\n   - The identified components (decision variables, parameters, constraints, and objective function) are consistent with the problem description and align with the goal of maximizing profit.\n\nNow, let's focus on the question:\n\n**Question:** Which data parameters are participating in the objective criterion for this problem?\n\nThe objective criterion is to maximize the total profit. The profit generated from pairing each type of aircraft with specific flight routes is a key parameter in this objective.\n\n**Options:**\nA) Departure time and arrival time of a flight\nB) Fixed cost of an aircraft type, overnight number of aircraft by type and city\nC) Maximum number of each aircraft type, departure time for each flight route, arrival time for each flight route\nD) Profit contribution by type and flight\n\nThe correct answer is D) Profit contribution by type and flight, as it directly contributes to the objective of maximizing profit.\n\nANSWER: D"
+  },
+  "orqa_0048": {
+    "extracted": "D",
+    "correct": "B",
+    "outcome": "incorrect",
+    "response": "Let's follow the skill procedure step by step:\n\n1. **Read the problem description carefully and identify the context and main goal.**\n   - Context: Home renovation project.\n   - Main goal: Determine which tasks to undertake and in what sequence to maximize the total importance score of completed tasks while ensuring tasks are completed within their deadlines.\n\n2. **Identify the decision variables - what are the choices that need to be made?**\n   - Decision variables: Which tasks to undertake and in what sequence.\n\n3. **Identify the parameters - what data is available to use in the model?**\n   - Parameters: Task completion deadlines, required durations, and importance scores.\n\n4. **Identify the constraints - what limitations or conditions must be met?**\n   - Constraints: Task deadlines, limited resources (human resources, tools, materials), and the inability to handle multiple tasks simultaneously.\n\n5. **Identify the objective function - what is the goal we are trying to optimize?**\n   - Objective function: Maximize the total importance score of completed tasks.\n\n6. **Determine the model type - what type of optimization problem is this (e.g., linear, nonlinear, integer, etc.)?**\n   - Model type: Sequencing problem with resource constraints, which can be modeled as a Mixed Integer Programming (MIP) problem.\n\n7. **Verify the identified components - ensure all parts of the model are present and correctly identified.**\n   - Ensure that the decision variables, parameters, constraints, and objective function are correctly identified and align with the problem description.\n\nNow, let's analyze the options in the context of the objective criterion:\n\nA) **Task completion deadline**: This is a constraint, not a decision variable or a part of the objective function.\nB) **Task selection indicator**: This is a decision variable, but it is not directly part of the objective function.\nC) **Task required duration**: This is a parameter, not a decision variable or a part of the objective function.\nD) **Task importance score**: This is a parameter that directly contributes to the objective function, which is to maximize the total importance score of completed tasks.\n\nBased on the analysis, the correct answer is:\n\nANSWER: D"
+  },
+  "orqa_0049": {
+    "extracted": "B",
+    "correct": "D",
+    "outcome": "incorrect",
+    "response": "Let's follow the skill procedure step by step:\n\n1. **Read the problem description carefully and identify the context and main goal.**\n   - The context is designing a robust electrical grid for power distribution.\n   - The main goal is to meet power demand while minimizing the total cost of constructing and maintaining the grid.\n\n2. **Identify the decision variables - what are the choices that need to be made?**\n   - The decision variables include the number of direct HT and LT power lines connecting various substations.\n   - The power load to be routed through each direct power line.\n   - The amount of power load routed through the main distribution substation (Substation Zeta).\n\n3. **Identify the parameters - what data is available to use in the model?**\n   - Expected power consumption between each pair of substations.\n   - Fixed and variable costs for HT and LT lines for each pair.\n   - Power capacity of both HT and LT lines.\n\n4. **Identify the constraints - what limitations or conditions must be met?**\n   - Power capacity constraints for HT and LT lines.\n   - Power demand must be met.\n\n5. **Identify the objective function - what is the goal we are trying to optimize?**\n   - Minimize the total cost of constructing and maintaining the grid.\n\n6. **Determine the model type - what type of optimization problem is this (e.g., linear, nonlinear, integer, etc.)?**\n   - This problem can be modeled as a mixed-integer linear programming (MILP) problem.\n\n7. **Verify the identified components - ensure all parts of the model are present and correctly identified.**\n   - The decision variables, parameters, constraints, and objective function are all correctly identified.\n\nNow, let's analyze the options:\n\nA) The fixed and variable costs for HT and LT lines for each pair - These are parameters, not decision variables.\nB) The power load to be routed through each direct power line - This is a decision variable.\nC) The amount used via the hub - This is a decision variable (the amount of power load routed through Substation Zeta).\nD) Number of HT lines between each substation pair, Number of LT lines between each substation pair - These are decision variables.\n\nThe options that are participating decision activities in the objective criterion for this problem are B, C, and D.\n\nANSWER: B, C, D"
+  },
+  "orqa_0050": {
+    "extracted": "A",
+    "correct": "D",
+    "outcome": "incorrect",
+    "response": "Let's follow the skill procedure step by step:\n\n1. **Read the problem description carefully and identify the context and main goal.**\n   - The context is the distribution of artifacts among four grandchildren after the passing of the family matriarch.\n   - The main goal is to distribute the artifacts fairly, ensuring each heir receives items they cherish while maintaining a balance in their relative sentimental value.\n\n2. **Identify the decision variables - what are the choices that need to be made?**\n   - The decision variables are the allocations of each artifact to one of the four grandchildren.\n\n3. **Identify the parameters - what data is available to use in the model?**\n   - The parameters include the artifacts' types (vintage photos, books, paintings, jewelry), their tangible value, sentimental worth, and the preferences of each grandchild for each type of artifact.\n\n4. **Identify the constraints - what limitations or conditions must be met?**\n   - The constraints are ensuring each grandchild receives a fair share of the artifacts, considering their preferences and the sentimental value of the items.\n\n5. **Identify the objective function - what is the goal we are trying to optimize?**\n   - The objective function is to maximize the satisfaction of each grandchild while minimizing the difference in the sentimental value received by each grandchild.\n\n6. **Determine the model type - what type of optimization problem is this (e.g., linear, nonlinear, integer, etc.)?**\n   - This problem can be modeled as a nonlinear optimization problem due to the complex nature of the objective function and the constraints.\n\n7. **Verify the identified components - ensure all parts of the model are present and correctly identified.**\n   - The components are:\n     - Decision variables: Allocation of artifacts to grandchildren.\n     - Parameters: Artifact types, tangible value, sentimental worth, and preferences.\n     - Constraints: Fair distribution and respect for preferences.\n     - Objective function: Maximize satisfaction and minimize difference in sentimental value.\n     - Model type: Nonlinear optimization.\n\nNow, let's analyze the options:\n\nA) Allocation of belongings to each grandchild - This is a decision variable.\nB) Preference of each grandchild for each belonging - This is a parameter.\nC) Weight applied to minimize the maximum allocation - This is part of the objective function.\nD) Minimum allocation for each grandchild - This is a constraint.\n\nThe options that are participating decision activities in the objective criterion for this problem are:\n\nA) Allocation of belongings to each grandchild\nC) Weight applied to minimize the maximum allocation\n\nANSWER: A, C"
+  }
+}

@@ -1,0 +1,65 @@
+_note: This is demo metadata showing the schema format. Evidence strength is demo-level
+  and requires cross-model, larger-sample validation before marketplace publication.
+_provenance:
+  run_id: '20260326_165518'
+  timestamp: '2026-03-26T16:55:18'
+  model: deepseek
+  git_commit: b9ccd8e3abcdfcb651c5a3c887fe640db1038568
+asset_name: or-or-model-identification
+asset_type: capsule
+domain: operations_research
+supported_models:
+- deepseek-chat
+evidence:
+  benchmark: ORQA subset
+  evidence_level: demo
+  methodology:
+    dev_test_split: true
+    scaffold_controlled: true
+    optimizer_blind_to_test: true
+  dev_set:
+    n_tasks: 25
+    conditions:
+      baseline:
+        accuracy: 0.8
+      generic_scaffold:
+        accuracy: 0.84
+      v0_self_generated:
+        accuracy: 0.88
+      v1_curated:
+        accuracy: 0.8
+      v2_optimized:
+        accuracy: 0.84
+  test_set:
+    n_tasks: 20
+    conditions:
+      baseline:
+        accuracy: 0.8
+      generic_scaffold:
+        accuracy: 0.85
+      v0_self_generated:
+        accuracy: 0.85
+      v1_curated:
+        accuracy: 0.8
+      v2_optimized:
+        accuracy: 0.85
+  dev_test_gap: 'v2 dev: 84%, test: 85%'
+version_history:
+- version: v1_curated
+  author: human
+  note: Initial domain-specific skill design
+- version: v2_optimized
+  author: deepseek-chat
+  note: '- Enhanced Step 3 (model skeleton instantiation): Added clarification about
+    implicit sets and parameter synonyms to address failures where sets were missed
+    or terminology was over-interpreted.
+
+    - Enhan'
+quality_signals:
+  verification_type: exact_match
+  reproducibility: temperature 0; full determinism not guaranteed on hosted APIs
+limitations:
+- Demo-level sample size (~20 test questions) — directional evidence only
+- Single model validation — cross-model testing required
+- Single-turn QA — agent-level task execution not validated
+- No statistical significance testing at this sample size

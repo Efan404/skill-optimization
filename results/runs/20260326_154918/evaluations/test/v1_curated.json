@@ -1,0 +1,122 @@
+{
+  "orqa_0031": {
+    "extracted": null,
+    "correct": "D",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0032": {
+    "extracted": null,
+    "correct": "C",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0033": {
+    "extracted": null,
+    "correct": "D",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0034": {
+    "extracted": null,
+    "correct": "B",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0035": {
+    "extracted": null,
+    "correct": "A",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0036": {
+    "extracted": null,
+    "correct": "A",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0037": {
+    "extracted": null,
+    "correct": "D",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0038": {
+    "extracted": null,
+    "correct": "B",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0039": {
+    "extracted": null,
+    "correct": "D",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0040": {
+    "extracted": null,
+    "correct": "A",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0041": {
+    "extracted": null,
+    "correct": "A",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0042": {
+    "extracted": null,
+    "correct": "A",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0043": {
+    "extracted": null,
+    "correct": "A",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0044": {
+    "extracted": null,
+    "correct": "B",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0045": {
+    "extracted": null,
+    "correct": "C",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0046": {
+    "extracted": null,
+    "correct": "B",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0047": {
+    "extracted": null,
+    "correct": "B",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0048": {
+    "extracted": null,
+    "correct": "B",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0049": {
+    "extracted": null,
+    "correct": "D",
+    "outcome": "extraction_failed",
+    "response": ""
+  },
+  "orqa_0050": {
+    "extracted": null,
+    "correct": "D",
+    "outcome": "extraction_failed",
+    "response": ""
+  }
+}

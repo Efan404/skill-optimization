@@ -1,0 +1,265 @@
+{
+  "baseline": {
+    "orqa_0010": {
+      "root_causes": [
+        "task_misunderstood",
+        "wrong_reasoning"
+      ],
+      "explanation": "The LLM misread the problem by focusing on the allocation of patients to rooms and doctors, rather than the specific constraint of One Job Per Machine. Additionally, the reasoning steps are flawed as they incorrectly apply the constraint to time slots and patient appointments."
+    },
+    "orqa_0011": {
+      "root_causes": [
+        "wrong_reasoning",
+        "constraint_missed"
+      ],
+      "explanation": "The LLM misunderstood the Single Purchase Rule, incorrectly applying it to timeframes instead of client categories, and ignored the constraint that each client category can purchase the diamond during the first, second, or third period based on the highest price they can offer."
+    },
+    "orqa_0018": {
+      "root_causes": [
+        "wrong_reasoning"
+      ],
+      "explanation": "The LLM incorrectly identified 'Distribution Centers' as not defining a set, despite the problem implying their existence for processing or storing crops."
+    },
+    "orqa_0019": {
+      "root_causes": [
+        "wrong_reasoning",
+        "skill_overfit"
+      ],
+      "explanation": "The LLM incorrectly identified Power Load as a set instead of a variable, and it followed the prompting strategy too rigidly, missing the nuance that only Substations are the correct set."
+    },
+    "orqa_0021": {
+      "root_causes": [
+        "task_misunderstood",
+        "wrong_reasoning"
+      ],
+      "explanation": "The LLM misread the problem and applied incorrect reasoning steps."
+    },
+    "orqa_0025": {
+      "root_causes": [
+        "wrong_reasoning",
+        "constraint_missed"
+      ],
+      "explanation": "The LLM misunderstood the objective criterion by focusing on 'revenue contribution' instead of 'profit contribution' and ignored the constraint of 'revenue' in the problem statement."
+    },
+    "orqa_0026": {
+      "root_causes": [
+        "wrong_reasoning",
+        "skill_overfit"
+      ],
+      "explanation": "The LLM incorrectly concluded that discounts are not part of the objective criterion, despite the problem description suggesting they are considered in setting prices to balance user satisfaction, cost control, and revenue maximization. This indicates a logical flaw in reasoning and a rigid adherence to a skill that missed the nuance of the problem."
+    },
+    "orqa_0027": {
+      "root_causes": [
+        "wrong_reasoning",
+        "constraint_missed"
+      ],
+      "explanation": "The LLM incorrectly identified option D as the correct answer, ignoring the critical constraint that the capacity of each track is directly related to the problem's objective. It also misunderstood the problem by focusing on the number of trains rather than the capacity of the tracks."
+    },
+    "orqa_0028": {
+      "root_causes": [
+        "wrong_reasoning",
+        "skill_overfit"
+      ],
+      "explanation": "The LLM incorrectly identified options A and C as participating decision activities, while the correct answer is C. This indicates a logical flaw in the reasoning process and a tendency to follow the skill too rigidly, missing the nuance of the problem."
+    },
+    "orqa_0029": {
+      "root_causes": [
+        "wrong_reasoning",
+        "skill_overfit"
+      ],
+      "explanation": "The LLM incorrectly identified options A, C, and D as participating decision activities in the objective criterion, while the correct answer is B. This indicates a flaw in the reasoning process and a tendency to follow the skill too rigidly, missing the nuance that task drop status (B) is not a direct decision activity in maximizing overall value."
+    },
+    "orqa_0030": {
+      "root_causes": [
+        "wrong_reasoning"
+      ],
+      "explanation": "The LLM incorrectly identified the objective criterion and decision activities, leading to the selection of the wrong option."
+    }
+  },
+  "generic_scaffold": {
+    "orqa_0009": {
+      "root_causes": [
+        "wrong_reasoning",
+        "skill_overfit"
+      ],
+      "explanation": "The LLM incorrectly interpreted the demand satisfaction constraint's left-hand side, leading to a flawed reasoning process. Additionally, it followed the structured problem-solving guide too rigidly, missing the nuance of the question."
+    },
+    "orqa_0010": {
+      "root_causes": [
+        "task_misunderstood",
+        "constraint_missed"
+      ],
+      "explanation": "LLM misread the problem and ignored the 'One Job Per Machine' constraint."
+    },
+    "orqa_0011": {
+      "root_causes": [
+        "wrong_reasoning",
+        "constraint_missed"
+      ],
+      "explanation": "The LLM misinterpreted the Single Purchase Rule's application, ignoring the specific constraints and focusing on a broader, incorrect scope."
+    },
+    "orqa_0014": {
+      "root_causes": [
+        "wrong_reasoning",
+        "skill_overfit"
+      ],
+      "explanation": "LLM misinterpreted the problem as a knapsack problem instead of a bin packing problem, and followed the structured problem-solving guide too rigidly, missing the nuance of the actual problem type."
+    },
+    "orqa_0018": {
+      "root_causes": [
+        "task_misunderstood",
+        "skill_overfit"
+      ],
+      "explanation": "LLM misread the problem and followed a rigid skill, missing the nuance that 'Customers' represent demand and preferences rather than a set in the optimization model."
+    },
+    "orqa_0019": {
+      "root_causes": [
+        "wrong_reasoning",
+        "skill_overfit"
+      ],
+      "explanation": "The LLM incorrectly identified the sets in the optimization model, likely due to overfitting to the structured problem-solving guide and missing the nuanced distinction between sets and collections in the problem context."
+    },
+    "orqa_0020": {
+      "root_causes": [
+        "task_misunderstood",
+        "skill_overfit"
+      ],
+      "explanation": "LLM misread the problem and followed a skill too rigidly, missing the nuance of the optimization model."
+    },
+    "orqa_0022": {
+      "root_causes": [
+        "wrong_reasoning",
+        "skill_overfit"
+      ],
+      "explanation": "The LLM incorrectly identified the decision activities by focusing on assigning employees to different days, which is a specific task rather than a decision activity. It also followed the skill too rigidly, missing the nuance that the problem is about minimizing the total number of employees."
+    },
+    "orqa_0025": {
+      "root_causes": [
+        "wrong_reasoning",
+        "skill_overfit"
+      ],
+      "explanation": "The LLM incorrectly identified the objective criterion and followed a rigid problem-solving approach, missing the nuance of the problem."
+    },
+    "orqa_0026": {
+      "root_causes": [
+        "wrong_reasoning",
+        "constraint_missed"
+      ],
+      "explanation": "The LLM incorrectly identified fixed costs as not participating in the objective criterion, ignoring the constraint that these costs must be considered in the pricing decision."
+    },
+    "orqa_0027": {
+      "root_causes": [
+        "task_misunderstood",
+        "wrong_reasoning"
+      ],
+      "explanation": "LLM misread the problem and followed incorrect reasoning steps."
+    },
+    "orqa_0029": {
+      "root_causes": [
+        "wrong_reasoning",
+        "skill_overfit"
+      ],
+      "explanation": "LLM followed a structured problem-solving guide too rigidly, missing the nuance that only options A and C are valid decision activities."
+    }
+  },
+  "v0_self_generated": {
+    "orqa_0010": {
+      "root_causes": [
+        "task_misunderstood"
+      ],
+      "explanation": "LLM misread the problem and provided an incorrect answer."
+    },
+    "orqa_0011": {
+      "root_causes": [
+        "task_misunderstood",
+        "constraint_missed"
+      ],
+      "explanation": "LLM misread the problem and missed the Single Purchase Rule constraint applied to both timeframes and diamond prices."
+    },
+    "orqa_0018": {
+      "root_causes": [
+        "wrong_reasoning",
+        "skill_overfit"
+      ],
+      "explanation": "The LLM incorrectly identified 'Customers' as not defining a set, despite them being unique entities with specific requirements, rather than a collection of distinct entities."
+    },
+    "orqa_0020": {
+      "root_causes": [
+        "task_misunderstood",
+        "skill_overfit"
+      ],
+      "explanation": "The LLM misread the problem and followed the skill procedure too rigidly, missing the nuance that 'Songs' is the set being defined in the optimization model."
+    },
+    "orqa_0022": {
+      "root_causes": [
+        "skill_overfit",
+        "task_misunderstood"
+      ],
+      "explanation": "The LLM focused too rigidly on the 'Identify Optimization Model Components' skill, missing the nuance that the decision activities involve assigning employees to specific days, not just identifying model components."
+    },
+    "orqa_0025": {
+      "root_causes": [
+        "task_misunderstood"
+      ],
+      "explanation": "LLM misread the problem, failing to identify the correct data parameters participating in the objective criterion."
+    },
+    "orqa_0027": {
+      "root_causes": [
+        "skill_overfit",
+        "task_misunderstood"
+      ],
+      "explanation": "The LLM focused too rigidly on the 'Identify Optimization Model Components' skill, missing the specific question about data parameters in the objective criterion."
+    },
+    "orqa_0028": {
+      "root_causes": [
+        "skill_mismatch",
+        "skill_overfit"
+      ],
+      "explanation": "The LLM's response focused on identifying an optimization model component rather than correctly identifying the decision activity in the objective criterion for the problem."
+    },
+    "orqa_0029": {
+      "root_causes": [
+        "skill_overfit",
+        "task_misunderstood"
+      ],
+      "explanation": "LLM followed the 'Identify Optimization Model Components' skill too rigidly, missing the nuance that the question was asking about decision activities in the objective criterion, not just model components."
+    },
+    "orqa_0030": {
+      "root_causes": [
+        "skill_overfit",
+        "wrong_reasoning"
+      ],
+      "explanation": "The LLM followed the skill too rigidly, missing the nuance that variance below the target is a result of the decision variables and parameters, not a decision activity itself."
+    }
+  },
+  "v1_curated": {
+    "orqa_0018": {
+      "root_causes": [
+        "skill_overfit",
+        "hallucinated_procedure"
+      ],
+      "explanation": "The LLM followed the skill too rigidly, leading to a misunderstanding of the problem. It incorrectly identified 'Modes of Transport' as a set, which was not explicitly mentioned as such in the problem description."
+    },
+    "orqa_0025": {
+      "root_causes": [
+        "skill_overfit",
+        "hallucinated_procedure"
+      ],
+      "explanation": "The LLM followed the skill too rigidly, leading to the inclusion of steps not present in the original skill and the incorrect identification of parameters participating in the objective function."
+    },
+    "orqa_0027": {
+      "root_causes": [
+        "wrong_reasoning",
+        "skill_overfit"
+      ],
+      "explanation": "The LLM incorrectly identified the objective criterion as involving data parameters, while the correct answer is about the capacity of each track as a parameter participating in the objective criterion. The LLM's reasoning was flawed, and it followed the skill too rigidly, missing the nuance of the problem."
+    },
+    "orqa_0029": {
+      "root_causes": [
+        "skill_overfit",
+        "hallucinated_procedure"
+      ],
+      "explanation": "The LLM followed the skill procedure too rigidly, missing the nuance of the problem and hallucinating steps not present in the skill."
+    }
+  }
+}

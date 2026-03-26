@@ -1,28 +1,38 @@
-name: Identify Optimization Model Components
+name: OR Model Component Identifier
 version: v0_self_generated
 source: self_generated
 domain: operations_research
-task_type: or_model_identification
-when_to_use: When you need to identify the components of an optimization model from a natural language problem description.
-when_not_to_use: When the problem description is not clear or lacks necessary details to identify model components.
+task_type: optimization_model_component_identification
+when_to_use: When presented with a natural language description of an operations research problem and asked to identify specific optimization model components (decision variables, parameters, constraints,
+  objectives, model type) or answer questions about their properties.
+when_not_to_use: When the problem requires solving the optimization model, performing calculations, or when the question is about implementation details, software tools, or non-OR mathematical concepts.
 preconditions:
-- The problem description is provided in natural language.
-- The problem is an operations research model identification problem.
+- Problem description is provided in natural language
+- Question specifically asks about optimization model components or their properties
+- Context contains sufficient information about goals, limitations, and system elements
 procedure:
-- step: Understand the problem context and objectives.
-  check: Verify that you have a clear understanding of the problem's goals and constraints.
-- step: Identify decision variables.
-  check: Ensure that decision variables are explicitly stated or can be inferred from the problem description.
-- step: Determine parameters.
-  check: Verify that parameters are clearly defined or can be derived from the problem context.
-- step: Define constraints.
-  check: Ensure that constraints are explicitly mentioned or can be logically deduced from the problem description.
-- step: Identify the objective function.
-  check: Verify that the objective function is clearly stated or can be inferred from the problem's goals.
-- step: Determine the model type.
-  check: Ensure that the model type is appropriate for the problem context and objectives.
+- step: Read the entire problem context carefully to understand the overall scenario, goals, and limitations
+  check: Can you summarize the main objective and key constraints in one sentence?
+- step: Identify the decision variables - what quantities need to be determined by the optimization
+  check: Are these variables under the decision-maker's control and directly affect the objective?
+- step: Identify the objective function - what quantity is being maximized or minimized
+  check: Does this align with the stated goal (e.g., minimize cost, maximize profit, minimize time)?
+- step: Identify all constraints - what limitations, requirements, or relationships must be satisfied
+  check: For each constraint, can you state what must be true regardless of the solution?
+- step: Identify parameters - what fixed data or coefficients are given in the problem
+  check: Are these values provided as inputs that don't change during optimization?
+- step: Determine the model type based on the mathematical structure (linear, integer, nonlinear, network, etc.)
+  check: What mathematical features are present (e.g., discrete decisions, nonlinear relationships, network flow)?
+- step: Read the specific question to understand which component or property is being asked about
+  check: Is the question about objectives, constraints, variables, parameters, or model classification?
+- step: Map the question to the identified components and select the answer that correctly describes the requested element
+  check: Does the selected answer accurately reflect the component's role in the optimization model?
 common_failures:
-- Insufficient problem description leading to ambiguity in identifying components.
-- Misinterpretation of problem constraints or objectives.
-- Overlooking the importance of certain parameters or decision variables.
-verification: Review the identified components (decision variables, parameters, constraints, objectives, model type) to ensure they accurately represent the problem described in the natural language.
+- Confusing parameters with decision variables
+- Mistaking constraints for objectives
+- Overlooking implicit constraints (e.g., non-negativity)
+- Misclassifying model type due to superficial reading
+- Confusing left-hand side and right-hand side of constraint expressions
+- Failing to recognize that some descriptions may include irrelevant details
+verification: 'After selecting an answer, verify it by checking: (1) Does it match the component''s definition from OR theory? (2) Is it consistent with the problem context? (3) Would including this component
+  in the mathematical model correctly represent the described situation?'
