@@ -18,7 +18,7 @@ These are two phases, not one. Step 4 is gated on Step 3 results.
 - **Repository:** https://github.com/nl4opt/ORQA
 - **Files:** `ORQA_test.jsonl` (1,468 instances), `ORQA_validation.jsonl` (45 instances with expert reasoning steps)
 - **Dataset label:** "ORQA subset" (source_category 1 — directly from published benchmark)
-- **IMPORTANT framing note:** Our dev/test split is an **internal re-split of the published ORQA data**, NOT the canonical ORQA public-test evaluation. Results should never be compared directly to Table 2 of the ORQA paper. All reporting must state: "Evaluated on an internal 20-dev/25-test split of ORQA instances, not the official ORQA test benchmark."
+- **IMPORTANT framing note:** Our dev/test split is an **internal re-split of the published ORQA data**, NOT the canonical ORQA public-test evaluation. Results should never be compared directly to Table 2 of the ORQA paper. All reporting must state: "Evaluated on an internal 25-dev/20-test split of ORQA instances, not the official ORQA test benchmark."
 
 ### Task Format
 
@@ -39,8 +39,8 @@ Rationale: ORQA has 11 question subtypes, but at 50 questions total, splitting i
 
 **Source allocation:**
 - **Seed set (5 questions):** Drawn exclusively from `ORQA_validation.jsonl` (45 instances). Used ONLY for v0 skill generation (the LLM sees these 5 examples). Seed questions are NEVER evaluated and NEVER seen by the optimizer.
-- **Dev set (20 questions):** Drawn from `ORQA_test.jsonl` (1,468 instances). Used for all condition runs, error analysis, and optimization.
-- **Test set (25 questions):** Drawn from `ORQA_test.jsonl`. Held out — optimizer never sees these.
+- **Dev set (25 questions):** Drawn from `ORQA_test.jsonl` (1,468 instances). Used for all condition runs, error analysis, and optimization.
+- **Test set (20 questions):** Drawn from `ORQA_test.jsonl`. Held out — optimizer never sees these.
 
 **Knowledge source boundary (v0 vs v1):**
 - **v0_self_generated:** The LLM sees ONLY the 5 seed questions (with their context, question, and options — but NOT the expert reasoning). It generates a skill from these examples alone.
