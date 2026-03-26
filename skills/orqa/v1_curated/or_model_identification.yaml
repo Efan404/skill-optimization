@@ -1,0 +1,262 @@
+name: "or-model-identification"
+version: "v1_curated"
+source: "curated"
+domain: "operations_research"
+task_type: "model_identification"
+
+# Metadata & citations
+# ---------------------------------------------------------------------------
+# This skill is grounded in three sources:
+#   1. ORQA validation set expert reasoning (45 instances, Q1-Q11) --
+#      patterns for identifying objectives, constraints, sets, parameters,
+#      decision variables, model type, and constraint semantics from
+#      natural-language problem descriptions.
+#   2. LLMOPT five-element formulation (Li et al., 2023) --
+#      Sets -> Parameters -> Variables -> Objective -> Constraints.
+#   3. SkillsBench SKILL.md format (Didolkar et al., 2024) --
+#      procedure/check/common_failures structure.
+# ---------------------------------------------------------------------------
+
+when_to_use: >
+  When answering questions that require identifying components of an
+  optimization model from a natural-language problem description --
+  including decision variables, parameters, sets, objective function,
+  constraints, problem category, or model type (LP/IP/MILP/NLP).
+
+when_not_to_use: >
+  When asked to numerically solve an optimization model, generate code,
+  prove optimality, or apply advanced OR techniques such as decomposition,
+  column generation, or metaheuristics. This skill covers model
+  identification only, not solution procedures.
+
+preconditions:
+  - "A natural-language description of an optimization scenario is provided, containing a decision-maker, a goal, controllable choices, given data, and restrictions."
+  - "The question asks about one or more model components: objective criterion, constraints, sets, parameters, decision variables, problem category, or model type."
+  - "Enough contextual detail exists in the problem description to distinguish the requested component from plausible distractors."
+
+procedure:
+  # =========================================================================
+  # Step 1 -- Read context; identify DECISION-MAKER and GOAL
+  # =========================================================================
+  # ORQA expert pattern (Q1): locate the sentence that states the goal,
+  # e.g. "Your goal is to minimize total cost" or "maximize the total
+  # viewer rating score." Distinguish the true objective from side
+  # information. Watch for subtle phrasings such as min-max fairness
+  # ("no one heir benefits significantly more than the others") which
+  # imply minimizing the gap between best and worst outcomes, not simply
+  # maximizing a total.
+  # =========================================================================
+  - step: >
+      Read the entire problem description. Identify WHO is the
+      decision-maker and WHAT is their overarching goal. Find the
+      sentence(s) that state the objective (look for "goal is to,"
+      "aim is to," "objective is to," "you want to," "challenge is to").
+      Restate the goal in precise terms: what quantity, and is it
+      maximized or minimized? Be alert to implicit objective forms --
+      a fairness goal ("no one benefits significantly more") means
+      minimize the max-min gap, not maximize a total.
+    check: >
+      Can you quote the exact sentence(s) from the description that
+      define the goal? Have you correctly identified whether the
+      objective is maximize or minimize? Have you captured the correct
+      quantity (e.g., total cost vs. total profit vs. min-max
+      difference)? Does your restatement match the description, not
+      your assumption?
+
+  # =========================================================================
+  # Step 2 -- Identify DECISION ACTIVITIES (variables)
+  # =========================================================================
+  # ORQA expert pattern (Q6, Q9): enumerate every candidate decision
+  # from the answer options, then verify each against the problem text.
+  # A valid decision variable must have an explicit textual reference
+  # showing the decision-maker can CONTROL or CHOOSE it. Reject
+  # candidates that sound plausible but lack textual grounding.
+  # Decision variables can be continuous (amounts, quantities),
+  # binary (yes/no indicators, open/close), or integer (counts).
+  # =========================================================================
+  - step: >
+      Identify the DECISION ACTIVITIES -- what the decision-maker can
+      control or choose. For each candidate, ask: "Does the problem
+      text explicitly say this is something the decision-maker decides?"
+      Only accept decisions with direct textual support. Classify each
+      variable by type: continuous (e.g., amount to ship), binary
+      (e.g., whether to open a facility), or integer (e.g., number of
+      workers assigned). Note which variables participate directly in
+      the objective function versus only in constraints.
+    check: >
+      For every identified decision variable, can you point to a
+      specific span in the problem text that supports it? Have you
+      rejected plausible-sounding decisions that are actually given
+      data or consequences, not choices? Have you classified each
+      variable as continuous, binary, or integer?
+
+  # =========================================================================
+  # Step 3 -- Identify SETS and DATA PARAMETERS
+  # =========================================================================
+  # ORQA expert pattern (Q5): sets are indexing collections that
+  # parameterize the model -- time periods, locations, products, people,
+  # machines. They are NOT individual numbers or costs. A set is
+  # "the collection you iterate over."
+  # ORQA expert pattern (Q8): data parameters are given constants that
+  # appear as coefficients or right-hand-side values. They are NOT
+  # decisions. Distinguish "cost per unit" (parameter) from "number of
+  # units to ship" (decision variable).
+  # =========================================================================
+  - step: >
+      Identify the SETS -- the indexing collections over which the
+      model is defined. Sets are groups of entities you iterate over:
+      time periods, locations, products, customers, machines, workers,
+      routes. They are not individual numbers or costs.
+      Then identify the DATA PARAMETERS -- the given constants, fixed
+      inputs, and coefficients. Parameters include costs per unit,
+      capacities, demands, distances, durations, and quality scores.
+      For each parameter, note which sets it is indexed over (e.g.,
+      "shipping cost" is indexed over factories x customers).
+      Distinguish parameters from decision variables: if the value is
+      given and fixed, it is a parameter; if the decision-maker
+      chooses it, it is a variable.
+    check: >
+      Are your sets truly collections of entities (not single values)?
+      For each parameter, can you trace it to a specific piece of given
+      data in the problem text? Have you avoided listing decision
+      variables as parameters? Can you state the index sets for each
+      parameter?
+
+  # =========================================================================
+  # Step 4 -- Formulate the OBJECTIVE function
+  # =========================================================================
+  # ORQA expert pattern (Q1, Q8, Q9): the objective is a function of
+  # decision variables and parameters. Identify which parameters appear
+  # as coefficients and which variables are summed or aggregated. Note
+  # that sometimes NO data parameters appear directly in the objective
+  # (e.g., minimizing a deviation variable). The direction (max/min)
+  # must match the goal sentence from Step 1.
+  # =========================================================================
+  - step: >
+      Write the OBJECTIVE FUNCTION in words or symbolic form. Specify:
+      (a) the direction -- maximize or minimize;
+      (b) the quantity being optimized -- express it as a function of
+          decision variables and parameters identified earlier;
+      (c) which data parameters serve as coefficients in the objective;
+      (d) which decision variables appear directly in the objective.
+      If the objective involves no explicit data parameters (e.g.,
+      minimizing a derived variable like makespan or deviation), state
+      that clearly. Cross-check against the goal sentence from Step 1.
+    check: >
+      Does the objective direction match the goal sentence? Are ALL
+      variables in the objective actually decision variables (not
+      parameters misclassified)? Are ALL coefficients actually given
+      data (not decisions)? If the question asks specifically about
+      parameters or variables in the objective, have you answered
+      precisely which ones participate?
+
+  # =========================================================================
+  # Step 5 -- Identify CONSTRAINTS and their semantics
+  # =========================================================================
+  # ORQA expert pattern (Q2, Q7, Q10, Q11): for each constraint,
+  # identify (a) what it limits, (b) its left-hand side meaning
+  # (what is being summed and over which index), (c) which set
+  # element it is applied "for each" of, and (d) the right-hand side.
+  # Key constraint types seen in ORQA: capacity limits (total assigned
+  # to a resource <= capacity), demand satisfaction (supply >= demand),
+  # balance equations (ending inventory = beginning + inflow - outflow),
+  # assignment constraints (each task assigned to exactly one resource),
+  # cardinality limits (at most k facilities open), and logical
+  # constraints (if facility closed, no shipment from it).
+  # =========================================================================
+  - step: >
+      Identify ALL CONSTRAINTS from the problem description. Re-read
+      the text sentence by sentence. For each constraint, determine:
+      (a) TYPE -- capacity limit, demand satisfaction, balance equation,
+          assignment, cardinality bound, logical/linking, or
+          non-negativity/bound;
+      (b) LEFT-HAND SIDE -- what quantity is aggregated (e.g., "total
+          amount shipped to customer j from all factories"), and over
+          which set index it is summed;
+      (c) RELATION -- <=, >=, or =;
+      (d) RIGHT-HAND SIDE -- what given data or value it is compared to;
+      (e) APPLIED ON -- which set element this constraint is "for each"
+          of (e.g., "for each customer," "for each time period").
+      Pay special attention to implicit constraints: non-negativity,
+      binary restrictions, "a factory that cannot produce an item ships
+      zero," and balance equations where inflow minus outflow equals
+      net change.
+    check: >
+      Have you re-read the problem to catch implicit constraints? For
+      each constraint, can you state its LHS meaning, its RHS, and
+      which set element it applies to? Have you captured balance
+      equations (stock_end = stock_begin + in - out)? Have you included
+      non-negativity and variable-type restrictions? Does each
+      constraint reference the correct variables and parameters?
+
+  # =========================================================================
+  # Step 6 -- Classify MODEL TYPE and PROBLEM CATEGORY
+  # =========================================================================
+  # ORQA expert pattern (Q4): classify based on variable types and
+  # linearity. If all variables continuous and all functions linear -> LP.
+  # If all variables integer/binary and functions linear -> ILP.
+  # If mix of continuous and integer/binary with linear functions -> MILP.
+  # If any function is nonlinear (quadratic interactions, products of
+  # variables, nonlinear costs) -> NLP or MINLP.
+  # ORQA expert pattern (Q3): classify the problem category by its
+  # structure: assignment, blending, vehicle routing, scheduling/
+  # timetabling, network flow, lot-sizing, facility location, etc.
+  # Match the decision structure (what is assigned to what) to the
+  # standard OR problem category.
+  # =========================================================================
+  - step: >
+      Classify the MODEL TYPE based on two axes:
+      (1) Variable types -- are all decision variables continuous (LP),
+          all integer/binary (ILP), or a mix (MILP)?
+      (2) Function linearity -- are the objective and all constraints
+          linear in the decision variables? If any involve products of
+          variables, powers, or other nonlinear terms, the model is
+          NLP (or MINLP if also mixed-integer).
+      Then classify the PROBLEM CATEGORY by matching the decision
+      structure to standard OR archetypes: assignment (match entities
+      one-to-one), blending (mix ingredients to meet specs),
+      scheduling/timetabling (assign tasks to time slots or resources),
+      vehicle routing (determine paths for vehicles), network flow
+      (route commodities through a network), facility location
+      (open/close sites and assign demand), lot-sizing/production
+      planning (decide production quantities over time), or other.
+    check: >
+      Have you checked every decision variable's type (continuous,
+      integer, binary) to determine LP vs. ILP vs. MILP? Have you
+      verified that the objective and constraints are truly linear
+      (no variable products, no powers, no nonlinear functions)? Does
+      your problem category label match the core decision structure
+      described in the problem text?
+
+common_failures:
+  - >
+    Accepting a decision variable that sounds plausible but has no
+    explicit textual support in the problem description. ORQA expert
+    reasoning consistently rejects options that lack a direct reference
+    in the text, even when they are semantically related to the problem.
+  - >
+    Confusing a data parameter with a decision variable, or vice versa.
+    Parameters are given constants (costs, capacities, demands); variables
+    are quantities the decision-maker chooses. If the problem says "you
+    know the cost," that cost is a parameter, not a decision.
+  - >
+    Misidentifying the objective direction or quantity -- for example,
+    reading "minimize cost" as "maximize profit," or missing a min-max
+    fairness objective (minimize the gap between best and worst) and
+    treating it as a simple total maximization.
+  - >
+    Overlooking implicit constraints such as non-negativity, binary
+    restrictions on facility open/close decisions, balance equations
+    (inventory_end = inventory_start + inflow - outflow), or logical
+    linking constraints (if a facility is closed, nothing ships from it).
+
+verification: >
+  After completing the analysis, cross-check every identified component
+  against the original problem text. For each decision variable, confirm
+  a supporting text span exists. For each parameter, confirm it is given
+  data. For each constraint, confirm the LHS meaning, RHS value, and
+  the set element it applies to. Verify the objective direction and
+  quantity match the goal sentence. Confirm the model type is consistent
+  with the variable types and function linearity you identified. If the
+  question offers answer choices, compare your analysis against each
+  option and eliminate those that contradict the problem text.
