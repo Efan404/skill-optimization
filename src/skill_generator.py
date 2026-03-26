@@ -21,13 +21,9 @@ SKILL_GEN_PROMPT = """You are an expert in operations research and problem-solvi
 
 I need you to create a structured problem-solving skill for the following type of OR problem: {task_type_description}
 
-Here are 2 example problems of this type (for context only — do NOT solve them):
+Here are {n} example problems of this type (for context only — do NOT solve them):
 
-Example 1:
-{seed_example_1}
-
-Example 2:
-{seed_example_2}
+{seed_examples_block}
 
 NOTE: These examples are provided only to illustrate the problem format. Your skill must be general-purpose — it should work for ANY problem of this type, not just these examples.
 
@@ -172,11 +168,15 @@ def generate_skill(
             f"Need at least 2 seed examples, got {len(seed_examples)}."
         )
 
-    # Build the prompt
+    # Build the prompt — use ALL seed examples
+    seed_examples_block = "\n\n".join(
+        f"Example {i + 1}:\n{_format_example(ex)}"
+        for i, ex in enumerate(seed_examples)
+    )
     prompt_text = SKILL_GEN_PROMPT.format(
         task_type_description=TASK_TYPE_DESCRIPTIONS[task_type],
-        seed_example_1=_format_example(seed_examples[0]),
-        seed_example_2=_format_example(seed_examples[1]),
+        n=len(seed_examples),
+        seed_examples_block=seed_examples_block,
         task_type=task_type,
     )
 
