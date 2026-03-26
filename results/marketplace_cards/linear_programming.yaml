@@ -1,0 +1,56 @@
+_note: This is demo metadata showing the schema format. Evidence strength is demo-level
+  and requires cross-model, larger-sample validation before marketplace publication.
+asset_name: or-linear-programming
+asset_type: capsule
+domain: operations_research
+supported_models:
+- deepseek-chat
+evidence:
+  benchmark: ORQA-derived evaluation set
+  evidence_level: demo
+  methodology:
+    dev_test_split: true
+    scaffold_controlled: true
+    optimizer_blind_to_test: true
+  dev_set:
+    n_tasks: 5
+    conditions:
+      baseline:
+        accuracy: 0.6
+      generic_scaffold:
+        accuracy: 0.4
+      v0_self_generated:
+        accuracy: 0.6
+      v1_curated:
+        accuracy: 0.6
+      v2_optimized:
+        accuracy: 0.6
+  test_set:
+    n_tasks: 5
+    conditions:
+      baseline:
+        accuracy: 0.6
+      generic_scaffold:
+        accuracy: 0.4
+      v0_self_generated:
+        accuracy: 0.6
+      v1_curated:
+        accuracy: 0.6
+      v2_optimized:
+        accuracy: 0.4
+  dev_test_gap: 'v2 dev: 60%, test: 40%'
+version_history:
+- version: v1_curated
+  author: human
+  note: Initial domain-specific skill design
+- version: v2_optimized
+  author: deepseek-chat
+  note: No changelog provided by the optimizer.
+quality_signals:
+  verification_type: exact_match
+  reproducibility: temperature 0; full determinism not guaranteed on hosted APIs
+limitations:
+- Demo-level sample size (~5 test questions) — directional evidence only
+- Single model validation — cross-model testing required
+- Single-turn QA — agent-level task execution not validated
+- No statistical significance testing at this sample size

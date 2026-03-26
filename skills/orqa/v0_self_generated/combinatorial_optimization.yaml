@@ -1,0 +1,41 @@
+name: combinatorial_optimization_solver
+version: v0_self_generated
+source: self_generated
+domain: operations_research
+task_type: combinatorial_optimization
+when_to_use:
+- Problem involves discrete choices, assignments, selections, or ordering
+- Objective is to maximize or minimize a quantity subject to constraints
+- Decision variables are integer (often binary) or represent discrete assignments
+- Problem types include knapsack, assignment, scheduling, bin packing, set covering, or similar
+when_not_to_use:
+- Variables are continuous (use linear/nonlinear programming instead)
+- Problem is purely statistical or probabilistic without optimization structure
+- Constraints are soft or fuzzy without clear boundaries
+- Problem size is trivially small enough for complete enumeration by inspection
+preconditions:
+- Problem statement clearly defines decision variables, objective function, and constraints
+- All numerical parameters (weights, costs, capacities, etc.) are provided or derivable
+- Objective is quantifiable (maximize/minimize a numerical measure)
+- Constraints are explicitly stated or clearly implied
+procedure:
+- step: Identify the core problem type and structure
+  check: 'Determine if it matches known patterns: assignment (one-to-one matching), knapsack (selection with capacity), scheduling (ordering with time constraints), etc.'
+- step: Formalize the mathematical model
+  check: Write decision variables, objective function, and constraints in mathematical notation. Verify all problem elements are captured.
+- step: Choose appropriate solution method
+  check: 'Select method based on problem characteristics: Hungarian algorithm for assignment, dynamic programming for knapsack, branch-and-bound for general IP, greedy/heuristic if appropriate.'
+- step: Apply the chosen method systematically
+  check: Execute algorithm steps precisely. Document intermediate results for verification.
+- step: Extract and interpret the optimal solution
+  check: Translate algorithmic output back to problem context. Verify all constraints are satisfied.
+- step: Calculate the objective value
+  check: Compute objective function value from solution. Double-check arithmetic.
+common_failures:
+- Misidentifying problem type (e.g., treating assignment as knapsack)
+- Missing implicit constraints (e.g., 'each worker does one task' implies both row and column constraints)
+- Arithmetic errors in cost/weight calculations
+- Algorithm implementation errors (e.g., incorrect Hungarian algorithm initialization)
+- Stopping optimization prematurely for greedy approaches
+verification: Re-solve using alternative method if possible (e.g., complete enumeration for small instances), check constraint satisfaction individually, verify objective calculation independently, ensure
+  solution makes logical sense in problem context

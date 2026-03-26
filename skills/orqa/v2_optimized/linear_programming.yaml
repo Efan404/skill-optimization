@@ -1,0 +1,44 @@
+name: linear-programming-solving
+version: v2_curated
+source: curated
+domain: operations_research
+task_type: linear_programming
+when_to_use: When solving a linear programming problem that involves optimizing a linear objective function subject to linear constraints over continuous or integer decision variables
+when_not_to_use: When the objective or constraints are nonlinear, or when the problem is purely combinatorial with no linear structure
+preconditions:
+- The problem has a linear objective function to maximize or minimize
+- All constraints can be expressed as linear inequalities or equalities
+- Decision variables are clearly identifiable from the problem statement
+procedure:
+- step: Identify and define all decision variables. Read the problem statement carefully and assign a variable name to each quantity you can control. State what each variable represents, including its units.
+  check: Can you name each variable and state what it represents with units? Have you missed any controllable quantity mentioned in the problem?
+- step: Write the objective function. Express the quantity to be optimized as a linear combination of the decision variables. Clearly state whether the goal is to maximize or minimize.
+  check: Is the objective function linear in the decision variables? Have you correctly identified whether to maximize or minimize? Do the coefficients match the problem data?
+- step: List ALL constraints. Translate every stated requirement, limitation, and condition into a linear inequality or equality. Re-read the problem sentence by sentence to ensure no constraint is overlooked,
+    including implicit ones like resource capacities or demand requirements.
+  check: Re-read the problem. Have you captured every constraint, including implicit ones like capacity limits, demand floors, and balance equations? Does each constraint reference the correct variables
+    and coefficients?
+- step: Determine variable bounds and integrality requirements. State non-negativity constraints explicitly. Check whether any variable must be an integer or binary. Note any explicit upper or lower bounds
+    given in the problem.
+  check: Are non-negativity constraints stated for all relevant variables? Are there any upper bounds mentioned? Does the problem require integer solutions? Have you specified all bound constraints?
+- step: 'Solve the linear program. For two-variable problems, use the graphical method: plot each constraint as a line, identify the feasible region, find all corner points (vertices) of the feasible region,
+    and evaluate the objective function at each vertex. For larger problems, use algebraic reasoning or simplex-like logic to identify the optimal basic feasible solution.'
+  check: If using the graphical method, have you found ALL vertices of the feasible region? Have you evaluated the objective at every vertex? For algebraic methods, have you checked that your solution is
+    feasible and optimal?
+- step: Verify your answer. Substitute the optimal solution back into every constraint to confirm feasibility. Compute the objective value and ensure it matches your claim. Compare against the given answer
+    choices.
+  check: Does your solution satisfy every single constraint? Is the objective value correctly computed? Does it match one of the given options? Have you confirmed no other vertex gives a better value?
+- step: Perform arithmetic validation. After obtaining the final objective value, re-calculate it independently using a different approach or order of operations. For multiple-choice questions, verify that
+    your computed value logically corresponds to the closest option when rounding is appropriate.
+  check: Have you double-checked all arithmetic, especially when simplifying expressions or combining constant terms? If your computed value doesn't exactly match any option, have you considered rounding,
+    unit conversion, or re-checked your problem setup?
+common_failures:
+- Missing a constraint from the problem text, especially implicit constraints like non-negativity, capacity limits, or balance requirements that are stated indirectly
+- Confusing maximize with minimize, or flipping the direction of an inequality constraint, leading to an infeasible or suboptimal solution
+- Ignoring integer or non-negativity requirements, returning a fractional solution when the problem demands whole units
+- Evaluating the objective function at the wrong vertex or missing a vertex of the feasible region entirely when using the graphical method
+- Arithmetic errors in objective function simplification or final calculation, especially when combining constant terms or coefficients
+- Failing to map computed results to multiple-choice options due to rounding differences or minor calculation discrepancies
+verification: "Substitute your final answer into ALL constraints and confirm every one is satisfied. \nRecompute the objective value using two different calculation paths. \nIf using the graphical method,\
+  \ verify you have enumerated all vertices and checked each one. \nFor multiple-choice questions, determine if your computed value matches an option exactly or corresponds to the closest reasonable option\
+  \ after considering rounding conventions."
