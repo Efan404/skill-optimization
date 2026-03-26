@@ -3,28 +3,209 @@ version: "v1_scaffold"
 source: "curated"
 domain: "general"
 task_type: "general"
-when_to_use: "When solving any structured analytical problem that requires reasoning through given information to select the correct answer from multiple choice options"
-when_not_to_use: "When the problem requires no reasoning or analysis, such as simple factual recall or direct lookup questions"
+
+when_to_use: >
+  When solving any structured analytical problem that requires careful
+  reasoning through given information to select the correct answer from
+  multiple-choice options -- including problems where you must identify
+  components, classify categories, evaluate relationships, or determine
+  quantities from a detailed scenario description.
+
+when_not_to_use: >
+  When the problem requires no reasoning or analysis, such as simple
+  factual recall, direct lookup, or straightforward single-step
+  calculations. This skill is designed for multi-step analytical
+  problems, not for questions that can be answered immediately from
+  memory or a single observation.
+
 preconditions:
-  - "The problem statement provides sufficient information to determine a unique correct answer"
-  - "There are well-defined answer options to choose from and exactly one is correct"
-  - "The problem requires multi-step reasoning or analysis rather than immediate recognition"
+  - "A detailed problem description is provided containing a scenario with multiple pieces of information, conditions, relationships, and enough context to determine a unique correct answer from the given options."
+  - "The question asks about one or more specific aspects of the scenario: identifying components, classifying types, evaluating relationships, determining quantities, or selecting the best characterization of the described situation."
+  - "Enough contextual detail exists in the problem description to distinguish the correct answer from plausible distractors, meaning the answer can be derived through careful analysis rather than guesswork."
+
 procedure:
-  - step: "Read the problem statement carefully and identify the core question. Determine exactly what quantity, decision, or conclusion you are being asked to find. Restate the goal in your own words to confirm understanding. Note the format of the expected answer."
-    check: "Can you state the goal in one clear sentence? Do you understand what form the answer should take? Have you identified whether you need to find a quantity, make a selection, or determine a relationship?"
-  - step: "Extract and organize all given information. List every piece of data, every condition, and every relationship stated in the problem. Organize these systematically. Convert any verbal descriptions into precise numerical or logical statements that you can work with directly."
-    check: "Have you captured every piece of data mentioned in the problem? Are all conditions and relationships listed? Have you converted qualitative descriptions into workable precise statements? Did you re-read to make sure nothing was missed?"
-  - step: "Classify the problem type and select an appropriate solution approach. Based on the structure of the information and what is being asked, determine what category of problem this is. Choose a solution method that is well-suited to this type of problem and plan your overall approach before proceeding."
-    check: "Can you name the general problem category? Have you chosen a solution method that is appropriate for this type of problem? Can you outline the key steps of your approach before executing them?"
-  - step: "Set up the formal structure of your solution. Translate the problem into a precise framework using the method you selected. Define any variables, expressions, or relationships you will need. Establish the connections between your given information and what you need to find."
-    check: "Have you clearly defined all variables and expressions? Does your formal setup correctly capture all the given information and conditions? Is the structure complete, or are you missing any necessary components?"
-  - step: "Execute your solution method step by step. Work through your planned approach carefully, showing each intermediate result. Perform all calculations deliberately, double-checking arithmetic at each stage. Keep track of units and signs throughout the process."
-    check: "Is each step logically following from the previous one? Have you double-checked your arithmetic at each stage? Are intermediate results reasonable? Have you maintained consistency in units and signs throughout?"
-  - step: "Verify your answer against all stated conditions and select the matching option. Substitute your result back into every condition from the original problem to confirm it is consistent. Check that your answer is reasonable given the context. Compare with the available answer choices and select the one that matches."
-    check: "Does your answer satisfy every requirement stated in the problem? Is the result reasonable in context? Have you checked it against all conditions, not just some? Does it match one of the given options exactly?"
+  # Step 1 -- Read the problem; identify the CENTRAL QUESTION and GOAL
+  - step: >
+      Read the entire problem description before attempting to answer.
+      Identify WHO or WHAT the scenario is about and WHAT specific
+      question is being asked. Find the sentence(s) that define what
+      you need to determine -- look for phrasing like "which of the
+      following," "what is the," "identify the," or "select the best."
+      Restate the question in precise terms: what specific aspect of
+      the scenario is being queried? Be alert to subtle phrasing --
+      negations ("which is NOT"), superlatives ("which is MOST"), or
+      qualifiers ("which BEST describes") each require different
+      reasoning.
+    check: >
+      Can you quote the exact sentence(s) that define the question?
+      Have you identified whether it asks you to find, classify,
+      identify, compare, or evaluate something? Have you noted any
+      negations or qualifiers? Does your restatement match the actual
+      question, not your assumption?
+
+  # Step 2 -- Extract KEY ENTITIES and their ROLES
+  - step: >
+      Identify the KEY ENTITIES in the scenario -- the named items,
+      categories, people, groups, processes, or concepts described.
+      For each entity, determine its ROLE: is it something that can
+      be chosen or controlled (an active element), something fixed and
+      given (background information), or something that results from
+      interactions (a derived outcome)? For each candidate entity in
+      the answer options, ask: "Does the problem text explicitly
+      describe this entity and its role?" Only accept entities with
+      direct textual support. Classify each as active, fixed, or
+      derived. Note which entities participate directly in the aspect
+      the question asks about versus which are peripheral context.
+    check: >
+      For every identified entity, can you point to a specific span
+      in the problem text? Have you rejected plausible-sounding
+      entities not actually described or playing a different role?
+      Have you classified each entity as active, fixed, or derived?
+      Have you distinguished central entities from peripheral context?
+
+  # Step 3 -- Identify CATEGORIES and GIVEN INFORMATION
+  - step: >
+      Identify the CATEGORIES or GROUPINGS in the problem -- the
+      collections of things that the scenario describes. Categories are
+      groups of similar entities: types of items, time periods, named
+      groups, locations, stages in a process, or classes of outcomes.
+      They are not individual facts or numbers.
+      Then identify the GIVEN INFORMATION -- the specific facts, values,
+      properties, and stated conditions. Given information includes
+      quantities, rates, capacities, requirements, qualities, costs,
+      durations, and any other specific data. For each piece of given
+      information, note which category or entity it describes (e.g.,
+      "processing time" describes a task within a set of tasks).
+      Distinguish given facts from aspects that are the subject of
+      the question: if a value is stated as known, it is given
+      information; if determining it is the point of the question,
+      it is what you need to derive.
+    check: >
+      Are your categories truly collections of entities (not single
+      values or facts)? For each piece of given information, can you
+      trace it to a specific statement in the problem text? Have you
+      avoided listing aspects that are actually the focus of the
+      question as "given" information? Can you state which category
+      each piece of information relates to?
+
+  # Step 4 -- Analyze the CORE RELATIONSHIP or STRUCTURE
+  - step: >
+      Determine the CORE RELATIONSHIP or STRUCTURE connecting the
+      given information to the answer. Specify:
+      (a) its nature -- quantitative (values combine via arithmetic),
+          logical (conditions that must jointly hold), classificatory
+          (features determine category membership), or causal (actions
+          produce outcomes);
+      (b) which entities and given information participate -- express
+          it as a connection between elements identified earlier;
+      (c) the direction or logic -- does a larger value of X lead to
+          more or less of Y? Does condition A imply or exclude B?
+      (d) any special structure -- interactions between elements,
+          thresholds that change behavior, or hierarchical dependencies
+          where one determination depends on another?
+      Cross-check against the question from Step 1 to confirm you are
+      analyzing the right structure.
+    check: >
+      Does the relationship actually connect given information to what
+      the question asks? Are ALL elements present in the problem (not
+      assumed)? Are ALL stated relationships included? If the question
+      asks about specific elements, have you analyzed precisely those?
+      Does the structure account for special conditions mentioned?
+
+  # Step 5 -- Identify ALL CONDITIONS and RESTRICTIONS
+  - step: >
+      Identify ALL CONDITIONS and RESTRICTIONS from the problem
+      description. Re-read the text sentence by sentence. For each
+      condition, determine:
+      (a) TYPE -- is it a limit (something cannot exceed a value), a
+          requirement (something must meet or exceed a threshold), an
+          equality (something must be exactly a specific value), an
+          exclusion (certain combinations are forbidden), or a logical
+          dependency (one thing is required only if another holds);
+      (b) WHAT IT CONSTRAINS -- which entities, quantities, or
+          relationships does this condition apply to;
+      (c) THE THRESHOLD OR RULE -- what specific value, property, or
+          logical rule defines the boundary;
+      (d) SCOPE -- does this condition apply universally, to a specific
+          subset, or conditionally based on other factors;
+      (e) DIRECTION -- is the condition an upper bound (at most), a
+          lower bound (at least), or an exact match (exactly).
+      Pay special attention to implicit conditions: default assumptions,
+      logical necessities (you cannot select more items than exist),
+      mutual exclusivity (selecting one option may preclude another),
+      and boundary conditions (what happens at the limits of the
+      described ranges).
+    check: >
+      Have you re-read the problem to catch implicit conditions? For
+      each condition, can you state what it restricts, what the
+      threshold is, and what scope it applies to? Have you captured
+      logical dependencies between conditions? Have you included
+      boundary conditions and mutual exclusivity constraints? Does
+      each condition reference elements that are actually described
+      in the problem?
+
+  # Step 6 -- CLASSIFY, VERIFY, and SELECT the answer
+  - step: >
+      Classify the SCENARIO TYPE on two dimensions:
+      (1) Reasoning type -- quantitative calculation, logical deduction,
+          pattern matching, causal reasoning, classification, or
+          comparison?
+      (2) Complexity -- does the answer depend on a single determination
+          or on multiple interacting determinations?
+      Then evaluate EACH ANSWER OPTION against your complete analysis.
+      For each option: does it match all entities, relationships,
+      conditions, and given information? Does it contradict any stated
+      fact? Eliminate options conflicting with the problem text. If
+      multiple seem consistent, re-examine the distinguishing details
+      -- the correct answer matches the text precisely, not
+      approximately. Select the option with the strongest textual
+      support.
+    check: >
+      Have you checked every option against every condition and
+      relationship? Is the selected answer consistent with ALL stated
+      facts, not just some? If the answer required multiple
+      determinations, have you verified each independently? Have you
+      confirmed eliminated options genuinely conflict with the text?
+
 common_failures:
-  - "Overlooking a condition, requirement, or piece of information stated in the problem, especially those mentioned indirectly or embedded within longer sentences"
-  - "Making arithmetic or algebraic errors during intermediate calculation steps, particularly sign errors, order-of-operations mistakes, or unit conversion errors"
-  - "Failing to verify the final answer against all stated conditions, leading to a result that satisfies some but not all requirements of the problem"
-  - "Jumping to a conclusion without systematic reasoning, selecting an answer that seems intuitively plausible but has not been rigorously derived from the given information"
-verification: "Re-read the original problem statement in full. Verify that your answer satisfies every stated condition and requirement by checking each one explicitly. Recompute the key calculation to confirm the numerical result. Ensure your answer matches one of the provided options exactly."
+  - >
+    Accepting an answer option that sounds plausible but has no direct
+    textual support in the problem description. Careful analysis
+    consistently rejects options that lack a specific reference in the
+    text, even when they are semantically related to the scenario. Always
+    demand that every element of your chosen answer can be traced to an
+    explicit statement in the problem.
+  - >
+    Confusing given information with aspects that are the focus of the
+    question, or vice versa. Given information consists of stated facts,
+    values, and conditions that are presented as established; the focus
+    of the question is what you need to determine or classify. If the
+    problem states something as known, it is given information. If
+    determining it is the point, it is not given -- it is what you must
+    derive.
+  - >
+    Misidentifying the question's precise requirement -- for example,
+    reading "which is NOT" as "which IS," overlooking a qualifier like
+    "BEST describes" or "MOST likely," or confusing two similar but
+    distinct question phrasings. Always re-read the question stem and
+    confirm you are answering exactly what was asked, including any
+    negations, superlatives, or qualifying words.
+  - >
+    Overlooking implicit conditions such as logical dependencies between
+    stated facts, mutual exclusivity of options, boundary conditions at
+    the limits of described ranges, or default assumptions that are not
+    explicitly stated but are logically required. Re-read the full
+    problem description to catch conditions embedded in subordinate
+    clauses, parenthetical remarks, or phrased as background context
+    rather than explicit rules.
+
+verification: >
+  Cross-check every identified element against the original problem
+  text. For each key entity, confirm a supporting text span exists.
+  For each piece of given information, confirm it is stated in the
+  problem. For each condition, confirm the threshold, scope, and
+  direction match. Verify the core relationship connects given
+  information to the question correctly. Compare your analysis against
+  each answer option and eliminate those contradicting any element of
+  the problem text. Confirm your selected answer is the ONLY option
+  fully consistent with all stated information and conditions.
