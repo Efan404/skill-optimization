@@ -16,12 +16,17 @@ At the time of writing, the run metadata has been written, but the full evaluati
 
 The active StepFun run has shown the following dev summary so far:
 
-| Condition | DeepSeek Dev | StepFun Dev |
-|-----------|:------------:|:-----------:|
-| baseline | 80% | 56% |
-| generic_scaffold | 76% | 56% |
-| v0_self_generated | 84% | 64% |
-| v1_curated | 84% | 80% |
+| Condition | DeepSeek Dev | StepFun Dev (artifact-verified) |
+|-----------|:------------:|:-------------------------------:|
+| baseline | 80% | 56% (14/25) |
+| generic_scaffold | 76% | 52% (13/25) |
+| v0_self_generated | 84% | 60% (15/25, 2 extraction failures) |
+| v1_curated | 84% | 84% (21/25) |
+| v2_optimized | 80% | 0% (25/25 extraction_failed — optimizer fallback broken) |
+
+> **Correction:** Earlier console-observed numbers (56/56/64/80) were inaccurate.
+> The numbers above are verified from `results/runs/20260326_154918/evaluations/dev/*.json`
+> and `results/runs/20260326_154918/analysis/dev_error_analysis.json`.
 
 ## Provisional Interpretation
 
@@ -47,8 +52,8 @@ Three claims are reasonable at this stage:
 1. **StepFun appears weaker than DeepSeek on the ORQA dev split without skill support.**  
    The current baseline contrast is `56%` vs `80%`.
 
-2. **Generic prompt structure alone does not explain the current StepFun gain.**  
-   On the current dev numbers, `generic_scaffold` stays at baseline while `v1_curated` rises substantially above it.
+2. **Generic prompt structure alone does not explain the current StepFun gain.**
+   On the current dev numbers, `generic_scaffold` is actually slightly below baseline (52% vs 56%), while `v1_curated` rises substantially above it (84%).
 
 3. **StepFun is a strong candidate model for Phase 2 skill studies.**  
    Even if the final held-out gain shrinks, the dev-stage separation suggests this model is more diagnostic than DeepSeek for testing whether skill content matters.
