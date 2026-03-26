@@ -1,0 +1,211 @@
+name: "or-model-identification"
+version: "v1_component_minimal"
+source: "curated"
+domain: "operations_research"
+task_type: "or_model_identification"
+
+# Metadata
+# ---------------------------------------------------------------------------
+# Phase 2 Track A — A1 Minimal Component-Semantics Skill
+#
+# Hypothesis: A skill targeting ORQA's actual difficulty gradient (component-
+# level disambiguation) will outperform the archetype-prior skill (v1_curated)
+# and the generic scaffold, because it addresses the specific failure modes
+# identified in Phase 1 error analysis (Q4, Q8, Q9 — the universally failed
+# questions on DeepSeek).
+#
+# This skill is deliberately shorter than the v1 archetype skill. It contains
+# NO archetype library and NO trigger cues for assignment/routing/scheduling.
+# Instead it focuses narrowly on the three hardest question families:
+#   1. Parameter vs Variable disambiguation
+#   2. Objective participant identification
+#   3. Model type classification
+# ---------------------------------------------------------------------------
+
+when_to_use: >
+  When answering questions that require identifying components of an
+  optimization model from a natural-language problem description --
+  especially questions about decision variables vs parameters, which
+  quantities participate in the objective function, or the model type
+  (LP/ILP/MILP/NLP).
+
+when_not_to_use: >
+  When asked to numerically solve an optimization model, generate code,
+  prove optimality, or apply solution techniques. This skill covers
+  component identification only.
+
+preconditions:
+  - "A natural-language description of an optimization scenario is provided, containing a goal, controllable choices, given data, and restrictions."
+  - "The question asks about one or more model components: decision variables, parameters, objective participants, or model type."
+  - "Enough contextual detail exists to distinguish the requested component from plausible distractors."
+
+procedure:
+  # =========================================================================
+  # Stage A -- Determine Question Target and Read the Problem
+  # =========================================================================
+  - step: >
+      Read the question stem first. Determine which component-semantics
+      question this is:
+      (a) Parameter vs Variable — asks what is given data vs what is decided;
+      (b) Objective participants — asks which variables or parameters appear
+          in the objective function;
+      (c) Model type — asks whether the model is LP, ILP, MILP, or NLP;
+      (d) Other component question — constraints, sets, problem category, or
+          relationships.
+      Note any qualifiers: negations ("which is NOT"), superlatives ("which
+      BEST"), or specificity. Then read the full problem description.
+    check: >
+      Can you state in one sentence what component the question targets?
+      Have you noted any negations or qualifiers? Have you read the full
+      problem description?
+
+  # =========================================================================
+  # Stage B -- Parameter vs Variable Disambiguation
+  # =========================================================================
+  # This is the core disambiguation step. Phase 1 error analysis showed
+  # that confusing parameters with variables is the primary failure mode
+  # on Q8 and Q9 questions. The cues below are extracted from ORQA expert
+  # reasoning patterns.
+  # =========================================================================
+  - step: >
+      For every quantity mentioned in the problem, classify it as a
+      parameter (given data) or a decision variable (chosen by the
+      decision-maker). Apply these concrete cues:
+
+      PARAMETER cues — the quantity is given, fixed, or known:
+        - "you know the cost" / "the cost is" → parameter
+        - "given that" / "it is known that" → parameter
+        - "each task has a duration of" → parameter (duration is stated)
+        - "capacity of" / "demand of" / "budget of" → parameter
+        - "rated at" / "costs $X" / "takes Y hours" → parameter
+        - Numeric values stated in the problem → parameter
+
+      VARIABLE cues — the quantity is chosen or determined:
+        - "you decide how many" / "determine which" → variable
+        - "allocate" / "assign" / "select" / "choose" → variable
+        - "how much to produce" / "whether to open" → variable
+        - The problem asks "what should be done" about this quantity → variable
+
+      For each quantity, cite the specific text that supports your
+      classification. If the problem says "you know X" or "X is given,"
+      it is a parameter — even if X sounds like something that could be
+      decided. If the problem says "decide X" or "determine X," it is a
+      variable — even if X sounds like fixed data.
+
+      Build two lists:
+        PARAMETERS: [name, supporting text quote, indexed over which sets]
+        VARIABLES: [name, supporting text quote, type: continuous/binary/integer]
+    check: >
+      For every classified quantity, can you cite a specific phrase from the
+      problem text? Have you checked each quantity against both the parameter
+      cues and variable cues? Have you avoided classifying any quantity based
+      on plausibility alone rather than textual evidence?
+
+  # =========================================================================
+  # Stage C -- Objective Participant Identification and Model Type
+  # =========================================================================
+  - step: >
+      Identify the objective function and classify the model type:
+
+      OBJECTIVE PARTICIPANTS:
+      (1) Find the goal sentence — look for "minimize", "maximize", "the
+          goal is to", "the aim is to", "your objective is to".
+      (2) Identify what quantity is being optimized (e.g., "total cost",
+          "total profit", "makespan", "total distance").
+      (3) Trace which quantities this objective depends on. For each
+          quantity in the objective expression:
+          - Is it a parameter (coefficient, given cost, given weight)?
+            If so, it participates as a parameter in the objective.
+          - Is it a variable (amount produced, whether to open)?
+            If so, it participates as a variable in the objective.
+      (4) Parameters in the objective are typically coefficients that
+          multiply variables (e.g., unit_cost * quantity_shipped: unit_cost
+          is a parameter, quantity_shipped is a variable).
+
+      MODEL TYPE CLASSIFICATION:
+      Based on the variables identified in Stage B:
+        - All variables continuous AND all functions linear → LP
+        - All variables integer or binary AND all functions linear → ILP
+        - Mix of continuous and integer/binary AND linear → MILP
+        - Any product of variables, or any nonlinear function of
+          variables (quadratic, exponential, logarithmic) → NLP or MINLP
+      Key signals for non-LP:
+        - "whether to" / "yes or no" / "open or close" → binary variable → ILP or MILP
+        - "integer number of" / "whole units" → integer variable → ILP or MILP
+        - Products of two decision variables → nonlinear → NLP
+    check: >
+      Have you found and quoted the goal sentence? Have you traced which
+      parameters and which variables participate in the objective? Does
+      your model type classification match the variable types and function
+      forms you identified? Have you checked for binary/integer variables
+      that would make it ILP/MILP rather than LP?
+
+  # =========================================================================
+  # Stage D -- Answer Against Options
+  # =========================================================================
+  - step: >
+      Focus on the specific component from Stage A. Using your analysis
+      from Stages B and C, evaluate each answer option:
+
+      (a) For each option, check: does it match your parameter/variable
+          classification, objective analysis, or model type determination?
+          Cite specific textual evidence.
+
+      (b) Eliminate options that:
+          - List a parameter as a variable, or vice versa
+          - Include quantities not mentioned in the problem text
+          - Misidentify the objective direction or participants
+          - Give the wrong model type for the variable types present
+
+      (c) Among remaining options, prefer the one with the most direct
+          and complete textual support.
+
+      (d) For model type questions: double-check by verifying every
+          variable's type (continuous/binary/integer) and every function's
+          form (linear/nonlinear).
+
+      State your final answer with explicit justification.
+    check: >
+      Have you evaluated every option against the problem text? Is your
+      answer consistent with your parameter/variable lists and model type
+      classification? If the question has a negation, have you inverted
+      correctly? Can you justify your answer with a direct quote?
+
+common_failures:
+  - >
+    Confusing a parameter with a decision variable. The most reliable
+    test: if the problem says "you know X", "X is given", "each item has
+    X", or states a numeric value for X, then X is a parameter. If the
+    problem says "decide X", "determine X", "choose X", or "how much X",
+    then X is a variable. Do not rely on what "sounds like" a decision —
+    rely only on what the text explicitly frames as decided vs given.
+  - >
+    Misidentifying which quantities participate in the objective. The
+    objective is the quantity being maximized or minimized. Parameters
+    in the objective are coefficients (e.g., unit costs, distances);
+    variables in the objective are the quantities being optimized over
+    (e.g., amounts shipped, items selected). A parameter that appears
+    only in a constraint does NOT participate in the objective.
+  - >
+    Classifying the model type incorrectly. The most common error is
+    calling a model LP when it contains binary or integer variables
+    (making it ILP or MILP). Check every variable: if any variable is
+    restricted to integer or binary values, the model cannot be a pure
+    LP. Also check for nonlinear terms: if two variables are multiplied
+    together, the model is NLP regardless of variable types.
+  - >
+    Accepting an answer option that sounds plausible but has no direct
+    textual support. ORQA questions include distractors that are
+    semantically related to the problem domain but are not actually
+    mentioned in the specific problem text. Always verify that every
+    element of your chosen answer can be traced to an explicit statement
+    in the problem description.
+
+verification: >
+  Cross-check your parameter/variable classifications against the problem
+  text. For each parameter, confirm it is stated as given data. For each
+  variable, confirm the text says it is decided or chosen. Verify the
+  objective direction and participants match the goal sentence. Confirm
+  the model type is consistent with all variable types and function forms.
+  Compare your analysis against each answer option and select the one
+  fully supported by textual evidence.
