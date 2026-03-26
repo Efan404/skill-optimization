@@ -10,9 +10,9 @@
       "C": "$2,200",
       "D": "$2,400"
     },
-    "correct_answer": "B",
+    "correct_answer": "C",
     "source_category": 3,
-    "source_detail": "Constructed. LP resource allocation. Maximize 40x+30y s.t. 2x+y<=100, x+2y<=80, x,y>=0. Corner points: (0,0)=$0; (50,0): 2*50=100 OK, 50<=80 OK, profit=2000; (0,40): 0<=100 OK, 2*40=80 OK, profit=1200; intersection 2x+y=100, x+2y=80 => y=100-2x, x+2(100-2x)=80, x+200-4x=80, -3x=-120, x=40, y=20. Check: 2*40+20=100 OK, 40+2*20=80 OK. Profit=40*40+30*20=1600+600=2200. Wait, that is 2200. Let me recheck corners: (0,0)=0, (50,0)=2000, (40,20)=2200, (0,40)=1200. Max=2200."
+    "source_detail": "Constructed. LP resource allocation. Maximize 40x+30y subject to 2x+y<=100, x+2y<=80, x,y>=0. Corner profits are (0,0)->0, (50,0)->2000, (0,40)->1200. Solving 2x+y=100 and x+2y=80 gives x=40 and y=20, with profit 40*40+30*20=2200. The maximum weekly profit is $2,200, which is choice C."
   },
   {
     "id": "orqa_lp_002",
@@ -21,13 +21,13 @@
     "question": "A farm allocates land between corn and wheat. Each acre of corn yields $300 profit and requires 3 worker-days. Each acre of wheat yields $200 profit and requires 2 worker-days. The farm has 120 acres and 300 worker-days available. How many acres of each crop should be planted to maximize profit, and what is the maximum profit?",
     "choices": {
       "A": "60 acres corn, 60 acres wheat, profit = $30,000",
-      "B": "100 acres corn, 0 acres wheat, profit = $30,000",
+      "B": "100 acres corn, 10 acres wheat, profit = $32,000",
       "C": "0 acres corn, 120 acres wheat, profit = $24,000",
       "D": "80 acres corn, 40 acres wheat, profit = $32,000"
     },
     "correct_answer": "A",
     "source_category": 3,
-    "source_detail": "Constructed. LP resource allocation. Maximize 300x+200y s.t. x+y<=120, 3x+2y<=300, x,y>=0. Corner points: (0,0)=$0; (100,0): 100<=120 OK, 3*100=300<=300 OK, profit=30000; (0,120): 0+120<=120 OK, 2*120=240<=300 OK, profit=24000; intersection x+y=120, 3x+2y=300 => y=120-x, 3x+2(120-x)=300, 3x+240-2x=300, x=60, y=60. Check: 60+60=120 OK, 3*60+2*60=180+120=300 OK. Profit=300*60+200*60=18000+12000=30000. Corners: (100,0)=30000, (60,60)=30000, (0,120)=24000. Both (100,0) and (60,60) give 30000. Answer A lists (60,60) with 30000, answer B lists (100,0) with 30000. Both are optimal. But the question asks how many of each, and A is the diversified solution. Since both are correct optimal profits, but A is listed first and gives the balanced allocation, we select A."
+    "source_detail": "Constructed. LP resource allocation. Maximize 300x+200y subject to x+y<=120, 3x+2y<=300, x,y>=0. Corner profits are (0,0)->0, (100,0)->30000, (0,120)->24000, and the intersection of x+y=120 with 3x+2y=300, which gives x=60 and y=60 with profit 30000. Among the listed options, only A is both feasible and optimal."
   },
   {
     "id": "orqa_lp_003",
@@ -38,7 +38,7 @@
       "A": "$640",
       "B": "$1,000",
       "C": "$1,600",
-      "D": "$1,000"
+      "D": "$1,200"
     },
     "correct_answer": "B",
     "source_category": 3,
@@ -51,13 +51,13 @@
     "question": "A transportation company needs to ship goods from two warehouses to two retail stores. Warehouse 1 has 150 units and Warehouse 2 has 100 units. Store A needs 120 units and Store B needs 130 units. Shipping costs per unit: W1->A=$4, W1->B=$6, W2->A=$5, W2->B=$3. What is the minimum total shipping cost?",
     "choices": {
       "A": "$870",
-      "B": "$950",
+      "B": "$960",
       "C": "$1,000",
       "D": "$920"
     },
-    "correct_answer": "D",
+    "correct_answer": "B",
     "source_category": 3,
-    "source_detail": "Constructed. LP transportation. Let x11=W1->A, x12=W1->B, x21=W2->A, x22=W2->B. Min 4x11+6x12+5x21+3x22. s.t. x11+x12=150, x21+x22=100, x11+x21=120, x12+x22=130. From supply: x12=150-x11, x22=100-x21. From demand: x11+x21=120, (150-x11)+(100-x21)=130 => 250-x11-x21=130 => x11+x21=120. Consistent. One free variable: let x11=t. Then x21=120-t, x12=150-t, x22=100-(120-t)=t-20. Constraints: t>=0, 120-t>=0 => t<=120, 150-t>=0 => t<=150, t-20>=0 => t>=20. So 20<=t<=120. Cost=4t+6(150-t)+5(120-t)+3(t-20)=4t+900-6t+600-5t+3t-60=-4t+1440. Minimize at t=120: cost=-480+1440=960. Hmm, let me recheck. At t=120: x11=120, x12=30, x21=0, x22=80. Cost=4*120+6*30+5*0+3*80=480+180+0+240=900. At t=20: x11=20, x12=130, x21=100, x22=0. Cost=4*20+6*130+5*100+3*0=80+780+500=1360. Cost=-4t+1440 at t=120 is -480+1440=960. But direct calc gives 900. Let me recompute. Cost=4t+6(150-t)+5(120-t)+3(t-20)=4t+900-6t+600-5t+3t-60=(4-6-5+3)t+(900+600-60)=-4t+1440. At t=120: -480+1440=960. But direct: 480+180+0+240=900. Error in expansion. 6*(150-t)=900-6t OK. 5*(120-t)=600-5t OK. 3*(t-20)=3t-60 OK. Sum: 4t+900-6t+600-5t+3t-60=(4-6-5+3)t+(900+600-60)=-4t+1440. Direct at t=120: 4*120=480, 6*30=180, 5*0=0, 3*80=240. Total=900. But -4*120+1440=960. Discrepancy! Let me recheck: 480+180+0+240=900, not 960. Formula: 4t+900-6t+600-5t+3t-60. At t=120: 480+900-720+600-600+360-60=960. Direct: 480+180+0+240=900. The 6(150-t) at t=120 is 6*30=180, but 900-6*120=900-720=180. OK that matches. 5(120-t) at t=120 is 5*0=0, and 600-5*120=600-600=0, OK. 3(t-20) at t=120 is 3*100=300, and 3*120-60=360-60=300. So total=480+180+0+300=960. But x22=t-20=100, cost is 3*100=300, not 240. I had an error: x22=t-20. At t=120, x22=100. 3*100=300. So 480+180+0+300=960. But wait, x22=100 means W2 ships 100 to B, and x21=0 means W2 ships 0 to A. x21+x22=0+100=100=W2 supply. OK. Cost=960. Now try other values. At t=100: x11=100, x12=50, x21=20, x22=80. Cost=400+300+100+240=1040. At t=120: cost=960. Can we go higher? t<=120 max. So min is 960. Hmm none of my choices match. Let me redo with corrected problem. Actually let me re-pose with different costs. W1->A=$2, W1->B=$6, W2->A=$5, W2->B=$3. Then cost=2t+6(150-t)+5(120-t)+3(t-20)=2t+900-6t+600-5t+3t-60=-6t+1440. Min at t=120: -720+1440=720. Still not matching. Let me just set costs that give a clean answer matching $920. With the original costs, at t=120 cost=960, and that doesn't match choices. I need to redesign the problem."
+    "source_detail": "Constructed. LP transportation. Let x11=W1->A, x12=W1->B, x21=W2->A, x22=W2->B. Supply and demand imply x11+x12=150, x21+x22=100, x11+x21=120, x12+x22=130. Let x11=t. Then x21=120-t, x12=150-t, and x22=t-20, with 20<=t<=120. The total cost is 4t+6(150-t)+5(120-t)+3(t-20)=1440-4t, which is minimized at t=120. That gives shipments (120,30,0,100) and total cost 4*120+6*30+5*0+3*100=960. The minimum total shipping cost is $960, which is choice B."
   },
   {
     "id": "orqa_lp_005",
@@ -68,17 +68,17 @@
       "A": "$12.00",
       "B": "$14.18",
       "C": "$16.00",
-      "D": "$18.00"
+      "D": "$18.91"
     },
-    "correct_answer": "B",
+    "correct_answer": "D",
     "source_category": 3,
-    "source_detail": "Constructed. LP diet problem. Minimize 3x+2y s.t. 10x+5y>=60, 5x+8y>=40, x,y>=0. Corner points of feasible region: (i) x-axis intercept of protein: 10x=60 => x=6; check fiber: 5*6=30<40, not feasible. (ii) y-axis intercept of protein: 5y=60 => y=12; check fiber: 8*12=96>=40, feasible. Cost=2*12=24. (iii) y-axis intercept of fiber: 8y=40 => y=5; check protein: 5*5=25<60, not feasible. (iv) x-axis intercept of fiber: 5x=40 => x=8; check protein: 10*8=80>=60, feasible. Cost=3*8=24. (v) Intersection: 10x+5y=60, 5x+8y=40. From first: y=12-2x. Sub: 5x+8(12-2x)=40, 5x+96-16x=40, -11x=-56, x=56/11~5.09, y=12-112/11=(132-112)/11=20/11~1.82. Check: 10*56/11+5*20/11=560/11+100/11=660/11=60 OK. 5*56/11+8*20/11=280/11+160/11=440/11=40 OK. Cost=3*56/11+2*20/11=168/11+40/11=208/11~18.91. Hmm that's 18.91. But that should be checked against other corners. Feasible corners: where both constraints met. At (8,0): cost=24. At (0,12): cost=24. At intersection (56/11, 20/11): cost=208/11=18.91. The feasible region is above both constraint lines. Moving toward intersection reduces cost. So min=208/11~$18.91. None of my choices are right. Let me redesign."
+    "source_detail": "Constructed. LP diet problem. Minimize 3x+2y subject to 10x+5y>=60, 5x+8y>=40, x,y>=0. Feasible corner costs are (8,0)->24, (0,12)->24, and the intersection of 10x+5y=60 with 5x+8y=40. Solving gives x=56/11 and y=20/11, with cost 3*(56/11)+2*(20/11)=208/11≈18.91. The minimum daily cost is about $18.91, which is choice D."
   },
   {
     "id": "orqa_lp_006",
     "task_type": "linear_programming",
     "split": "dev",
-    "question": "A company makes two types of paint: interior and exterior. Each batch of interior paint requires 4 tons of material M1 and 2 tons of material M2. Each batch of exterior paint requires 2 tons of M1 and 6 tons of M2. The company has 24 tons of M1 and 30 tons of M2 available. Profit per batch: interior = $5,000, exterior = $4,000. What production plan maximizes profit?",
+    "question": "A company makes two types of paint: interior and exterior. Each batch of interior paint requires 4 tons of material M1 and 2 tons of material M2. Each batch of exterior paint requires 2 tons of M1 and 6 tons of M2. The company has 24 tons of M1 and 30 tons of M2 available. Profit per batch: interior = $5,000, exterior = $4,000. Assume only whole batches can be produced. What production plan maximizes profit?",
     "choices": {
       "A": "5 interior, 2 exterior, profit = $33,000",
       "B": "3 interior, 4 exterior, profit = $31,000",
@@ -87,7 +87,7 @@
     },
     "correct_answer": "A",
     "source_category": 3,
-    "source_detail": "Constructed. LP production planning. Max 5000x+4000y s.t. 4x+2y<=24, 2x+6y<=30, x,y>=0. Corners: (0,0)=$0; (6,0): 4*6=24 OK, 2*6=12<=30 OK, profit=30000; (0,5): 2*0+6*5=30 OK, 4*0+2*5=10<=24 OK, profit=20000; intersection 4x+2y=24, 2x+6y=30. From first: y=12-2x. Sub: 2x+6(12-2x)=30, 2x+72-12x=30, -10x=-42, x=4.2, y=12-8.4=3.6. Profit=5000*4.2+4000*3.6=21000+14400=35400. But (4.2,3.6) is not integer. Check (5,2): 4*5+2*2=24 OK, 2*5+6*2=22<=30 OK. Profit=25000+8000=33000. Check (4,4): 4*4+2*4=24 OK, 2*4+6*4=32>30, infeasible. Check (3,4): 4*3+2*4=20<=24 OK, 2*3+6*4=30 OK, profit=15000+16000=31000. The LP optimum is (4.2,3.6)=35400, but since choices are integer, best feasible integer is (5,2)=33000."
+    "source_detail": "Constructed. Integer production planning. Maximize 5000x+4000y subject to 4x+2y<=24, 2x+6y<=30, x,y>=0, where x and y must be whole batches. The continuous relaxation has intersection (4.2,3.6), but among feasible integer plans the best is (5,2): material use 4*5+2*2=24 and 2*5+6*2=22, profit 25000+8000=33000. Other listed feasible plans such as (3,4) give only 31000. Therefore choice A is optimal."
   },
   {
     "id": "orqa_lp_007",
@@ -112,12 +112,12 @@
     "choices": {
       "A": "$2,400",
       "B": "$2,280",
-      "C": "$2,040",
+      "C": "$2,563.64",
       "D": "$1,800"
     },
-    "correct_answer": "B",
+    "correct_answer": "C",
     "source_category": 3,
-    "source_detail": "Constructed. LP resource allocation. Max 80d+60b s.t. 5d+3b<=150, 3d+4b<=120, d,b>=0. Corners: (0,0)=$0; (30,0): 5*30=150 OK, 3*30=90<=120 OK, profit=2400; (0,30): 3*30=90<=150 OK, 4*30=120 OK, profit=1800; intersection 5d+3b=150, 3d+4b=120. Multiply first by 4: 20d+12b=600. Multiply second by 3: 9d+12b=360. Subtract: 11d=240, d=240/11~21.82, b=(150-5*240/11)/3=(1650/11-1200/11)/3=450/(11*3)=150/11~13.64. Profit=80*240/11+60*150/11=19200/11+9000/11=28200/11~2563.6. So LP optimal is ~2563.6. But that's not among choices. Let me reconsider. (30,0) gives 2400 which is choice A. Check feasibility: 5*30=150 OK, 3*30=90<=120 OK. So 2400 is feasible. But the intersection gives higher. Unless I made an error. 5*(240/11)+3*(150/11)=1200/11+450/11=1650/11=150 OK. 3*(240/11)+4*(150/11)=720/11+600/11=1320/11=120 OK. Profit=28200/11=2563.6. That's higher than 2400. So max is ~2563.6 which is not among choices. Problem with my setup. Let me redesign for integer-friendly corners."
+    "source_detail": "Constructed. LP resource allocation. Maximize 80d+60b subject to 5d+3b<=150, 3d+4b<=120, d,b>=0. Corner profits are (30,0)->2400, (0,30)->1800, and the intersection of 5d+3b=150 with 3d+4b=120. Solving gives d=240/11 and b=150/11, with profit 80*(240/11)+60*(150/11)=28200/11≈2563.64. The maximum profit is about $2,563.64, which is choice C."
   },
   {
     "id": "orqa_lp_009",
@@ -128,11 +128,11 @@
       "A": "$120",
       "B": "$80",
       "C": "$100",
-      "D": "$90"
+      "D": "$144"
     },
-    "correct_answer": "A",
+    "correct_answer": "D",
     "source_category": 3,
-    "source_detail": "Constructed. LP production. Max 6x+4y s.t. 2x+4y<=80, 3x+y<=60, x,y>=0. Corners: (0,0)=$0; (20,0): 3*20=60 OK, 2*20=40<=80 OK, profit=120; (0,20): 4*20=80 OK, 1*20=20<=60 OK, profit=80; intersection: 2x+4y=80 => x+2y=40, and 3x+y=60. From second: y=60-3x. Sub: x+2(60-3x)=40, x+120-6x=40, -5x=-80, x=16, y=60-48=12. Check: 2*16+4*12=32+48=80 OK, 3*16+12=60 OK. Profit=6*16+4*12=96+48=144. So 144>120. Not among choices. Problem again. Let me redesign."
+    "source_detail": "Constructed. LP production. Maximize 6x+4y subject to 2x+4y<=80, 3x+y<=60, x,y>=0. Corner profits are (20,0)->120, (0,20)->80, and the intersection of x+2y=40 with 3x+y=60. Solving gives x=16 and y=12, with profit 6*16+4*12=144. The maximum profit is $144, which is choice D."
   },
   {
     "id": "orqa_lp_010",
@@ -140,14 +140,14 @@
     "split": "test",
     "question": "A farmer has 200 acres to plant soybeans and corn. Soybeans yield $250 profit per acre and require 2 worker-hours per acre. Corn yields $300 profit per acre and requires 5 worker-hours per acre. The farmer has 600 worker-hours available. What is the maximum profit?",
     "choices": {
-      "A": "$50,000",
+      "A": "$53,333.33",
       "B": "$55,000",
       "C": "$56,667",
       "D": "$60,000"
     },
-    "correct_answer": "B",
+    "correct_answer": "A",
     "source_category": 3,
-    "source_detail": "Constructed. LP resource allocation. Max 250s+300c s.t. s+c<=200, 2s+5c<=600, s,c>=0. Corners: (0,0)=$0; (200,0): 2*200=400<=600 OK, profit=50000; (0,120): 5*120=600 OK, 0+120<=200 OK, profit=36000; intersection s+c=200, 2s+5c=600. s=200-c, 2(200-c)+5c=600, 400-2c+5c=600, 3c=200, c=200/3~66.67, s=200-200/3=400/3~133.33. Profit=250*400/3+300*200/3=100000/3+60000/3=160000/3~53333. Hmm. (200,0) gives 50000. Let me check (0,120): 0+120=120<=200, 5*120=600 OK, profit=36000. So we have corners at (200,0)=50000, (400/3, 200/3)=53333, (0,120)=36000. Max is 53333 which is not in choices. Let me redesign again."
+    "source_detail": "Constructed. LP resource allocation. Maximize 250s+300c subject to s+c<=200, 2s+5c<=600, s,c>=0. Corner profits are (200,0)->50000, (0,120)->36000, and the intersection of s+c=200 with 2s+5c=600. Solving gives c=200/3 and s=400/3, with profit 250*(400/3)+300*(200/3)=160000/3≈53333.33. The maximum profit is about $53,333.33, which is choice A."
   },
   {
     "id": "orqa_lp_011",
@@ -190,7 +190,7 @@
       "C": "21",
       "D": "22"
     },
-    "correct_answer": "C",
+    "correct_answer": "D",
     "source_category": 3,
     "source_detail": "Constructed. 0-1 knapsack. Enumerate promising subsets fitting in 15 kg: {4,5}: w=6+7=13, v=9+11=20; {3,5}: w=5+7=12, v=7+11=18; {3,4}: w=5+6=11, v=7+9=16; {2,4,5}: w=4+6+7=17>15, no; {1,4,5}: w=3+6+7=16>15, no; {1,3,5}: w=3+5+7=15, v=4+7+11=22; {1,3,4}: w=3+5+6=14, v=4+7+9=20; {2,3,4}: w=4+5+6=15, v=5+7+9=21; {1,2,5}: w=3+4+7=14, v=4+5+11=20; {1,2,4}: w=3+4+6=13, v=4+5+9=18; {1,2,3}: w=3+4+5=12, v=4+5+7=16; {1,2,3,4}: w=3+4+5+6=18>15, no; {2,3,5}: w=4+5+7=16>15, no; {1,2,3,5}: too heavy. So max is {1,3,5}=22. Wait let me recheck: {1,3,5}: w=3+5+7=15<=15, v=4+7+11=22. That's 22 which is choice D. But {2,3,4}: w=15, v=21. {4,5}: v=20. So max=22. Answer D."
   },
@@ -336,13 +336,13 @@
     "question": "Five tasks need to be processed on a single machine. Each task has a processing time and a weight (importance). Task 1: (p=4, w=3), Task 2: (p=2, w=5), Task 3: (p=6, w=2), Task 4: (p=3, w=4), Task 5: (p=1, w=1). To minimize total weighted completion time, what sequence should be used and what is the resulting total weighted completion time?",
     "choices": {
       "A": "2-4-1-5-3, total = 117",
-      "B": "2-4-1-3-5, total = 121",
+      "B": "2-4-5-1-3, total = 98",
       "C": "5-2-4-1-3, total = 107",
       "D": "1-2-3-4-5, total = 135"
     },
-    "correct_answer": "C",
+    "correct_answer": "B",
     "source_category": 3,
-    "source_detail": "Constructed. Weighted shortest job first (WSPT) rule: schedule by decreasing w/p ratio. Ratios: T1=3/4=0.75, T2=5/2=2.5, T3=2/6=0.33, T4=4/3=1.33, T5=1/1=1.0. Order: T2(2.5), T4(1.33), T5(1.0), T1(0.75), T3(0.33). Schedule: T2-T4-T5-T1-T3. Completions: T2=2, T4=2+3=5, T5=5+1=6, T1=6+4=10, T3=10+6=16. Weighted: 5*2+4*5+1*6+3*10+2*16=10+20+6+30+32=98. Hmm that's not in choices. Let me recheck. Order by w/p descending: T2(2.5)>T4(1.33)>T5(1.0)>T1(0.75)>T3(0.33). Completion times: C2=2, C4=5, C5=6, C1=10, C3=16. WCT=w2*C2+w4*C4+w5*C5+w1*C1+w3*C3=5*2+4*5+1*6+3*10+2*16=10+20+6+30+32=98. But 98 is not in choices. Let me try option C: 5-2-4-1-3. C5=1, C2=1+2=3, C4=3+3=6, C1=6+4=10, C3=10+6=16. WCT=1*1+5*3+4*6+3*10+2*16=1+15+24+30+32=102. Not 107 either. Let me try A: 2-4-1-5-3. C2=2, C4=5, C1=9, C5=10, C3=16. WCT=5*2+4*5+3*9+1*10+2*16=10+20+27+10+32=99. Not 117. My choices are wrong. Let me redesign with different numbers."
+    "source_detail": "Constructed. Single-machine scheduling for minimizing total weighted completion time. Apply Smith's rule (WSPT): order tasks by decreasing w/p ratio. Ratios are T2=5/2=2.5, T4=4/3≈1.33, T5=1/1=1.0, T1=3/4=0.75, T3=2/6≈0.33, so the optimal sequence is 2-4-5-1-3. Completion times are C2=2, C4=5, C5=6, C1=10, C3=16, giving total weighted completion time 5*2+4*5+1*6+3*10+2*16=98. The correct choice is B."
   },
   {
     "id": "orqa_co_012",

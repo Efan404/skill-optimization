@@ -53,6 +53,14 @@ class TestLoadQuestions:
                 f"Question {q['id']}: answer '{q['correct_answer']}' not in choices"
             )
 
+    def test_choice_texts_are_unique_per_question(self):
+        """Choice text should not contain duplicates within a question."""
+        for q in load_questions():
+            choice_texts = list(q["choices"].values())
+            assert len(choice_texts) == len(set(choice_texts)), (
+                f"Question {q['id']} has duplicate choice text: {choice_texts}"
+            )
+
 
 class TestSplitIntegrity:
     def test_split_integrity_passes(self):
@@ -136,3 +144,61 @@ class TestQuestionsByType:
         """Returns seed LP questions."""
         qs = get_questions_by_type("seed", "linear_programming")
         assert len(qs) == 2
+
+
+class TestDatasetAudit:
+    """Regression tests for the manually audited 24-question corpus."""
+
+    VERIFIED_CORRECT_ANSWERS = {
+        "orqa_lp_001": "C",
+        "orqa_lp_002": "A",
+        "orqa_lp_003": "B",
+        "orqa_lp_004": "B",
+        "orqa_lp_005": "D",
+        "orqa_lp_006": "A",
+        "orqa_lp_007": "A",
+        "orqa_lp_008": "C",
+        "orqa_lp_009": "D",
+        "orqa_lp_010": "A",
+        "orqa_lp_011": "B",
+        "orqa_lp_012": "B",
+        "orqa_co_001": "D",
+        "orqa_co_002": "A",
+        "orqa_co_003": "B",
+        "orqa_co_004": "C",
+        "orqa_co_005": "A",
+        "orqa_co_006": "C",
+        "orqa_co_007": "A",
+        "orqa_co_008": "A",
+        "orqa_co_009": "B",
+        "orqa_co_010": "B",
+        "orqa_co_011": "B",
+        "orqa_co_012": "A",
+    }
+
+    def test_audited_answer_key_matches_verified_results(self):
+        questions = {q["id"]: q for q in load_questions()}
+        assert set(questions) == set(self.VERIFIED_CORRECT_ANSWERS)
+        for qid, expected in self.VERIFIED_CORRECT_ANSWERS.items():
+            assert questions[qid]["correct_answer"] == expected, (
+                f"Question {qid} should have verified correct_answer={expected}"
+            )
+
+    def test_no_question_contains_draft_residue(self):
+        forbidden_phrases = [
+            "let me redesign",
+            "problem again",
+            "none of my choices are right",
+            "my choices are wrong",
+            "not among choices",
+        ]
+        for q in load_questions():
+            detail = q["source_detail"].lower()
+            for phrase in forbidden_phrases:
+                assert phrase not in detail, (
+                    f"Question {q['id']} still contains draft residue: {phrase}"
+                )
+
+    def test_integer_lp_stem_is_explicit_when_needed(self):
+        questions = {q["id"]: q for q in load_questions()}
+        assert "whole batches" in questions["orqa_lp_006"]["question"].lower()
