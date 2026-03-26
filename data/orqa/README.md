@@ -1,42 +1,77 @@
-# ORQA-Derived Evaluation Set
+# ORQA Subset (source_category 1)
 
-## Dataset Label
+## Overview
 
-**ORQA-derived evaluation set** — all questions are constructed (source_category: 3), not extracted from the original ORQA benchmark dataset.
+This directory contains a deterministic 50-instance subset of the
+**ORQA** benchmark dataset (Operations Research Question Answering).
+These are real questions extracted from the published ORQA validation and
+test sets -- **not** constructed/synthetic questions.
+
+> **Important:** This is an internal re-split of published ORQA data for
+> the skill-optimization project.  It is **NOT** the canonical ORQA test
+> benchmark.  Results on this subset should not be compared directly with
+> published ORQA leaderboard numbers.
 
 ## Source
 
-Questions are inspired by the operations research problem types described in:
+> Evaluating LLM Reasoning in the Operations Research Domain with ORQA
+> (AAAI 2025)
 
-> "Evaluating LLM Reasoning in the Operations Research Domain with ORQA" (AAAI 2025)
+- Raw files: `ORQA_validation.jsonl` (45 instances) and
+  `ORQA_test.jsonl` (1,468 instances)
+- All instances have exactly 4 options and a single correct answer (A-D)
+- `source_category: 1` in the canonical schema
 
-The ORQA dataset was not directly downloadable at the time of data collection. Per the manual curation protocol in the spec, all questions are constructed to match the described problem types and difficulty distribution.
+## Sampling Protocol
 
-## Composition
+The sampling is fully deterministic and reproducible via
+`scripts/sample_orqa.py`.
 
-- **Total questions:** 24
-- **Task types:** linear_programming (12), combinatorial_optimization (12)
+### Seed split (5 instances, from validation set)
 
-### Split Distribution
+1. Group validation instances by `QUESTION_TYPE` (Q1-Q11).
+2. Within each group, sort by `len(REASONING)` descending.  Ties are
+   broken by file order (stable sort).
+3. Iterate over types in sorted order (Q1, Q10, Q11, Q2, Q3);
+   take the top-1 from each type until 5 are selected.
 
-| Split | LP | CO | Total | Purpose |
-|-------|----|----|-------|---------|
-| seed  | 2  | 2  | 4     | v0 skill generation examples only |
-| dev   | 5  | 5  | 10    | All conditions + error analysis + optimization |
-| test  | 5  | 5  | 10    | Held-out final evaluation |
+### Dev + Test splits (45 instances, from test set)
 
-### LP Problem Types
+1. Stratified random sample of 45 from 1,468 test instances, proportional
+   to each `QUESTION_TYPE`'s share.  Random seed = 42.
+2. Per-type alternating assignment: within each type's sampled instances
+   (sorted by original file index), the 1st goes to dev, the 2nd to test,
+   the 3rd to dev, etc.
+3. This guarantees every type with at least 1 sampled instance has
+   representation in dev.
 
-Resource allocation, production planning, transportation, diet/blending, advertising mix
+## Split Distribution
 
-### CO Problem Types
+| Split | Count | Purpose                                    |
+|-------|------:|---------------------------------------------|
+| seed  |     5 | v0 skill generation examples only           |
+| dev   |    25 | All conditions + error analysis + optimization |
+| test  |    20 | Held-out final evaluation                   |
+| TOTAL |    50 |                                             |
 
-Knapsack (0/1), assignment, shortest path, scheduling, minimum spanning tree, TSP, critical path, capital budgeting
+### Per QUESTION_TYPE breakdown
 
-## Methodology
+| QType | seed | dev | test | total |
+|-------|-----:|----:|-----:|------:|
+| Q1    |    1 |   2 |    1 |     4 |
+| Q2    |    1 |   2 |    2 |     5 |
+| Q3    |    1 |   2 |    2 |     5 |
+| Q4    |    0 |   2 |    2 |     4 |
+| Q5    |    0 |   3 |    2 |     5 |
+| Q6    |    0 |   3 |    2 |     5 |
+| Q7    |    0 |   1 |    0 |     1 |
+| Q8    |    0 |   3 |    2 |     5 |
+| Q9    |    0 |   3 |    3 |     6 |
+| Q10   |    1 |   2 |    2 |     5 |
+| Q11   |    1 |   2 |    2 |     5 |
 
-- All questions are source_category 3 (constructed)
-- Questions target undergraduate/graduate OR course level
-- Each question has exactly 4 multiple-choice options (A/B/C/D)
-- Split assignment is fixed in `split.json` and never modified after initial creation
-- Seed questions are disjoint from dev and test — used only for v0 skill generation
+## Files
+
+- `questions.json` -- array of 50 question objects in canonical format
+- `split.json` -- `{"seed": [...], "dev": [...], "test": [...]}` of question IDs
+- `README.md` -- this file

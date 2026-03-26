@@ -1,362 +1,852 @@
 [
   {
-    "id": "orqa_lp_001",
-    "task_type": "linear_programming",
+    "id": "orqa_0001",
+    "task_type": "or_model_identification",
     "split": "seed",
-    "question": "A factory produces two products, A and B. Product A requires 2 hours of machining and 1 hour of assembly. Product B requires 1 hour of machining and 2 hours of assembly. The factory has 100 hours of machining time and 80 hours of assembly time available per week. The profit is $40 per unit of A and $30 per unit of B. What is the maximum weekly profit?",
+    "context": "In your role as a manager in the oil refinery industry, you are tasked with mixing gasoline to achieve a specific Motor Octane Number (MON) - 90 to be precise. The challenge lies in finding the most cost-effective combination of raw materials that will meet this target.  You have at your disposal for the mixing process a variety of raw materials such as Alkylate, Reformate, and Butane. Each of these materials comes with its own cost, availability, and individual MON value. Moreover, there are quadratic interactions between each pair of raw materials that influence the mixing process.  The selling price of the mixed gasoline is fixed at 140. Your goal is to minimize the total mixing cost, considering the relative costs and availability of each raw material, and the quadratic interactions between them. The final mix must meet the industry standards and customer expectations by achieving the target MON of 90.  To tackle this problem, you will need to collaborate with an operations research consultant. Together, you will develop an optimization model that accurately represents the mixing process and helps determine the optimal combination of raw materials. This model will incorporate all relevant data, including the MON values, costs, and availability of each raw material, and the quadratic interaction terms between them. This way, you can ensure cost-effective decisions in your mixing process while still meeting the required MON target.",
+    "question": " Which of the following choices define the objective criterion of the problem?",
     "choices": {
-      "A": "$1,800",
-      "B": "$2,000",
-      "C": "$2,200",
-      "D": "$2,400"
-    },
-    "correct_answer": "C",
-    "source_category": 3,
-    "source_detail": "Constructed. LP resource allocation. Maximize 40x+30y subject to 2x+y<=100, x+2y<=80, x,y>=0. Corner profits are (0,0)->0, (50,0)->2000, (0,40)->1200. Solving 2x+y=100 and x+2y=80 gives x=40 and y=20, with profit 40*40+30*20=2200. The maximum weekly profit is $2,200, which is choice C."
-  },
-  {
-    "id": "orqa_lp_002",
-    "task_type": "linear_programming",
-    "split": "seed",
-    "question": "A farm allocates land between corn and wheat. Each acre of corn yields $300 profit and requires 3 worker-days. Each acre of wheat yields $200 profit and requires 2 worker-days. The farm has 120 acres and 300 worker-days available. How many acres of each crop should be planted to maximize profit, and what is the maximum profit?",
-    "choices": {
-      "A": "60 acres corn, 60 acres wheat, profit = $30,000",
-      "B": "100 acres corn, 10 acres wheat, profit = $32,000",
-      "C": "0 acres corn, 120 acres wheat, profit = $24,000",
-      "D": "80 acres corn, 40 acres wheat, profit = $32,000"
-    },
-    "correct_answer": "A",
-    "source_category": 3,
-    "source_detail": "Constructed. LP resource allocation. Maximize 300x+200y subject to x+y<=120, 3x+2y<=300, x,y>=0. Corner profits are (0,0)->0, (100,0)->30000, (0,120)->24000, and the intersection of x+y=120 with 3x+2y=300, which gives x=60 and y=60 with profit 30000. Among the listed options, only A is both feasible and optimal."
-  },
-  {
-    "id": "orqa_lp_003",
-    "task_type": "linear_programming",
-    "split": "dev",
-    "question": "A company blends two types of coffee beans (Premium and Standard) to make a specialty mix. Each pound of Premium costs $8 and each pound of Standard costs $3. The mix must contain at least 40% Premium beans. The company wants to make 200 pounds of the mix at minimum cost. What is the minimum cost?",
-    "choices": {
-      "A": "$640",
-      "B": "$1,000",
-      "C": "$1,600",
-      "D": "$1,200"
-    },
-    "correct_answer": "B",
-    "source_category": 3,
-    "source_detail": "Constructed. LP blending/min-cost. Minimize 8p+3s s.t. p+s=200, p>=0.4*200=80, p,s>=0. Since we must use exactly 200 lbs: s=200-p. Cost=8p+3(200-p)=8p+600-3p=5p+600. Minimize over p>=80, p<=200. Cost decreasing? No: 5p+600 increases with p. So minimize at p=80, s=120. Cost=5*80+600=400+600=1000."
-  },
-  {
-    "id": "orqa_lp_004",
-    "task_type": "linear_programming",
-    "split": "dev",
-    "question": "A transportation company needs to ship goods from two warehouses to two retail stores. Warehouse 1 has 150 units and Warehouse 2 has 100 units. Store A needs 120 units and Store B needs 130 units. Shipping costs per unit: W1->A=$4, W1->B=$6, W2->A=$5, W2->B=$3. What is the minimum total shipping cost?",
-    "choices": {
-      "A": "$870",
-      "B": "$960",
-      "C": "$1,000",
-      "D": "$920"
-    },
-    "correct_answer": "B",
-    "source_category": 3,
-    "source_detail": "Constructed. LP transportation. Let x11=W1->A, x12=W1->B, x21=W2->A, x22=W2->B. Supply and demand imply x11+x12=150, x21+x22=100, x11+x21=120, x12+x22=130. Let x11=t. Then x21=120-t, x12=150-t, and x22=t-20, with 20<=t<=120. The total cost is 4t+6(150-t)+5(120-t)+3(t-20)=1440-4t, which is minimized at t=120. That gives shipments (120,30,0,100) and total cost 4*120+6*30+5*0+3*100=960. The minimum total shipping cost is $960, which is choice B."
-  },
-  {
-    "id": "orqa_lp_005",
-    "task_type": "linear_programming",
-    "split": "dev",
-    "question": "A diet problem: A person needs at least 60g of protein and 40g of fiber daily. Food X provides 10g protein and 5g fiber per serving at $3 per serving. Food Y provides 5g protein and 8g fiber per serving at $2 per serving. What is the minimum daily cost to meet the nutritional requirements?",
-    "choices": {
-      "A": "$12.00",
-      "B": "$14.18",
-      "C": "$16.00",
-      "D": "$18.91"
+      "A": "Maximize the MON value of the mixed gasoline",
+      "B": "Minimize the total cost of raw materials used in the mixing process",
+      "C": "Minimize the quadratic interactions between each pair of raw materials.",
+      "D": "Maximize the revenue from selling gasoline minus the mixing cost."
     },
     "correct_answer": "D",
-    "source_category": 3,
-    "source_detail": "Constructed. LP diet problem. Minimize 3x+2y subject to 10x+5y>=60, 5x+8y>=40, x,y>=0. Feasible corner costs are (8,0)->24, (0,12)->24, and the intersection of 10x+5y=60 with 5x+8y=40. Solving gives x=56/11 and y=20/11, with cost 3*(56/11)+2*(20/11)=208/11≈18.91. The minimum daily cost is about $18.91, which is choice D."
+    "source_category": 1,
+    "source_detail": "ORQA validation set, QUESTION_TYPE Q1, instance index 17",
+    "question_subtype": "Q1"
   },
   {
-    "id": "orqa_lp_006",
-    "task_type": "linear_programming",
-    "split": "dev",
-    "question": "A company makes two types of paint: interior and exterior. Each batch of interior paint requires 4 tons of material M1 and 2 tons of material M2. Each batch of exterior paint requires 2 tons of M1 and 6 tons of M2. The company has 24 tons of M1 and 30 tons of M2 available. Profit per batch: interior = $5,000, exterior = $4,000. Assume only whole batches can be produced. What production plan maximizes profit?",
+    "id": "orqa_0002",
+    "task_type": "or_model_identification",
+    "split": "seed",
+    "context": "As an airline manager, you're tasked with a challenge: how to route and assign your fleet in the most cost-effective way. You have a variety of flights to manage, each carrying different numbers of passengers, and a range of vehicle types, each with its own capacity and characteristics. Your goal is to reduce transportation costs while ensuring every passenger reaches their destination.  Your flights operate across multiple cities. Each vehicle type can carry a certain number of passengers, has a cost per journey, and there's a limited number of each vehicle type available. You also have to work within specific time periods, represented by a series of periods or events. Plus, you have data on flight demand, showing how many passengers each flight needs to transport between different locations and at different times.  To tackle this challenge, you need to figure out the best way to assign vehicles to flights. This involves considering the capacity of each vehicle type, the number of passengers on each flight, and the number of available vehicles. You also need to plan the routes of these vehicles, making sure they're spread out efficiently across locations and times to make the most of your resources and keep costs down.  You should create a thorough and efficient plan for routing and assigning your fleet, reducing transportation costs while ensuring all passengers are accommodated.",
+    "question": "In this problem there is a demand satisfaction constraint. What is the meaning of its left-hand side?",
     "choices": {
-      "A": "5 interior, 2 exterior, profit = $33,000",
-      "B": "3 interior, 4 exterior, profit = $31,000",
-      "C": "6 interior, 0 exterior, profit = $30,000",
-      "D": "0 interior, 5 exterior, profit = $20,000"
-    },
-    "correct_answer": "A",
-    "source_category": 3,
-    "source_detail": "Constructed. Integer production planning. Maximize 5000x+4000y subject to 4x+2y<=24, 2x+6y<=30, x,y>=0, where x and y must be whole batches. The continuous relaxation has intersection (4.2,3.6), but among feasible integer plans the best is (5,2): material use 4*5+2*2=24 and 2*5+6*2=22, profit 25000+8000=33000. Other listed feasible plans such as (3,4) give only 31000. Therefore choice A is optimal."
-  },
-  {
-    "id": "orqa_lp_007",
-    "task_type": "linear_programming",
-    "split": "dev",
-    "question": "A bakery can produce at most 100 cakes per day. Chocolate cakes sell for $20 and cost $8 to make. Vanilla cakes sell for $15 and cost $5 to make. The bakery must produce at least 20 of each type. At most 60% of cakes can be chocolate (due to oven constraints). How many of each type should the bakery produce to maximize profit?",
-    "choices": {
-      "A": "60 chocolate, 40 vanilla, profit = $1,120",
-      "B": "50 chocolate, 50 vanilla, profit = $1,100",
-      "C": "20 chocolate, 80 vanilla, profit = $1,040",
-      "D": "80 chocolate, 20 vanilla, profit = $1,160"
-    },
-    "correct_answer": "A",
-    "source_category": 3,
-    "source_detail": "Constructed. LP production planning. Profit per cake: chocolate=20-8=12, vanilla=15-5=10. Max 12c+10v s.t. c+v<=100, c>=20, v>=20, c<=0.6*100=60, c,v>=0. Since profit per chocolate is higher, maximize c. Max c=60 (from 60% constraint). Then v=100-60=40 (using all capacity). Check: 40>=20 OK. Profit=12*60+10*40=720+400=1120. Answer A."
-  },
-  {
-    "id": "orqa_lp_008",
-    "task_type": "linear_programming",
-    "split": "test",
-    "question": "A furniture maker produces desks and bookcases. Each desk needs 5 board-feet of lumber and 3 hours of labor. Each bookcase needs 3 board-feet of lumber and 4 hours of labor. Available: 150 board-feet of lumber and 120 hours of labor. Profit: $80 per desk, $60 per bookcase. What is the maximum profit?",
-    "choices": {
-      "A": "$2,400",
-      "B": "$2,280",
-      "C": "$2,563.64",
-      "D": "$1,800"
+      "A": "The total number of passengers that need to be transported during a specific time period",
+      "B": "The number of passengers that a specific vehicle can carry during a specific time period",
+      "C": "The total number of passengers seats of vehicles assigned to a particular journey during a specific time period",
+      "D": "The total number of vehicles available for a specific journey during a specific time period"
     },
     "correct_answer": "C",
-    "source_category": 3,
-    "source_detail": "Constructed. LP resource allocation. Maximize 80d+60b subject to 5d+3b<=150, 3d+4b<=120, d,b>=0. Corner profits are (30,0)->2400, (0,30)->1800, and the intersection of 5d+3b=150 with 3d+4b=120. Solving gives d=240/11 and b=150/11, with profit 80*(240/11)+60*(150/11)=28200/11≈2563.64. The maximum profit is about $2,563.64, which is choice C."
+    "source_category": 1,
+    "source_detail": "ORQA validation set, QUESTION_TYPE Q10, instance index 26",
+    "question_subtype": "Q10"
   },
   {
-    "id": "orqa_lp_009",
-    "task_type": "linear_programming",
-    "split": "test",
-    "question": "A chemical company produces two fertilizers using two raw materials. Fertilizer F1 needs 2 kg of R1 and 3 kg of R2 per bag. Fertilizer F2 needs 4 kg of R1 and 1 kg of R2 per bag. Available supplies: 80 kg of R1 and 60 kg of R2. Profit: $6 per bag of F1, $4 per bag of F2. What is the maximum profit?",
+    "id": "orqa_0003",
+    "task_type": "or_model_identification",
+    "split": "seed",
+    "context": "At our manufacturing company, we are gearing up to produce a groundbreaking new electric skateboard, a product that has generated significant buzz from our successful ProductLauncher campaign. As we set our production lines in motion, we are confronted with a challenge related to harmonizing our assembly line. Your objective is to assign specific tasks to stations, ensuring that all tasks are completed in the right sequence. Each station should have a harmonized workload, and the overall cycle time should be as brief as possible. Additionally, you have the option to pick the type of robot for each station, which can influence the duration of tasks. Our facility handles a myriad of tasks, each with its own duration. These tasks need to be allocated to a specific number of workstations. We also have an assortment of robots that can be employed at each station, potentially altering the time needed to complete tasks. It is paramount that tasks are allocated to stations in the correct sequence, implying that some tasks must be finished before others commence. Your mission is to decrease the assembly line's cycle time, ensuring tasks are executed in the appropriate order and that the workload is uniformly distributed across all stations. With sufficient data on the tasks and their durations, the number of workstations, the diverse robots and their impact on task times, and the sequence in which tasks should be completed, you will aid in making our production of the electric skateboard more streamlined and efficient in using our limited resources.",
+    "question": "Which of the following system element(s) is the Task Assignment constraint applied on?",
     "choices": {
-      "A": "$120",
-      "B": "$80",
-      "C": "$100",
-      "D": "$144"
+      "A": "Robots, Workstation",
+      "B": "Tasks",
+      "C": "Tasks, Workstation",
+      "D": "Tasks, Robots, Workstation"
+    },
+    "correct_answer": "B",
+    "source_category": 1,
+    "source_detail": "ORQA validation set, QUESTION_TYPE Q11, instance index 22",
+    "question_subtype": "Q11"
+  },
+  {
+    "id": "orqa_0004",
+    "task_type": "or_model_identification",
+    "split": "seed",
+    "context": "As a manager in the hydroelectric industry, you are tasked with managing a water reservoir system. This system includes various pools like reservoirs, lakes, and dams. Your challenge is to figure out the optimal strategy for releasing water from these pools. The goal is to maximize the electricity generated without exceeding any capacity limits.   In each time period, you need to decide how much water to release for electricity generation. You also need to determine how much extra water to release, which might be necessary if a pool is overfilled.  Each pool can have one successor pool at most. This is where the water goes in the next period after it's released. Each pool also gets a certain amount of water inflow from external sources like rain and snowmelt. A river stretch can be thought of as a pool too, but with minimal storage and no generation capacity.  You have access to data on several factors. This includes the value per unit of water used for electricity generation by each pool, the minimum and maximum capacity of each pool, the initial volume of water in each pool, and the maximum generation capacity of each pool. You also have data on the inflow of water from external sources into each pool per period, and the time it takes for water to travel between connected pools.  Your main goal is to maximize the value of electricity generated. To do this, you need to manage the water release from the pools efficiently. You need to consider the inflows, capacities, and connections between the pools. This task is vital for optimizing hydroelectric power generation and ensuring sustainable water resource management in the watershed.",
+    "question": "Which of the following options define an inventory balance constraint that is required for this problem?",
+    "choices": {
+      "A": "The ending inventory of each pool after the first period is the beginning inventory plus inflow from outside and upstream pools plus the outflow",
+      "B": " The ending inventory of each pool after the first period is the beginning inventory minus inflow from outside and upstream pools minus the outflow",
+      "C": " The ending inventory of each pool after the first period is the beginning inventory minus inflow from outside and upstream pools plus the outflow",
+      "D": "The ending inventory of each pool after the first period is the beginning inventory plus inflow from outside and upstream pools minus the outflow"
     },
     "correct_answer": "D",
-    "source_category": 3,
-    "source_detail": "Constructed. LP production. Maximize 6x+4y subject to 2x+4y<=80, 3x+y<=60, x,y>=0. Corner profits are (20,0)->120, (0,20)->80, and the intersection of x+2y=40 with 3x+y=60. Solving gives x=16 and y=12, with profit 6*16+4*12=144. The maximum profit is $144, which is choice D."
+    "source_category": 1,
+    "source_detail": "ORQA validation set, QUESTION_TYPE Q2, instance index 15",
+    "question_subtype": "Q2"
   },
   {
-    "id": "orqa_lp_010",
-    "task_type": "linear_programming",
-    "split": "test",
-    "question": "A farmer has 200 acres to plant soybeans and corn. Soybeans yield $250 profit per acre and require 2 worker-hours per acre. Corn yields $300 profit per acre and requires 5 worker-hours per acre. The farmer has 600 worker-hours available. What is the maximum profit?",
-    "choices": {
-      "A": "$53,333.33",
-      "B": "$55,000",
-      "C": "$56,667",
-      "D": "$60,000"
-    },
-    "correct_answer": "A",
-    "source_category": 3,
-    "source_detail": "Constructed. LP resource allocation. Maximize 250s+300c subject to s+c<=200, 2s+5c<=600, s,c>=0. Corner profits are (200,0)->50000, (0,120)->36000, and the intersection of s+c=200 with 2s+5c=600. Solving gives c=200/3 and s=400/3, with profit 250*(400/3)+300*(200/3)=160000/3≈53333.33. The maximum profit is about $53,333.33, which is choice A."
-  },
-  {
-    "id": "orqa_lp_011",
-    "task_type": "linear_programming",
-    "split": "test",
-    "question": "A small workshop produces tables and chairs. Each table uses 10 kg of wood and 4 hours of labor. Each chair uses 5 kg of wood and 2 hours of labor. Available: 200 kg of wood and 120 hours of labor. Profit: $50 per table, $30 per chair. What is the maximum profit?",
-    "choices": {
-      "A": "$1,000",
-      "B": "$1,200",
-      "C": "$1,500",
-      "D": "$1,100"
-    },
-    "correct_answer": "B",
-    "source_category": 3,
-    "source_detail": "Constructed. LP. Max 50t+30c s.t. 10t+5c<=200, 4t+2c<=120. Simplify: 2t+c<=40, 2t+c<=60. First is tighter. So feasible region defined by 2t+c<=40, t,c>=0. Also 10t+5c<=200 => 2t+c<=40 same thing. 4t+2c<=120 => 2t+c<=60. So only binding is 2t+c<=40. Corners: (0,0)=$0; (20,0): profit=1000; (0,40): profit=1200. Along 2t+c=40, profit=50t+30(40-2t)=50t+1200-60t=-10t+1200. Max at t=0, profit=1200. So max=1200 at (0,40). Check: 10*0+5*40=200 OK, 4*0+2*40=80<=120 OK."
-  },
-  {
-    "id": "orqa_lp_012",
-    "task_type": "linear_programming",
-    "split": "test",
-    "question": "A company blends two fruit juices, Orange (O) and Apple (A), into a premium mix. Orange juice costs $5 per liter and Apple juice costs $3 per liter. The blend must contain at least 30% but no more than 70% orange juice. The company needs to produce exactly 500 liters. What is the minimum cost of the blend?",
-    "choices": {
-      "A": "$1,500",
-      "B": "$1,800",
-      "C": "$2,050",
-      "D": "$1,950"
-    },
-    "correct_answer": "B",
-    "source_category": 3,
-    "source_detail": "Constructed. LP blending. Min 5o+3a s.t. o+a=500, o>=150 (30%), o<=350 (70%), o,a>=0. Cost=5o+3(500-o)=5o+1500-3o=2o+1500. Minimize by minimizing o. Min o=150. Cost=2*150+1500=300+1500=1800."
-  },
-  {
-    "id": "orqa_co_001",
-    "task_type": "combinatorial_optimization",
+    "id": "orqa_0005",
+    "task_type": "or_model_identification",
     "split": "seed",
-    "question": "A hiker has a knapsack that can hold at most 15 kg. There are 5 items available: Item 1 (weight=3, value=4), Item 2 (weight=4, value=5), Item 3 (weight=5, value=7), Item 4 (weight=6, value=9), Item 5 (weight=7, value=11). What is the maximum total value the hiker can carry?",
+    "context": "As a manager in the transportation sector, you are currently dealing with the issue of routing multiple goods through a network in the most cost-effective way. This network consists of various locations (i.e., the nodes) and the connections between these locations (i.e., the edges). Some nodes are the starting points for the goods you're shipping. Your task is to figure out the best way to move goods through the network, reduce total shipping costs, and meet the demand at each endpoint.  The data you have for this task includes a demand matrix. This shows how much of each good needs to be shipped from the starting point to the endpoint. You also have the cost per unit shipped over each connection in the network and the maximum amount that can be shipped on each connection. Plus, you have information about whether a connection exists between two nodes.  In your industry, the nodes could be warehouses, distribution centers, or transportation hubs, and the goods could be various products that need to be shipped between these places. The connections represent transportation routes, like roads, rail lines, or shipping lanes. The challenge is figuring out the most efficient routing plan that reduces overall shipping costs while ensuring the demand at each endpoint is met. This requires considering the capacity limits of each connection in the network.",
+    "question": " Under which category does the given optimization problem fall in to?",
     "choices": {
-      "A": "18",
-      "B": "20",
-      "C": "21",
-      "D": "22"
+      "A": "Multi-period asset allocation problem",
+      "B": "Multi-level distribution problem",
+      "C": "Multi-period routing problem",
+      "D": "Multi-commodity flow problem"
     },
     "correct_answer": "D",
-    "source_category": 3,
-    "source_detail": "Constructed. 0-1 knapsack. Enumerate promising subsets fitting in 15 kg: {4,5}: w=6+7=13, v=9+11=20; {3,5}: w=5+7=12, v=7+11=18; {3,4}: w=5+6=11, v=7+9=16; {2,4,5}: w=4+6+7=17>15, no; {1,4,5}: w=3+6+7=16>15, no; {1,3,5}: w=3+5+7=15, v=4+7+11=22; {1,3,4}: w=3+5+6=14, v=4+7+9=20; {2,3,4}: w=4+5+6=15, v=5+7+9=21; {1,2,5}: w=3+4+7=14, v=4+5+11=20; {1,2,4}: w=3+4+6=13, v=4+5+9=18; {1,2,3}: w=3+4+5=12, v=4+5+7=16; {1,2,3,4}: w=3+4+5+6=18>15, no; {2,3,5}: w=4+5+7=16>15, no; {1,2,3,5}: too heavy. So max is {1,3,5}=22. Wait let me recheck: {1,3,5}: w=3+5+7=15<=15, v=4+7+11=22. That's 22 which is choice D. But {2,3,4}: w=15, v=21. {4,5}: v=20. So max=22. Answer D."
+    "source_category": 1,
+    "source_detail": "ORQA validation set, QUESTION_TYPE Q3, instance index 39",
+    "question_subtype": "Q3"
   },
   {
-    "id": "orqa_co_002",
-    "task_type": "combinatorial_optimization",
-    "split": "seed",
-    "question": "Four workers must be assigned to four tasks, one task per worker. The cost matrix (rows=workers, columns=tasks) is: Worker 1: [9,2,7,8], Worker 2: [6,4,3,7], Worker 3: [5,8,1,8], Worker 4: [7,6,9,4]. What is the minimum total cost of the optimal assignment?",
-    "choices": {
-      "A": "13",
-      "B": "14",
-      "C": "15",
-      "D": "16"
-    },
-    "correct_answer": "A",
-    "source_category": 3,
-    "source_detail": "Constructed. Assignment problem. Enumerate: W1-T2(2), W2-T3(3), W3-T1(5), W4-T4(4): total=2+3+5+4=14. Try W1-T2(2), W2-T1(6), W3-T3(1), W4-T4(4): total=2+6+1+4=13. Check: each worker assigned to different task, yes. Any better? W1-T2(2), W2-T4(7), W3-T3(1), W4-T1(7): 2+7+1+7=17. W1-T2(2), W3-T3(1): these are cheap. Remaining W2 and W4 for T1 and T4. W2-T1(6), W4-T4(4): 6+4=10. W2-T4(7), W4-T1(7): 14. So 2+1+6+4=13 is best with these. Try without W1-T2: W1-T1(9), W2-T2(4), W3-T3(1), W4-T4(4): 9+4+1+4=18. W1-T3(7), W2-T1(6), W3-T4(8), W4-T2(6): 7+6+8+6=27. Min=13."
-  },
-  {
-    "id": "orqa_co_003",
-    "task_type": "combinatorial_optimization",
+    "id": "orqa_0006",
+    "task_type": "or_model_identification",
     "split": "dev",
-    "question": "Consider a graph with 5 nodes (A, B, C, D, E) and edges with distances: A-B=3, A-C=6, B-C=2, B-D=4, C-D=1, C-E=5, D-E=3. What is the length of the shortest path from A to E?",
+    "context": "As a project manager, you are tasked with organizing tasks for a home renovation. You have different tasks such as \"Kitchen Refurbishment\", \"Garden Landscaping\", \"Living Room Paint Job\", and \"Bathroom Plumbing\". Each task has its completion deadline, required duration, and importance score. The completion deadlines are the specific dates by which each task should be finished. The required durations represent how long each task will take. The task's importance score measures its priority; for example, \"Roof Repair\" might have a higher importance score due to upcoming rainy seasons than the decorative task \"Living Room Paint Job\". You can't handle multiple tasks simultaneously because you only have a few weeks left before the winter season and limited resources, including human resources, tools, and materials.\nConsequently, you might need to decide which task to tackle in the coming weeks. Your challenge is determining which tasks to undertake and in what sequence, ensuring that the chosen tasks are completed within their specified deadlines while maximizing the total importance score of the completed tasks. This planning ensures that critical tasks are completed promptly, and the renovation progresses smoothly without unnecessary delays.",
+    "question": " Which of the following choices define the objective criterion of the problem?",
     "choices": {
-      "A": "8",
-      "B": "9",
-      "C": "10",
-      "D": "11"
+      "A": "Minimize the total number of tasks that are not completed within the deadline.",
+      "B": "Maximize the total importance score of the selected tasks.",
+      "C": "Minimize the total duration of the selected tasks.",
+      "D": "Maximize the total number of tasks completed within the deadline."
     },
     "correct_answer": "B",
-    "source_category": 3,
-    "source_detail": "Constructed. Shortest path. Paths from A to E: A-B-C-E: 3+2+5=10; A-B-C-D-E: 3+2+1+3=9; A-B-D-E: 3+4+3=10; A-C-E: 6+5=11; A-C-D-E: 6+1+3=10; A-B-C-D-E=9 is shortest. Dijkstra verification: start A, dist={A:0,B:inf,C:inf,D:inf,E:inf}. Process A: B=3, C=6. Process B(3): C=min(6,3+2)=5, D=3+4=7. Process C(5): D=min(7,5+1)=6, E=5+5=10. Process D(6): E=min(10,6+3)=9. Process E(9). Shortest A to E = 9."
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q1, instance index 453",
+    "question_subtype": "Q1"
   },
   {
-    "id": "orqa_co_004",
-    "task_type": "combinatorial_optimization",
+    "id": "orqa_0007",
+    "task_type": "or_model_identification",
     "split": "dev",
-    "question": "A project has 5 jobs that must be scheduled on a single machine. Each job has a processing time and a due date. Job 1: (p=3, d=5), Job 2: (p=1, d=3), Job 3: (p=4, d=8), Job 4: (p=2, d=7), Job 5: (p=2, d=6). Using the Earliest Due Date (EDD) rule, what is the maximum lateness of the schedule?",
+    "context": "As a financial manager, you are tasked with managing assets and liabilities over a series of time periods. This involves buying and selling various investments, as well as borrowing or lending money at a specific rate for one period. Your goal is to find the best investment strategy for each period to effectively manage your assets and liabilities.  Over seven periods, you need to fulfill external cash requirements due to prior commitments. There's a cap on how much you can borrow each period, and you must repay all borrowed funds by the end of the last period. You have three types of investments to choose from, each with a maximum holding limit. Initially, you don't own any of these investments. The returns from each investment differ based on the period and type of investment.  The cost to purchase each investment is only known in the first period, and once you've invested, you cannot sell these investments once made. The rates for borrowing and lending for one period are based on the yield curve and are assumed to be half a point higher for borrowing than for lending. Your task is to find the optimal investment strategy for each period. This strategy should take into account the returns, costs, borrowing and lending rates, and external cash needs, while also respecting the borrowing and holding limits for each type of investment.",
+    "question": " Which of the following choices define the objective criterion of the problem?",
     "choices": {
-      "A": "0",
-      "B": "2",
-      "C": "4",
-      "D": "1"
+      "A": "Maximize the expected wealth at the end of the final period",
+      "B": "Minimize the total cost of investments made over all periods",
+      "C": "Maximize the total return from all investments made over all periods",
+      "D": "Maximize the total amount of money borrowed over all periods"
+    },
+    "correct_answer": "A",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q1, instance index 531",
+    "question_subtype": "Q1"
+  },
+  {
+    "id": "orqa_0008",
+    "task_type": "or_model_identification",
+    "split": "dev",
+    "context": "You are the manager at Metro Express bus company. Your job is to plan bus routes between different places. You know how long it takes for a bus to travel between these places/bus stations. Throughout the day, people arrive at bus stations places and want to go to another location. You also know how many people will be arriving at each location and when they will arrive.  Each bus can only carry a certain number of people. It's important to make sure that people can get on a bus and reach their destination without waiting too long. If they wait too long, they get unhappy. So, you need to find the best bus routes and times that move everyone while making sure they don't wait too long. This way, you can provide a smooth and efficient bus service for everyone.",
+    "question": "In this problem there is a capacity constraint. What is the meaning of its left-hand side?",
+    "choices": {
+      "A": "The total number of passengers assigned to a bus at a specific time",
+      "B": "The total number of passengers arriving at a location at a specific time",
+      "C": "The total number of buses available at a specific time",
+      "D": "The total number of passengers waiting at all locations at a specific time"
+    },
+    "correct_answer": "A",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q10, instance index 699",
+    "question_subtype": "Q10"
+  },
+  {
+    "id": "orqa_0009",
+    "task_type": "or_model_identification",
+    "split": "dev",
+    "context": "As the head purchasing manager at LifeCare Hospitals, you're tasked with securing medical equipment. You're specifically focusing on acquiring 6,000 state-of-the-art heart monitors essential for the cardiology department. Two reputable medical equipment manufacturers, CardioTech Solutions and Heartbeat Instruments, have captured your interest with their enticing bulk purchasing offers.  CardioTech Solutions operates on an all-inclusive discount model, proposing reductions for every heart monitor purchased, regardless of the quantity. On the contrary, Heartbeat Instruments implements a tiered discount structure, providing discounts only on additional units once specified purchase thresholds are surpassed. These discount schemes are delineated in brackets, each encompassing its tailored reduction rate.  You have to determine the precise number of heart monitors to order from each supplier such that it ensures the purchase is as cost-effective as possible.",
+    "question": "In this problem there is a demand satisfaction constraint. What is the meaning of its left-hand side?",
+    "choices": {
+      "A": "The total quantity of heart monitors ordered from Heartbeat Instruments",
+      "B": "The total quantity of heart monitors ordered from CardioTech Solutions",
+      "C": "It represents the total quantity of heart monitors ordered from both vendors",
+      "D": "The total quantity of heart monitors required by the cardiology department"
     },
     "correct_answer": "C",
-    "source_category": 3,
-    "source_detail": "Constructed. Single machine scheduling, EDD rule minimizes maximum lateness. Sort by due date: Job2(d=3), Job1(d=5), Job5(d=6), Job4(d=7), Job3(d=8). Schedule: Job2 finishes at 1, lateness=1-3=-2; Job1 finishes at 1+3=4, lateness=4-5=-1; Job5 finishes at 4+2=6, lateness=6-6=0; Job4 finishes at 6+2=8, lateness=8-7=1; Job3 finishes at 8+4=12, lateness=12-8=4. Maximum lateness=4."
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q10, instance index 706",
+    "question_subtype": "Q10"
   },
   {
-    "id": "orqa_co_005",
-    "task_type": "combinatorial_optimization",
+    "id": "orqa_0010",
+    "task_type": "or_model_identification",
     "split": "dev",
-    "question": "Find the minimum spanning tree weight for a graph with 6 nodes (1-6) and edges: (1,2)=4, (1,3)=3, (2,3)=5, (2,4)=7, (3,4)=6, (3,5)=2, (4,5)=4, (4,6)=8, (5,6)=3. What is the total weight of the MST?",
+    "context": "In an emergency hospital, you face a challenge. In every shift, several patients arrive simultaneously at the shared waiting room, each with unique medical needs. Every appointment has a distinct purpose and duration based on the patient's condition. Your emergency department has multiple rooms for diagnoses, and each room is staffed by a doctor with a particular specialization. Your central task is to allocate each patient to a room and a doctor in a manner that aligns with the doctor's specialization, considering the specific medical needs of each patient. Your primary objective is to minimize the total waiting time for all the patients. Moreover, as you allocate patients, you must match each patient's medical needs and the doctor's expertise to guarantee optimal care. Each doctor in your team has a unique specialization or proficiency, making some more suitable for certain cases than others. Given the simultaneous arrival of patients and the variability in appointment durations, you need to devise an effective system that dynamically assigns patients to rooms and doctors, striking the right balance between waiting times and the quality of care.",
+    "question": "Which of the following system element(s) is the One Job Per Machine constraint applied on?",
     "choices": {
-      "A": "16",
-      "B": "18",
-      "C": "20",
-      "D": "22"
+      "A": "Doctors' specializations, Time slots",
+      "B": "Doctors' specializations",
+      "C": "Time slots, Patient appointment",
+      "D": "Doctors' specializations, Patient appointment"
+    },
+    "correct_answer": "B",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q11, instance index 568",
+    "question_subtype": "Q11"
+  },
+  {
+    "id": "orqa_0011",
+    "task_type": "or_model_identification",
+    "split": "dev",
+    "context": "You are a diamond merchant. You need to determine the ideal pricing for your precious stones over three distinct timeframes. Your objective is to unearth the most profitable pricing strategy for these diamonds. You have information about the ceiling price potential clients are ready to offer and the number of clients within each bracket. Conversely, these clients know the diamond prices across the three periods. They will purchase when the gap between the price they can pay and the actual price tag offers them the most value. Consider it akin to being a diamond wholesaler, determining the diamond prices at the beginning, midpoint, and end of the sales season. Customers are typically willing to shell out a higher amount during the initial phase, possibly driven by an urgent demand or the prestige of acquiring the gemstone promptly. This scenario mirrors the Stackelberg game in the realm of economics. Here, as the merchant, you pave the way by defining the prices. In return, the buyers make their acquisition choices based on these price points. To navigate this puzzle, ponder over the following:  Your aspiration: You aim to pocket the maximum revenue, taking into account the costs and varying peak prices each client group is poised to offer during the three spans. The guidelines: Every client category can purchase the diamond during the first, second, or third period based on the highest price they can offer and the real-time price you decide. The insights at your disposal: You are privy to the highest price each client group can offer during all three phases, the magnitude of each group, and the expense you incur per diamond. Equipped with this knowledge, you can pinpoint the optimal pricing strategy across the three spans, balancing both your choices and those of the buyers. This approach ensures you garner maximum earnings while ensuring the diamonds resonate with diverse client categories throughout the three durations.",
+    "question": "Which of the following system element(s) is the Single Purchase Rule constraint applied on?",
+    "choices": {
+      "A": "Customer group",
+      "B": "Timeframes",
+      "C": "Diamond prices",
+      "D": "Timeframes and Diamond prices"
     },
     "correct_answer": "A",
-    "source_category": 3,
-    "source_detail": "Constructed. MST via Kruskal's: sort edges by weight: (3,5)=2, (1,3)=3, (5,6)=3, (1,2)=4, (4,5)=4, (2,3)=5, (3,4)=6, (2,4)=7, (4,6)=8. Add (3,5)=2: {3,5}. Add (1,3)=3: {1,3,5}. Add (5,6)=3: {1,3,5,6}. Add (1,2)=4: {1,2,3,5,6}. Add (4,5)=4: {1,2,3,4,5,6}. Done, 5 edges. Total=2+3+3+4+4=16."
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q11, instance index 581",
+    "question_subtype": "Q11"
   },
   {
-    "id": "orqa_co_006",
-    "task_type": "combinatorial_optimization",
+    "id": "orqa_0012",
+    "task_type": "or_model_identification",
     "split": "dev",
-    "question": "A delivery truck has a capacity of 20 kg. There are 6 packages: P1(w=5, profit=8), P2(w=3, profit=6), P3(w=8, profit=13), P4(w=4, profit=7), P5(w=6, profit=9), P6(w=2, profit=3). What is the maximum profit the truck can deliver in one trip?",
+    "context": "You are an event manager overseeing a multi-track conference with different healthcare workshop sessions, from hands-on medical demonstrations to critical panel discussions on patient care. The hosts have assigned several conference rooms for the event, which allows you to facilitate multiple sessions simultaneously. However, every room has its seating constraints, and each session has a projected number of attendees. Your vision is for attendees to experience a cohesive journey through healthcare topics. Envision an attendee transitioning effortlessly from a session on preventative care to its implications in mental health. That's the holistic experience you're aiming to provide. You have a matrix that serves as a compass, indicating the thematic connections between each pair of sessions. Your goal is to achieve this thematic harmony without overwhelming any room's capacity based on the sessions you place within. The task is to strike a delicate balance between crafting a harmonious flow and respecting logistical constraints.",
+    "question": "Which of the following options define a room capacity that is required for this problem?",
     "choices": {
-      "A": "30",
-      "B": "33",
-      "C": "34",
-      "D": "36"
+      "A": " The total number of attendees for all sessions must not exceed the total seats of rooms",
+      "B": " The total number of attendees for all sessions must not exceed the total number of sessions in a room.",
+      "C": "The total number of attendees for all sessions in a room must not exceed the room's seating capacity",
+      "D": "The total number of sessions in a room must not exceed the room's seating capacity"
     },
     "correct_answer": "C",
-    "source_category": 3,
-    "source_detail": "Constructed. 0-1 knapsack, capacity=20. Try high-value combos: {P3,P1,P2,P4}: w=8+5+3+4=20, v=13+8+6+7=34. {P3,P1,P5}: w=8+5+6=19, v=13+8+9=30. {P3,P2,P4,P5}: w=8+3+4+6=21>20, no. {P3,P2,P4,P6}: w=8+3+4+2=17, v=13+6+7+3=29. {P3,P1,P2,P6}: w=8+5+3+2=18, v=13+8+6+3=30. {P1,P2,P4,P5,P6}: w=5+3+4+6+2=20, v=8+6+7+9+3=33. {P3,P4,P5}: w=8+4+6=18, v=13+7+9=29. {P3,P1,P4,P6}: w=8+5+4+2=19, v=13+8+7+3=31. {P1,P2,P3,P4}: w=20, v=34. Any better? {P3,P5,P2,P6}: w=8+6+3+2=19, v=13+9+6+3=31. {P1,P2,P4,P5}: w=5+3+4+6=18, v=8+6+7+9=30. So max=34 with {P1,P2,P3,P4}."
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q2, instance index 333",
+    "question_subtype": "Q2"
   },
   {
-    "id": "orqa_co_007",
-    "task_type": "combinatorial_optimization",
+    "id": "orqa_0013",
+    "task_type": "or_model_identification",
     "split": "dev",
-    "question": "Three workers are available to perform three jobs. The time (in hours) each worker takes for each job is: Worker A: [5,7,9], Worker B: [8,3,6], Worker C: [4,8,2]. Each worker does exactly one job. What is the minimum total time to complete all jobs?",
+    "context": "As a manager in the real estate sector, you are tasked with the efficient designation of parking spots for different apartment groups. Each parking spot has a specific capacity, and each apartment group has a certain demand for parking spaces. Your goal is to designate these parking spots to the apartment groups to reduce the total cost, primarily the distance between the parking spots and the apartments. You can access data on the parking spots' capacities, the apartment groups' demands, and the costs for each potential parking spot-apartment group pairing. This information will guide you in finding the best designation of parking spots for apartment groups, ensuring you meet each group's needs without surpassing the parking spots' capacities, all while keeping costs low. You have a detailed list of potential parking spot-apartment group combinations. Still, not all of these combinations may be viable. This challenge is especially significant in the real estate sector, where resource designation and cost reduction are vital to managing properties effectively and keeping residents happy. By solving this parking designation issue, you can guarantee residents have access to parking while maintaining the system's overall cost as low as possible.",
+    "question": "Which of the following options define a capacity constraint that is required for this problem?",
     "choices": {
-      "A": "10",
-      "B": "11",
-      "C": "12",
-      "D": "13"
+      "A": " The total demand of apartment groups  assigned to a parking spots does not exceed its capacity",
+      "B": "The total number of parking spots assigned to an apartment group does not exceed its demand",
+      "C": "The total capacity of parking spots assigned to an apartment group does not exceed its demand",
+      "D": "The total number of apartments assigned to a parking spot does not exceed its parking capacity"
     },
     "correct_answer": "A",
-    "source_category": 3,
-    "source_detail": "Constructed. Assignment problem. All permutations: A1-B2-C3: 5+3+2=10; A1-B3-C2: 5+6+8=19; A2-B1-C3: 7+8+2=17; A2-B3-C1: 7+6+4=17; A3-B1-C2: 9+8+8=25; A3-B2-C1: 9+3+4=16. Minimum=10 from A1-B2-C3."
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q2, instance index 349",
+    "question_subtype": "Q2"
   },
   {
-    "id": "orqa_co_008",
-    "task_type": "combinatorial_optimization",
-    "split": "test",
-    "question": "A graph has 5 nodes (A, B, C, D, E) with edges and weights: A-B=2, A-C=8, B-C=3, B-D=5, C-D=1, C-E=4, D-E=6. What is the total weight of the minimum spanning tree?",
+    "id": "orqa_0014",
+    "task_type": "or_model_identification",
+    "split": "dev",
+    "context": "As a Literary Compilation Specialist at the renowned Pendleton Publishing House, you're tasked with bundling works of literature for an upcoming special anthology edition. The publishing house has recently acquired rights to eleven unique stories, each varying in length.  You are assigned with the task to assemble anthology volumes. To ensure that each volume feels substantial and comprehensive, each volume should contain a certain number of pages. It's also essential to ensure that a particular section of a story doesn't appear in multiple volumes. Your goal is to maximize the number of anthology volumes while ensuring each one offers a rich literary experience by adhering to the specified minimum page count. ",
+    "question": " Under which category does the given optimization problem fall in to?",
     "choices": {
-      "A": "10",
-      "B": "12",
-      "C": "14",
-      "D": "16"
+      "A": "Multi-depot vehicle routing",
+      "B": "Knapsack problem ",
+      "C": "Multi-level distribution problem",
+      "D": "Bin packing problem"
+    },
+    "correct_answer": "D",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q3, instance index 1112",
+    "question_subtype": "Q3"
+  },
+  {
+    "id": "orqa_0015",
+    "task_type": "or_model_identification",
+    "split": "dev",
+    "context": "There has been a recent disease outbreak and as a clinical operations manager at the National Disease Outbreak Council, you have been assigned to planning the timely distribution of vital medical supplies. These medical supplies including vaccines and emergency medical kits. Starting from a central medical storage facility, you oversee several clinics and hospitals scattered across the affected region that urgently require these supplies. Each clinic or hospital has a specific demand based on the number of patients they treat and the amount of supplies they can hold due to storage capacity issues. The vehicles at your disposal, like ambulances or specialized medical transport vans, have a limited capacity to carry these supplies. You have been asked to minimize the total distance traveled by these vehicles. You need to make sure that every clinic and hospital receives the supplies they have requested, abiding by the carrying limits of the vehicles, ensuring that you do not overload while reducing the overall distance covered to efficiently distribute the vital medical supplies. Planning these routes effectively can make a significant difference, efficiently delivering medical supplies and aid to the affected areas to reduce the spread of the disease. ",
+    "question": " Under which category does the given optimization problem fall in to?",
+    "choices": {
+      "A": "Vehicle routing with time windows",
+      "B": "Vehicle Routing",
+      "C": "Full truck load routing",
+      "D": "Multi-depot vehicle routing"
+    },
+    "correct_answer": "B",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q3, instance index 1165",
+    "question_subtype": "Q3"
+  },
+  {
+    "id": "orqa_0016",
+    "task_type": "or_model_identification",
+    "split": "dev",
+    "context": "Your company has been asked to help optimize a local port. At this port, there are numerous cargo ships arriving at different times with each ship having a specific arrival time and a deadline by which it needs to be unloaded. Obviously, a ship cannot begin the unloading process before its arrival. The port utilizes several cranes or unloading machines to manage the task of removing containers from these ships. However, each machine can handle the unloading process for only one ship at a time. To add to the complexity of the problem, each ship-machine pairing has a unique unloading time and a value associated with it. Your goal is to allocate these cargo ships to the cranes and sequence the unloading tasks on each crane to maximize the value of the allocations while reducing delay. You should consider the arrival time, deadline, and unloading time for each cargo ship. Also, consider the value or profit of assigning a particular ship to a specific crane. A ship may not unload after its deadline. Your plan should optimally allocate and sequence the cargo ships on the cranes to ensure that the port operates at peak efficiency, meeting shipping deadlines and maximizing the value of your allocations.",
+    "question": " What is the type of optimization model related to this problem?",
+    "choices": {
+      "A": "Exponential Cone Programming",
+      "B": "Power Cone Programming",
+      "C": "Robust Optimization",
+      "D": "Linear Programming"
+    },
+    "correct_answer": "D",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q4, instance index 1286",
+    "question_subtype": "Q4"
+  },
+  {
+    "id": "orqa_0017",
+    "task_type": "or_model_identification",
+    "split": "dev",
+    "context": "A leading wine producer in valley of Napa, California, faces a complex challenge. Over the past years, the producer has expanded its operations, establishing three wineries in different parts of the valley. Each winery has unique production capacity, and a fixed cost associated with preparing and initiating shipments.  On the receiving end, four upscale restaurants scattered across the United States have partnered with this wine producer, seeking regular supplies. Each restaurant has its specific demands based on customer preferences and expected footfall.  As the winery production planner, you must ensure that each restaurant receives all its requested wine stock. Also, you must ensure that no winery overextends its production capacity. There are shipping variable costs, as shipping wines from each winery to every restaurant entails different expenses due to factors like distance, logistics, and regional tax differences.  You must create an ideal shipping plan that minimizing the costs and meet the demand. ",
+    "question": " What is the type of optimization model related to this problem?",
+    "choices": {
+      "A": "Mixed-Integer Linear Programming",
+      "B": "Unconstrained Optimization",
+      "C": "Constraint Programming",
+      "D": "Non-Linear Programming"
     },
     "correct_answer": "A",
-    "source_category": 3,
-    "source_detail": "Constructed. MST via Kruskal's: sort edges: (C,D)=1, (A,B)=2, (B,C)=3, (C,E)=4, (B,D)=5, (D,E)=6, (A,C)=8. Add (C,D)=1: {C,D}. Add (A,B)=2: {A,B},{C,D}. Add (B,C)=3: {A,B,C,D}. Add (C,E)=4: {A,B,C,D,E}. 4 edges, all connected. Total=1+2+3+4=10."
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q4, instance index 1337",
+    "question_subtype": "Q4"
   },
   {
-    "id": "orqa_co_009",
-    "task_type": "combinatorial_optimization",
-    "split": "test",
-    "question": "A backpacker can carry at most 12 kg. Available items: Item A (weight=2, value=3), Item B (weight=3, value=5), Item C (weight=5, value=8), Item D (weight=7, value=10), Item E (weight=4, value=6). What is the maximum total value?",
+    "id": "orqa_0018",
+    "task_type": "or_model_identification",
+    "split": "dev",
+    "context": "You are an operations manager in the agricultural sector. Your task is to streamline the process of getting crops from farms, processing or storing them as needed, and finally distributing them to various markets or direct consumers. Your farms produce diverse crops, from grains and vegetables to fruits and more. Each type of produce has its own cost of cultivation, influenced by factors like seeds, fertilizers, labor, and machinery. Additionally, different farms might have varying prices and yields for the same crops, given their location, soil quality, and techniques. Transportation is an important concern because different produce requires different conditions for transit. Strawberries might need refrigeration to stay fresh, while grains might not. You could look at refrigerated trucks, traditional cargo vehicles, or rail, each with its associated cost and suitability. The transportation choice can affect the produce's freshness, quality, and subsequent market value. Capacities are also crucial to consider. Each farm can produce only up to its potential, which is dictated by the land size, weather conditions, and the farming techniques. Conversely, each market or direct consumer has specific demands based on consumption patterns and preferences. Overproduction can lead to wastage, while underproduction can mean missed opportunities and unsatisfied demands.\nFurthermore, each market or buyer has preferences. Some might prioritize organic produce; others might have a higher demand for a particular fruit due to seasonal festivals or trends. Catering to these varied demands without compromising on quality becomes vital. You aim to minimize expenses from cultivation to transportation. You also need to ensure the produce reaches markets and consumers in its best state, meets demands, and ensures a steady supply. Your efforts form the backbone of a system that sustains and nourishes, making your decisions crucial for business and well-being.",
+    "question": " Which of the following elements does not define a set in the optimization model of this problem?",
     "choices": {
-      "A": "17",
-      "B": "19",
-      "C": "21",
-      "D": "22"
+      "A": " Modes of Transport",
+      "B": "Types of Crops",
+      "C": " Distribution Centers",
+      "D": " Customers"
     },
     "correct_answer": "B",
-    "source_category": 3,
-    "source_detail": "Constructed. 0-1 knapsack, W=12. Enumerate: {A,B,C,E}: w=2+3+5+4=14>12, no. {A,B,C}: w=2+3+5=10, v=3+5+8=16. {A,B,D}: w=2+3+7=12, v=3+5+10=18. {A,C,E}: w=2+5+4=11, v=3+8+6=17. {B,C,E}: w=3+5+4=12, v=5+8+6=19. {A,B,E}: w=2+3+4=9, v=3+5+6=14. {C,D}: w=5+7=12, v=8+10=18. {B,D}: w=3+7=10, v=5+10=15. {A,D,E}: w=2+7+4=13>12. {A,D}: w=2+7=9, v=3+10=13. {B,C}: w=8, v=13. {A,B,C}: v=16. {B,C,E}=19 is max. Check {A,B,C,A}: no duplicates. Max=19."
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q5, instance index 149",
+    "question_subtype": "Q5"
   },
   {
-    "id": "orqa_co_010",
-    "task_type": "combinatorial_optimization",
-    "split": "test",
-    "question": "Consider a directed graph with nodes S, A, B, C, T and edges: S->A=3, S->B=5, A->B=1, A->C=6, B->C=2, B->T=7, C->T=4. What is the length of the shortest path from S to T?",
+    "id": "orqa_0019",
+    "task_type": "or_model_identification",
+    "split": "dev",
+    "context": "You are a grid planner for a regional power distribution company and have been asked to design a robust electrical grid to distribute electricity to homes, businesses, and factories. You need to determine the optimal number of direct high-tension (HT) and low-tension (LT) power lines connecting various substations. Additionally, you must determine how much power load should be routed through each direct power line and how much should go through the main distribution substation, which is designated as Substation Zeta. This central substation (Substation Zeta) serves as the central hub of the grid. Your goal is to meet power demand while keeping the total cost of constructing and maintaining the grid to a minimum. The cost breakdown includes both fixed and variable expenses. Fixed costs stem from placing these HT and LT lines between substations, while variable costs vary based on the power load transferred between the substations. You know the expected power consumption between each pair of substations, as well as the fixed and variable costs for HT and LT lines for each pair. You also understand the power capacity of both HT and LT lines.",
+    "question": " Which of the following defines set(s) in the optimization model of this problem?",
     "choices": {
-      "A": "8",
-      "B": "10",
-      "C": "12",
-      "D": "9"
+      "A": "Power Lines",
+      "B": "Power Lines Types",
+      "C": "Substations",
+      "D": "Power Load"
     },
-    "correct_answer": "B",
-    "source_category": 3,
-    "source_detail": "Constructed. Shortest path in DAG. Paths: S->A->B->T: 3+1+7=11; S->A->B->C->T: 3+1+2+4=10; S->A->C->T: 3+6+4=13; S->B->T: 5+7=12; S->B->C->T: 5+2+4=11. Dijkstra: dist={S:0, A:inf, B:inf, C:inf, T:inf}. Process S: A=3, B=5. Process A(3): B=min(5,3+1)=4, C=3+6=9. Process B(4): C=min(9,4+2)=6, T=4+7=11. Process C(6): T=min(11,6+4)=10. Process T(10). Shortest=10."
+    "correct_answer": "C",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q5, instance index 219",
+    "question_subtype": "Q5"
   },
   {
-    "id": "orqa_co_011",
-    "task_type": "combinatorial_optimization",
-    "split": "test",
-    "question": "Five tasks need to be processed on a single machine. Each task has a processing time and a weight (importance). Task 1: (p=4, w=3), Task 2: (p=2, w=5), Task 3: (p=6, w=2), Task 4: (p=3, w=4), Task 5: (p=1, w=1). To minimize total weighted completion time, what sequence should be used and what is the resulting total weighted completion time?",
+    "id": "orqa_0020",
+    "task_type": "or_model_identification",
+    "split": "dev",
+    "context": "You are hosting a party and want to create a special playlist with two types of songs: upbeat and chilling. While you want the energy to be high for most of the party, you also understand the importance of leaving time to relax. You know the duration of each song. Your goal is to create a playlist that has the highest the number of chilling tracks. However, the total duration of the chilling songs shouldn't be more than half of the total duration of all the songs in the playlist or your friends will complain. By creating the perfect mix of upbeat and chilling songs, you can create an atmosphere that allows your friends to have time to dance their hearts out and find moments to relax.",
+    "question": " Which of the following defines set(s) in the optimization model of this problem?",
     "choices": {
-      "A": "2-4-1-5-3, total = 117",
-      "B": "2-4-5-1-3, total = 98",
-      "C": "5-2-4-1-3, total = 107",
-      "D": "1-2-3-4-5, total = 135"
-    },
-    "correct_answer": "B",
-    "source_category": 3,
-    "source_detail": "Constructed. Single-machine scheduling for minimizing total weighted completion time. Apply Smith's rule (WSPT): order tasks by decreasing w/p ratio. Ratios are T2=5/2=2.5, T4=4/3≈1.33, T5=1/1=1.0, T1=3/4=0.75, T3=2/6≈0.33, so the optimal sequence is 2-4-5-1-3. Completion times are C2=2, C4=5, C5=6, C1=10, C3=16, giving total weighted completion time 5*2+4*5+1*6+3*10+2*16=98. The correct choice is B."
-  },
-  {
-    "id": "orqa_co_012",
-    "task_type": "combinatorial_optimization",
-    "split": "test",
-    "question": "A graph has 6 nodes (1-6) with edges: (1,2)=7, (1,3)=9, (1,6)=14, (2,3)=10, (2,4)=15, (3,4)=11, (3,6)=2, (4,5)=6, (5,6)=9. What is the shortest distance from node 1 to node 5?",
-    "choices": {
-      "A": "20",
-      "B": "21",
-      "C": "23",
-      "D": "25"
+      "A": "Songs",
+      "B": "Playlist",
+      "C": "Chilling Tracks",
+      "D": "Participants"
     },
     "correct_answer": "A",
-    "source_category": 3,
-    "source_detail": "Constructed. Dijkstra from node 1. Init: d={1:0, 2:inf, 3:inf, 4:inf, 5:inf, 6:inf}. Process 1: d[2]=7, d[3]=9, d[6]=14. Process 2(7): d[3]=min(9,7+10)=9, d[4]=7+15=22. Process 3(9): d[4]=min(22,9+11)=20, d[6]=min(14,9+2)=11. Process 6(11): d[5]=11+9=20. Process 4(20): d[5]=min(20,20+6)=20. Process 5(20). Shortest 1->5=20. Path: 1->3->6->5 (9+2+9=20)."
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q5, instance index 256",
+    "question_subtype": "Q5"
+  },
+  {
+    "id": "orqa_0021",
+    "task_type": "or_model_identification",
+    "split": "dev",
+    "context": "As a manager in a home decor company, you are tasked with the challenge of grouping various decor products into distinct sections within the showroom. This arrangement is crucial to ensure intuitive browsing for customers and to highlight certain products, especially when the season changes and specific decor items are in trend.  In your showroom, you have a set number of sections, each with a maximum display capacity in terms of space. The products range from small decorative pieces like candles and photo frames to larger furniture items such as sofas and dining tables. Each product requires a certain display space, taking into account its size and any additional space needed to showcase it effectively.  The closeness measure is represented by a matrix that indicates the compatibility between every pair of products. This could be based on themes, colors, materials, or any other factor that determines how well two products complement each other in a display. Your mission is to assign each product to a specific showroom section, ensuring that the total display space taken up by products in a section doesn't exceed its capacity. The goal is to create visually appealing and thematically coherent sections, enhancing the shopping experience by ensuring related or complementary products are displayed close to one another.  To achieve this, you must consider the provided compatibility measure, each section's capacity, and the display space requirements of individual products.",
+    "question": " What are the decision activities of the optimization problem?",
+    "choices": {
+      "A": "Assignment of products to sections, Products in the same section",
+      "B": "Assignment of products to sections, Products in different sections",
+      "C": "Assignment of sections to products, Products in the same section",
+      "D": "Assignment of sections to products, Products in different sections"
+    },
+    "correct_answer": "A",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q6, instance index 23",
+    "question_subtype": "Q6"
+  },
+  {
+    "id": "orqa_0022",
+    "task_type": "or_model_identification",
+    "split": "dev",
+    "context": "As a manager in the service industry, you're currently grappling with a workforce scheduling issue. Your goal is to figure out the best staffing plan for each day of the week that meets daily needs while keeping the total number of employees to a minimum. Your operations run seven days a week, with different daily workforce needs. These needs are expressed as the number of employees required each day. Meeting these needs is vital to ensure smooth operations and high customer satisfaction. Additionally, each employee works for five straight days and then gets two days off. Hence, while assigning employees to different days, you must consider their start day and ensure they work for five consecutive days before getting their two days off. To tackle this problem, you'll need to consider various factors, such as the daily workforce needs, the consecutive working days constraint, and the total number of employees required. By finding the best solution, you can cut staffing costs while ensuring you have enough employees to meet your daily needs and maintain a high quality of service.",
+    "question": " What are the decision activities of the optimization problem?",
+    "choices": {
+      "A": "Total number of employees required",
+      "B": "Number of employees starting across all days",
+      "C": "Assigning employees to tasks",
+      "D": "Number of vacation days per employee"
+    },
+    "correct_answer": "B",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q6, instance index 39",
+    "question_subtype": "Q6"
+  },
+  {
+    "id": "orqa_0023",
+    "task_type": "or_model_identification",
+    "split": "dev",
+    "context": "Delivering healthcare in rural areas presents unique challenges, especially during flu season with high demand for vaccinations. You have a team of health workers that must vaccinate children across many distant and isolated villages. Each village might be connected by unpredictable roads, rugged terrains, or large stretches of land. Your primary goal is to ensure that every child receives their vaccine within a tight timeframe. This is especially important since these vaccines can be sensitive to temperature changes and need to be administered quickly to be effective. You need to plan a route that allows your team of health workers to visit each village efficiently. Each village should be visited just once, and the entire route needs to be completed in the shortest time possible. This not only maximizes the number of children vaccinated swiftly, but it also minimizes the transportation costs and the risk of the vaccine spoiling. While this task is complex, finding an optimal route is important to achieve the larger goal of widespread health of these rural areas.",
+    "question": " What are the decision activities of the optimization problem?",
+    "choices": {
+      "A": "Waiting time for parents, Number of vaccinated children",
+      "B": "Vaccine temperature control, Number of health workers",
+      "C": "Vaccine wastage, Transportation costs",
+      "D": "Healthcare worker route selection, Sequence number of village visits"
+    },
+    "correct_answer": "D",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q6, instance index 86",
+    "question_subtype": "Q6"
+  },
+  {
+    "id": "orqa_0024",
+    "task_type": "or_model_identification",
+    "split": "dev",
+    "context": "As a planner in an online ride-sharing company, you need to create a system that efficiently plan the route for each driver, separately. The goal is to have the driver visit a series of stops in the optimal way while ensuring that certain pairs of stops are visited in a specific order. This order is essential because the driver needs to pick up someone at a particular stop and drop them off at another specific stop.\nThe vehicle has enough space to accommodate all passengers, and the driver starts the journey from the home base, where no one is picked up or dropped off initially. The main objective is to find the most efficient route that minimizes the total traveling distance, covering all the stops while adhering to the constraints of the required stop order. You calculated distances between each pair of stops, and determined the sequence number assigned to each stop. By solving this optimization problem, you can ensure that the ride-sharing service operates smoothly and effectively, benefiting both the company and the customers.",
+    "question": "Which of the following constraint are required to properly formulate this optimization problem?",
+    "choices": {
+      "A": "Each stop should be entered at most once and each stop should be exited at most once",
+      "B": "Each stop should be entered at least once and each stop should be exited at least once",
+      "C": "Each stop should be entered exactly once and each stop should be exited exactly once",
+      "D": "Each stop should be entered exactly once except the home base"
+    },
+    "correct_answer": "C",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q7, instance index 1361",
+    "question_subtype": "Q7"
+  },
+  {
+    "id": "orqa_0025",
+    "task_type": "or_model_identification",
+    "split": "dev",
+    "context": "As an oil distribution company manager, you are tasked with efficiently routing oil shipments across an oil pipeline network of transfer stations and segments. Each segment of the oil pipeline network has a capacity limit. There is a set of oil well-refinery pairs with a specific demand amount to transport. Furthermore, there could be multiple paths for a single oil well-refinery pair, each with a different revenue from distribution per unit transported over it. Your goal is to maximize the total revenue from distribution by deciding how much to transport over each path while staying within the demand for any oil well-refinery pair or the capacity of any segment. This oil pipeline network has hubs (H1 and H2) through which all shipments involving transfer stations T3 and above must pass. However, this is only sometimes the case. Sometimes, capacity constraints may prevent some shipments from taking their most revenue-efficient path. To tackle this challenge, you've collected data on the transfer stations in the oil pipeline network, the network connections, the capacities of each segment, the oil well-refinery pairs with their respective demands, and the paths with their revenue contributions. This data also includes information on the segments of each path, which helps you define the paths more accurately. By solving this problem, you aim to optimize your oil distribution operations and maximize the total revenue from distribution while adhering to the capacity and demand constraints of the oil pipeline network. This will ultimately improve efficiency and profitability in your oil distribution business.",
+    "question": " Which data parameters are participating in the objective criterion for this problem?",
+    "choices": {
+      "A": "Profit contribution for each path, oil well, and refinery",
+      "B": "Demand for each oil well-refinery pair, ",
+      "C": "Revenue contribution for each path, oil well, and refinery",
+      "D": "Capacity of each pipeline segment"
+    },
+    "correct_answer": "A",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q8, instance index 980",
+    "question_subtype": "Q8"
+  },
+  {
+    "id": "orqa_0026",
+    "task_type": "or_model_identification",
+    "split": "dev",
+    "context": "You are the head of pricing strategy for a popular music and podcast streaming app. This app provides a range of membership packages, from basic access to premium features like ad-free listening, unlimited skips, offline downloads, and exclusive content. Each package can be seen as a distinct bundle of features, and users from different demographics value these bundles differently.  For instance, university students might place higher value on discounts, while families might see greater value in a package that offers multiple accounts under one subscription. The young professionals might appreciate the offline download feature due to their on-the-go lifestyle. With the vast array of user preferences in mind, you have to decide how to price each membership package.  If the price tag of a package is too high for a particular segment, that group will likely not subscribe. Instead, they might opt for a less ideal package or even switch to a competitor. On the other hand, if the package is priced too low, the revenue might not cover the costs, leading to potential losses. So, users will generally go for the option where they perceive they're getting the best deal, weighing the features of a package against its price.  Each of market segment has its unique size and specific value perception for the offered packages.  As the head of pricing, you have been given extensive data. This includes fixed costs for tapping into different market segments. For instance, targeting university students might involve partnership deals with universities or offering promotional prices during freshman orientations. Additionally, you're equipped with data on how much discounts can be given, either to individual customers or to bulk dealers like family plans or corporate tie-ups.  On the production side of things, there are costs to consider. Curating exclusive content, ensuring high-quality streaming, and developing new features all come with associated expenses. You know the cost of producing each package, any fixed overheads, and the upper limit of what the market can bear in terms of pricing.  With all these factors in play, your mission is to set prices for the membership packages.  It's a game of balancing user satisfaction, cost control, and revenue maximization. ",
+    "question": " Which data parameters are not participating in the objective criterion for this problem?",
+    "choices": {
+      "A": "Fixed product development costs",
+      "B": "List price of products",
+      "C": "Fixed costs for targeting each user segment",
+      "D": "Discount off list price to each customer"
+    },
+    "correct_answer": "B",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q8, instance index 1044",
+    "question_subtype": "Q8"
+  },
+  {
+    "id": "orqa_0027",
+    "task_type": "or_model_identification",
+    "split": "dev",
+    "context": "As the operations manager at Thunder Rail Co., your task is to manage a large railroad network that starts from the vibrant city of Metroville and ends at Terminus Town. This is not a simple two-point route; your network includes eight additional stations situated in various scenic and touristic locations facilitating the journey from Metroville to Terminus Town.\nThe network comprises a total of ten stations, interconnected by several tracks. Each track has its own unique capacity, indicating the maximum number of trains it can accommodate simultaneously.\nYour primary goal is to optimize the flow of trains from Metroville to Terminus Town, ensuring no track is overloaded beyond its capacity. You should keep in mind that each track has its own capacity, and not all can manage the same volume of train traffic. Your challenge is to identify the most efficient route distribution that maximizes the number of trains travelling from Metroville to Terminus Town without surpassing any track's capacity.",
+    "question": "Which data parameters are participating in the objective criterion for this problem?",
+    "choices": {
+      "A": "The number of tracks leaving from Metroville station",
+      "B": "The number of trains leaving Metroville station",
+      "C": "The capacity of each track leaving from Metroville station",
+      "D": "None"
+    },
+    "correct_answer": "D",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q8, instance index 1394",
+    "question_subtype": "Q8"
+  },
+  {
+    "id": "orqa_0028",
+    "task_type": "or_model_identification",
+    "split": "dev",
+    "context": "As an investment manager, you are currently tasked with analyzing a fund's performance. The goal is to see if the fund's performance can be explained by a simple weighted average of a few indices. This will help you determine if a fund is accurately mimicking a specific index, and if the weight assigned to that index is nearly equal to 1. Essentially, you are assessing the fund's style and its alignment with the performance of various indices.  To solve this, you have a collection of portfolios, including the fund you are analyzing. You also have a set of observations that include growth factors, and upper and lower error bounds. The data you are working with are the growth factors for each portfolio, which are numerical values that represent the performance of each portfolio over time. Your goal is to find the best weights for each index in the fund's performance to closely match the performance of the indices it is supposed to mimic.  Understanding a fund's style and its connection to various indices is vital for making informed investment decisions. This analysis will offer valuable insights into the fund's performance, helping you understand its strategy and risk profile better. By finding the best weights for each index in the fund's performance, you can ensure that your investment strategies align with your goals and risk tolerance, leading to improved investment results.",
+    "question": " Which of the following options are participating decision activities in the objective criterion for this problem?",
+    "choices": {
+      "A": "The performance of each index in the fund's portfolio",
+      "B": "The growth factor for each portfolio",
+      "C": "The weight for each index",
+      "D": "The upper and lower error bounds for each index"
+    },
+    "correct_answer": "C",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q9, instance index 798",
+    "question_subtype": "Q9"
+  },
+  {
+    "id": "orqa_0029",
+    "task_type": "or_model_identification",
+    "split": "dev",
+    "context": "As a manager in the manufacturing sector, you are faced with the challenge of task selection and sequencing for a single advanced robot. This robot is specifically designed to handle a wide array of tasks related to producing state-of-the-art electric car batteries. You have a variety of tasks at your disposal, each with unique attributes such as a specific start time, end time, duration, and the value it contributes when completed. Your robot can only execute one task at a time and requires a certain period to switch between different tasks. Your objective is to determine which tasks to undertake and the sequence in which to process them. It's imperative to maximize the overall value derived from completing these tasks while respecting each task's start time, end time, duration, and transition time between tasks. Addressing this issue effectively is paramount in the electric vehicle manufacturing industry. Efficient planning and sequencing of tasks can significantly amplify productivity and profitability, ensuring the rapid and high-quality production of these essential batteries.",
+    "question": " Which of the following options are participating decision activities in the objective criterion for this problem?",
+    "choices": {
+      "A": "Task order binary variable",
+      "B": "Task drop status",
+      "C": "Whether the job is the first one",
+      "D": "Whether the job is the last one"
+    },
+    "correct_answer": "B",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q9, instance index 818",
+    "question_subtype": "Q9"
+  },
+  {
+    "id": "orqa_0030",
+    "task_type": "or_model_identification",
+    "split": "dev",
+    "context": "As the finance lead at the eco-friendly tech startup \"GreenTech Innovations,\" you're entrusted with guiding the company's investments in key assets like GMT, ATT, and USX.  Yo need to reach a return target while minimizing investment return variance over possible scenarios.   You've got insights from 12 hypothetical market scenarios, each showing a different economic picture. These scenarios offer an estimate into the expected performance of each asset. Interestingly, every scenario is just as likely to unfold. Additionally, you have a predetermined return goal for GreenTech's portfolio.  Your challenge is to strategically distribute investments among these assets. ",
+    "question": " Among the following options, which one does not represent a decision activity that influences the objective criterion?",
+    "choices": {
+      "A": "Deviation above the target of each scenario",
+      "B": "Variance below the target of each scenario",
+      "C": "Probability of each scenario",
+      "D": "Deviation below and above the target of each scenario"
+    },
+    "correct_answer": "C",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q9, instance index 904",
+    "question_subtype": "Q9"
+  },
+  {
+    "id": "orqa_0031",
+    "task_type": "or_model_identification",
+    "split": "test",
+    "context": "In your role as a manager in the automotive industry, your task is to finetune the design of vehicle transmissions. The aim is to select the best combination of gear ratios and decide the duration each gear ratio should be engaged to achieve the quickest acceleration from 0 to a target speed.   To accomplish this, you need to consider several factors. These include the time required to shift from one gear ratio to another, the maximum number of gear ratios permissible in the design, and the time needed to accelerate from one speed to another using a specific gear ratio.  You have a set of speed milestones that the vehicle must reach, and a range of gear ratios to select from. For each combination of speed milestone and gear ratio, you have data on the time required to reach that speed milestone from the previous one using that gear ratio. You also have data on the time required to shift between gear ratios.  Your challenge is to decide which gear ratios to use and the duration each should be engaged to minimize the total time taken to accelerate from 0 to the target speed. This involves deciding which gear ratios to use at each speed milestone and when to switch between gear ratios during acceleration.  By optimizing the transmission design in this way, you can enhance the vehicle performance and the driving experience for customers. This also gives you a competitive edge in the automotive industry by offering vehicles that can accelerate more efficiently than those of competitors.",
+    "question": " Which of the following choices define the objective criterion of the problem?",
+    "choices": {
+      "A": "Minimize the time spent on each gear ratio to reach target speed.",
+      "B": "Minimize the time required to shift between gear ratios",
+      "C": "Maximize the number of gear ratios used to reach target speed",
+      "D": "Minimize total time to reach target speed with optimal gear ratios."
+    },
+    "correct_answer": "D",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q1, instance index 464",
+    "question_subtype": "Q1"
+  },
+  {
+    "id": "orqa_0032",
+    "task_type": "or_model_identification",
+    "split": "test",
+    "context": "As a manager in a ride-sharing company, you are faced with a unique challenge. You need to plan a route that visits a series of locations in the most efficient way possible. However, certain pairs of locations must be visited in a specific sequence. For instance if you number the locations, for every even-numbered location, you must visit it before moving on to the next one. This is because you're picking up someone at a location and dropping them off at the next location. Vehicles can carry as many people as needed. The route has to be started at the garage, where no pickups or drop-offs occur.  Your goal is to find the most efficient route that visits all locations while respecting the sequence requirements. You have the distance between each pair of cities, and a sequence number for each city at your disposal.  ",
+    "question": "In this problem there is a single visit constraint. What is the meaning of its left-hand side?",
+    "choices": {
+      "A": "It represents the sequence in which each city is visited",
+      "B": "It represents the number of vehicle load when it visits each city",
+      "C": "It represents the number of times each city is entered",
+      "D": "It represents the distance between each pair of cities"
+    },
+    "correct_answer": "C",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q10, instance index 702",
+    "question_subtype": "Q10"
+  },
+  {
+    "id": "orqa_0033",
+    "task_type": "or_model_identification",
+    "split": "test",
+    "context": "There has been a recent disease outbreak and as a clinical operations manager at the National Disease Outbreak Council, you have been assigned to planning the timely distribution of vital medical supplies. These medical supplies including vaccines and emergency medical kits. Starting from a central medical storage facility, you oversee several clinics and hospitals scattered across the affected region that urgently require these supplies. Each clinic or hospital has a specific demand based on the number of patients they treat and the amount of supplies they can hold due to storage capacity issues. The vehicles at your disposal, like ambulances or specialized medical transport vans, have a limited capacity to carry these supplies. You have been asked to minimize the total distance traveled by these vehicles. You need to make sure that every clinic and hospital receives the supplies they have requested, abiding by the carrying limits of the vehicles, ensuring that you do not overload while reducing the overall distance covered to efficiently distribute the vital medical supplies. Planning these routes effectively can make a significant difference, efficiently delivering medical supplies and aid to the affected areas to reduce the spread of the disease. ",
+    "question": "In this problem there is a capacity constraint. What is the meaning of its left-hand side?",
+    "choices": {
+      "A": "The total number of clinics or hospitals that a single vehicle can serve.",
+      "B": "The total distance that a single vehicle can travel.",
+      "C": "The total number of medical supplies that a single vehicle can carry.",
+      "D": "The total demand of the clinics or hospitals that a single vehicle is responsible for serving."
+    },
+    "correct_answer": "D",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q10, instance index 765",
+    "question_subtype": "Q10"
+  },
+  {
+    "id": "orqa_0034",
+    "task_type": "or_model_identification",
+    "split": "test",
+    "context": "As a manager in the transportation sector, you are currently dealing with the issue of routing multiple goods through a network in the most cost-effective way. This network consists of various locations (i.e., the nodes) and the connections between these locations (i.e., the edges). Some nodes are the starting points for the goods you're shipping. Your task is to figure out the best way to move goods through the network, reduce total shipping costs, and meet the demand at each endpoint.  The data you have for this task includes a demand matrix. This shows how much of each good needs to be shipped from the starting point to the endpoint. You also have the cost per unit shipped over each connection in the network and the maximum amount that can be shipped on each connection. Plus, you have information about whether a connection exists between two nodes.  In your industry, the nodes could be warehouses, distribution centers, or transportation hubs, and the goods could be various products that need to be shipped between these places. The connections represent transportation routes, like roads, rail lines, or shipping lanes. The challenge is figuring out the most efficient routing plan that reduces overall shipping costs while ensuring the demand at each endpoint is met. This requires considering the capacity limits of each connection in the network.",
+    "question": "Which of the following system element(s) is the Capacity Limit constraint applied on?",
+    "choices": {
+      "A": "Commodities",
+      "B": "Edges",
+      "C": "Nodes",
+      "D": "Commodities, Nodes"
+    },
+    "correct_answer": "B",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q11, instance index 572",
+    "question_subtype": "Q11"
+  },
+  {
+    "id": "orqa_0035",
+    "task_type": "or_model_identification",
+    "split": "test",
+    "context": "As an investment manager, your aim is to figure out the best way to distribute assets in your portfolio to boost returns and reduce risk. You're working with a variety of assets, each with its own expected returns, risk level, and initial share composition. You also have information on the acquisition cost per share, current buying and selling prices per share, projected dividends per share, and the tax rate. Your goal is to figure out the best way to distribute these assets in your portfolio to achieve a specific growth factor. You need to consider the bid/ask spread, taxes, and transaction costs. This will guide you in making decisions about which assets to buy or sell to boost returns and reduce risk in your portfolio. It's also important to consider any extra costs and taxes that might come up during this process.",
+    "question": "Which of the following system element(s) is the Inventory Balance constraint applied on?",
+    "choices": {
+      "A": "Different types of assets in the portfolio",
+      "B": "Taxes and Transaction Costs",
+      "C": "Acquisition Cost and Current Prices",
+      "D": "Bid/Ask Spread"
+    },
+    "correct_answer": "A",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q11, instance index 654",
+    "question_subtype": "Q11"
+  },
+  {
+    "id": "orqa_0036",
+    "task_type": "or_model_identification",
+    "split": "test",
+    "context": "In Metroville's greater metropolitan area, the Metroville Hospital Consortium (MHC) oversees a network of 12 hospitals. Financial constraints, changing populations, and medical needs require reevaluating these healthcare facilities. Engaged as a consultant for the Metroville Health Authority (MHA), you are tasked with analyzing these healthcare facilities. With advancements in medical fields and the emergence of specialized facilities, there is an opportunity to optimize and enhance the city's healthcare infrastructure. Your task is to determine which three hospitals should be closed or possibly merged to bolster the overall efficiency and accessibility of healthcare in Metroville. Each hospital has its catchment area, serving unique neighborhoods or districts. Financial metrics, patient wait times, travel distances, quality of care, and service accessibility gauge the efficiency of the healthcare facilities.  You must ensure that patient care remains excellent, emergency services are accessible, specialized medical treatments are strategically located, and the network's efficiency is optimized. Your role has profound implications, impacting the quality and accessibility of medical care, potential job opportunities, and the broader well-being of Metroville's residents. With Operations Research and data analytics tools, you aim to set forth a healthcare roadmap for Metroville that is future-forward, efficient, and undeniably centered on patient welfare.",
+    "question": "Which of the following options define a neighborhood assignment constraint that is required for this problem?",
+    "choices": {
+      "A": "Every neighborhood or district must be served by a hospital",
+      "B": " Each hospital must be assigned only to one neighborhood",
+      "C": " All hospitals must offer telemedicine services.",
+      "D": "Every neighborhood or district can be assigned to more than one hospital"
+    },
+    "correct_answer": "A",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q2, instance index 334",
+    "question_subtype": "Q2"
+  },
+  {
+    "id": "orqa_0037",
+    "task_type": "or_model_identification",
+    "split": "test",
+    "context": "Your company has been asked to help optimize a local port. At this port, there are numerous cargo ships arriving at different times with each ship having a specific arrival time and a deadline by which it needs to be unloaded. Obviously, a ship cannot begin the unloading process before its arrival. The port utilizes several cranes or unloading machines to manage the task of removing containers from these ships. However, each machine can handle the unloading process for only one ship at a time. To add to the complexity of the problem, each ship-machine pairing has a unique unloading time and a value associated with it. Your goal is to allocate these cargo ships to the cranes and sequence the unloading tasks on each crane to maximize the value of the allocations while reducing delay. You should consider the arrival time, deadline, and unloading time for each cargo ship. Also, consider the value or profit of assigning a particular ship to a specific crane. A ship may not unload after its deadline. Your plan should optimally allocate and sequence the cargo ships on the cranes to ensure that the port operates at peak efficiency, meeting shipping deadlines and maximizing the value of your allocations.",
+    "question": "Which of the following options is true regarding the machines assignment?",
+    "choices": {
+      "A": "Each ship is unloaded by multiple machines to expedite the process",
+      "B": "A machine can service a new ship even if its current task is not completed",
+      "C": "Each machine is idle until a ship arrives, regardless of previous tasks",
+      "D": "Each machine is either idle or starts a new task after finishing a previous one"
+    },
+    "correct_answer": "D",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q2, instance index 381",
+    "question_subtype": "Q2"
+  },
+  {
+    "id": "orqa_0038",
+    "task_type": "or_model_identification",
+    "split": "test",
+    "context": "You are a manager in the shipping industry and are dealing with an issue with packing. You need to pack a standard U.S. shipping pallet, measuring 40 inches by 48 inches, with barrels of different sizes and values. Your goal is to organize these barrels such that it maximizes the total value of the pallet, while making sure they do not overlap and all fit within the pallet's dimensions. To achieve this, you must consider the position of each barrel on the pallet, along with its radius and value. There is a variety of barrels with different radii and corresponding values that you can choose from. This packing issue is important to optimize to ensure efficient use of space and to maximize the value of the goods being shipped. By optimally arranging the barrels onto the shipping pallet, you can make your shipping process more cost-effective and deliver the highest possible value to your customers.",
+    "question": " Under which category does the given optimization problem fall in to?",
+    "choices": {
+      "A": "Allocation problem",
+      "B": "Bin-packing problem",
+      "C": "Multi-level distribution problem",
+      "D": "Clustering problem"
+    },
+    "correct_answer": "B",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q3, instance index 1156",
+    "question_subtype": "Q3"
+  },
+  {
+    "id": "orqa_0039",
+    "task_type": "or_model_identification",
+    "split": "test",
+    "context": "As a manager in an advertising agency, we are currently facing a media selection problem for one of our clients. Our client wants to place ads in various media to reach different demographic groups. Based on viewing and readership data, we have a table that shows the number of exposures obtained in each market segment per dollar spent on advertising in each medium. For each market segment, we have decided on a minimum desired number of exposures. We believe that we must reach at least this number of readers or viewers, regardless of the cost. On the other hand, we have a saturation level, which indicates that any exposure beyond this level is of no value to our client. Exposures between these two limits are considered useful exposures. Our objective is to determine how much should be spent on advertising in each medium, given an advertising budget and a target minimum of total useful exposures over all markets. The available media options include late-night TV, prime time TV, newspapers, billboards, and radio. We aim to maximize the overall impact of our client's advertising campaign while staying within budget and achieving the target minimum total useful exposures.",
+    "question": "Under which category does this optimization problem fall in to?",
+    "choices": {
+      "A": "Assignment problem ",
+      "B": "Covering Problem",
+      "C": "Packing problem ",
+      "D": "Allocation Problem "
+    },
+    "correct_answer": "D",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q3, instance index 1403",
+    "question_subtype": "Q3"
+  },
+  {
+    "id": "orqa_0040",
+    "task_type": "or_model_identification",
+    "split": "test",
+    "context": "You are a financial advisor, you are currently working on a problem related to bond portfolio and cash matching. You need to figure out the best mix of bonds to buy to meet your cash requirements for upcoming periods. You can purchase a range of bonds to choose from, each with its own unique features to consider like maturity period, price, and discount amount. You also have a requirement for how much cash you will need in each future period. You need to decide how many of each bond to buy to meet your cash requirements for each period, while keeping the total cost of buying the bonds as low as possible. To do this, you must meet the cash requirements for each period and can not buy a negative amount of bonds. Besides bonds, you may also put money into short-term investments with a fixed interest rate. These short-term investments may be used to help cover any cash requirements in each period that the bonds do not cover.  To summarize, you know the short-term interest rate, the maturity period and price of each bond, the discount amount of each bond, and the cash requirements for each future period. With this information, you need to determine the best mix of bonds to buy and the best short-term investment strategy while meeting your cash requirements in the most cost-effective way.",
+    "question": " What is the type of optimization model related to this problem?",
+    "choices": {
+      "A": "Linear Programming",
+      "B": "Second Order Cone Programming",
+      "C": "Semi-definite Programming",
+      "D": "Quadratic Programming"
+    },
+    "correct_answer": "A",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q4, instance index 1301",
+    "question_subtype": "Q4"
+  },
+  {
+    "id": "orqa_0041",
+    "task_type": "or_model_identification",
+    "split": "test",
+    "context": "As a production planning manager at ElectroMotors Inc., you are tasked with meeting the demand for the cutting-edge EV model \"E-Charger\" over several months. Balancing the assembly line's flow becomes a challenge as you consider the available storage for completed vehicles, the need to utilize assembly line workers efficiently during standard and overtime hours, and the flexibility required to adjust the production rate based on expected shifts in market demand. You've received forecasts that detail the expected sales figures for the E-Charger for each upcoming month. Alongside this, you have data that reveals the costs of storing completed vehicles in holding areas, running the assembly line during standard working hours, paying overtime wages for assembly line workers, and making any quick modifications to the production rates. Your overarching goal is to keep the total expenditure to a minimum. This encompasses the costs of storing finished E-Chargers, seamlessly operating the assembly line during both standard hours and overtime, and managing any changes in production rates. Starting with your initial inventory of E-Chargers and the standard output rate of the assembly line, you are challenged with ensuring you're churning out enough cars every month to meet the anticipated demand. It's crucial to remember that your production rate can only be adjusted by a certain percentage each month. Thus, your role becomes pivotal as you decide the number of standard production hours, the extent of overtime, and the degree of production rate adjustments needed each month to synchronize production with sales forecasts. By devising the best production strategy, you can pave the way for ElectroMotors Inc. to not only meet the surging demand for the E-Charger but to do so while ensuring operational efficiency and cost-effectiveness.",
+    "question": " What is the type of optimization model related to this problem?",
+    "choices": {
+      "A": "Mixed-Integer Linear Programming",
+      "B": "Non-Convex Quadratic Programming",
+      "C": "Linear Programming",
+      "D": "Quadratic Programming"
+    },
+    "correct_answer": "A",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q4, instance index 1344",
+    "question_subtype": "Q4"
+  },
+  {
+    "id": "orqa_0042",
+    "task_type": "or_model_identification",
+    "split": "test",
+    "context": "As an investment manager, you are currently facing a challenge. You aim to balance the primary asset with the remaining assets in the portfolio. This task is crucial as it aids in reducing the portfolio's risk while attaining a desired return. To do this, you need to identify the best combination of assets that reduces the variance of the portfolio returns, considering the expected returns and covariance matrix of the portfolio's assets. You can access data on the portfolio's assets, their expected returns, and the covariance matrix. This matrix indicates the correlation between the returns of the assets. A higher correlation suggests that the assets' returns are likely to be similar, potentially increasing the portfolio's risk. Conversely, a lower correlation implies a more diversified portfolio, which could reduce the risk. You also have a target return for the portfolio that you aim to achieve. The goal is to reduce the variance of the portfolio returns while ensuring that the portfolio's expected return matches or exceeds the target return. It would be best to remember that the sum of the asset weights in the portfolio should equal 1, indicating that the entire portfolio is invested in the given assets. In this scenario, you deal with three assets: GMC, ATT, and USX. These assets have specific expected returns and vary in correlation, as the covariance matrix indicates. You aim to find the best combination of these assets in your portfolio to reduce the portfolio's risk while still achieving a desired return of 1.15. As an investment industry expert, you need to collaborate with an operations research consultant to find the optimal solution that satisfies your objective and constraints. The consultant will assist you in determining the best asset mix that will enable you to hedge your portfolio effectively, minimizing risk and achieving the desired return.",
+    "question": " Which of the following defines set(s) in the optimization model of this problem?",
+    "choices": {
+      "A": "Assets",
+      "B": "Consultants",
+      "C": "Covariance Matrix",
+      "D": "Return Type"
+    },
+    "correct_answer": "A",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q5, instance index 188",
+    "question_subtype": "Q5"
+  },
+  {
+    "id": "orqa_0043",
+    "task_type": "or_model_identification",
+    "split": "test",
+    "context": "As the finance lead at the eco-friendly tech startup \"GreenTech Innovations,\" you're entrusted with guiding the company's investments in key assets like GMT, ATT, and USX.  Yo need to reach a return target while minimizing investment return variance over possible scenarios.   You've got insights from 12 hypothetical market scenarios, each showing a different economic picture. These scenarios offer an estimate into the expected performance of each asset. Interestingly, every scenario is just as likely to unfold. Additionally, you have a predetermined return goal for GreenTech's portfolio.  Your challenge is to strategically distribute investments among these assets. ",
+    "question": " Which of the following defines set(s) in the optimization model of this problem?",
+    "choices": {
+      "A": "Scenarios",
+      "B": "Market Conditions",
+      "C": "Time Periods",
+      "D": "Risks"
+    },
+    "correct_answer": "A",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q5, instance index 235",
+    "question_subtype": "Q5"
+  },
+  {
+    "id": "orqa_0044",
+    "task_type": "or_model_identification",
+    "split": "test",
+    "context": "As a manager in the hydroelectric industry, you are tasked with managing a water reservoir system. This system includes various pools like reservoirs, lakes, and dams. Your challenge is to figure out the optimal strategy for releasing water from these pools. The goal is to maximize the electricity generated without exceeding any capacity limits.   In each time period, you need to decide how much water to release for electricity generation. You also need to determine how much extra water to release, which might be necessary if a pool is overfilled.  Each pool can have one successor pool at most. This is where the water goes in the next period after it's released. Each pool also gets a certain amount of water inflow from external sources like rain and snowmelt. A river stretch can be thought of as a pool too, but with minimal storage and no generation capacity.  You have access to data on several factors. This includes the value per unit of water used for electricity generation by each pool, the minimum and maximum capacity of each pool, the initial volume of water in each pool, and the maximum generation capacity of each pool. You also have data on the inflow of water from external sources into each pool per period, and the time it takes for water to travel between connected pools.  Your main goal is to maximize the value of electricity generated. To do this, you need to manage the water release from the pools efficiently. You need to consider the inflows, capacities, and connections between the pools. This task is vital for optimizing hydroelectric power generation and ensuring sustainable water resource management in the watershed.",
+    "question": " What are the decision activities of the optimization problem?",
+    "choices": {
+      "A": "Minimum capacity of each pool, Value of electricity generated, Connections between the pools.",
+      "B": "Water released for power production, Extra water discharged due to overfill, Final water volume in pools",
+      "C": "Water inflow from external sources, Maximum generation capacity of each pool, Time for water to travel between pools",
+      "D": "Value per unit of water used for electricity generation, Price to set per unit of water, Maximum capacity of each pool"
+    },
+    "correct_answer": "B",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q6, instance index 26",
+    "question_subtype": "Q6"
+  },
+  {
+    "id": "orqa_0045",
+    "task_type": "or_model_identification",
+    "split": "test",
+    "context": "As the manager of a charitable organization, you are at the forefront of a significant metropolitan challenge: addressing hunger while simultaneously preventing the waste of perishable foods. For many reasons, multiple grocery stores in the city often end up with surplus perishable items. Though still fresh, these items have an ever-narrowing window for consumption. Concurrently, several food banks across the city look to your organization for fresh produce to sustain their communities. Each food bank has unique needs, driven by the communities it serves, its storage capabilities, and the frequency of individuals it assists. Under your guidance, three primary grocery stores are serving as starting points, each with its distinct supply capacity. On the other side of this equation, four specific food banks stand as the endpoints, each indicating a unique demand for these perishables. Different routes within the city come with their transportation costs and capacities. Each route's cost and maximum capacity, influenced by factors such as the size of the transport vehicle and the ideal transportation hours, are crucial to ensuring that no food is spoiled due to unforeseen delays. Your overarching mission is to orchestrate a distribution plan that aligns supply with demand, all while minimizing transportation costs. Achieving this requires a strategic approach, employing advanced optimization techniques to ensure perishables are delivered promptly, maximizing community service, and managing costs efficiently.",
+    "question": " What are the decision activities of the optimization problem?",
+    "choices": {
+      "A": "Number of communities serviced and assigning community groups to tasks",
+      "B": "Route to take to transport from grocery store to food bank",
+      "C": "Perishable goods transported from each grocery store to food bank",
+      "D": "Size of vehicles"
+    },
+    "correct_answer": "C",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q6, instance index 55",
+    "question_subtype": "Q6"
+  },
+  {
+    "id": "orqa_0046",
+    "task_type": "or_model_identification",
+    "split": "test",
+    "context": "You are asked to help the owner of \"La Douceur Parisienne,\" a patisserie that is celebrated for its exquisite pastries. Elise, the owner, finds herself in a perpetual balancing act, juggling the freshness of her products with the economics of running her establishment. Every item on her display has a distinct shelf life, determining its freshness window. Once this period lapses, the product is no longer up to the patisserie's esteemed standards.  When Elise places an order for ingredients, a fixed cost is immediately incurred. This cost isn't just a function of the quantity but also of the unique suppliers she sources her premium ingredients from. Alongside this, the selling price of each pastry, when weighed against the purchase cost of its ingredients, paints a picture of the potential profit for every item sold.  However, there is an inherent challenge in procuring these ingredients. They come in defined batches, meaning even if she needs a smaller quantity, the entire batch must be ordered. This batching can sometimes lead to an excess, posing a risk given the perishable nature of her products.  Furthermore, the patisserie's location, with their unpredictable nature, bring another layer of complexity. On some days, a burst of tourists might grace her establishment, while on others, only the familiar faces of locals appear. This ebb and flow in demand means that her ingredient orders must be agile, flexible, and well-timed.  With these intricate challenges, your mission is clear: to craft an ordering strategy that wisely balances between reducing costs from ordering, potential waste, and maximizing sales revenue. ",
+    "question": " Which data parameters are participating in the objective criterion for this problem?",
+    "choices": {
+      "A": "Shelf life of pastries, fixed cost of ordering ingredients, purchase cost per ingredient batch",
+      "B": "Fixed cost of ordering ingredients, selling price of each pastry, batch size of ingredients",
+      "C": "Shelf life of pastries, fixed cost of ordering ingredients, selling price of each pastry",
+      "D": "Pastry freshness window, pastry selling price, daily customer demand"
+    },
+    "correct_answer": "B",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q8, instance index 1023",
+    "question_subtype": "Q8"
+  },
+  {
+    "id": "orqa_0047",
+    "task_type": "or_model_identification",
+    "split": "test",
+    "context": "You work at an airline company, you must assign aircrafts to flights. Each flight route connects specific cities and has distinct departure and arrival times. Your airline's fleet is made up of different types of aircraft, each with its own operational costs and capabilities. Additionally, every flight and aircraft pairing results in a specific profit. You have access to the flight schedules, including departure and arrival times for routes between cities, different types of aircraft in your fleet, their operational costs, the maximum number of each type available, and the profit generated from pairing each type of aircraft with specific flight routes. You need to assign the right type of aircraft to each flight route to maximize your company's profit. In this competitive industry, assigning aircrafts to flights effectively is important to maximizing profits, ensuring efficient resource utilization, and fulfilling customer demands.",
+    "question": " Which data parameters are participating in the objective criterion for this problem?",
+    "choices": {
+      "A": "Departure time and arrival time of a flight",
+      "B": "Fixed cost of an aircraft type, overnight number of aircraft by type and city",
+      "C": "Maximum number of each aircraft type, departure time for each flight route, arrival time for each flight route",
+      "D": "Profit contribution by type and flight"
+    },
+    "correct_answer": "B",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q8, instance index 1047",
+    "question_subtype": "Q8"
+  },
+  {
+    "id": "orqa_0048",
+    "task_type": "or_model_identification",
+    "split": "test",
+    "context": "As a project manager, you are tasked with organizing tasks for a home renovation. You have different tasks such as \"Kitchen Refurbishment\", \"Garden Landscaping\", \"Living Room Paint Job\", and \"Bathroom Plumbing\". Each task has its completion deadline, required duration, and importance score. The completion deadlines are the specific dates by which each task should be finished. The required durations represent how long each task will take. The task's importance score measures its priority; for example, \"Roof Repair\" might have a higher importance score due to upcoming rainy seasons than the decorative task \"Living Room Paint Job\". You can't handle multiple tasks simultaneously because you only have a few weeks left before the winter season and limited resources, including human resources, tools, and materials.\nConsequently, you might need to decide which task to tackle in the coming weeks. Your challenge is determining which tasks to undertake and in what sequence, ensuring that the chosen tasks are completed within their specified deadlines while maximizing the total importance score of the completed tasks. This planning ensures that critical tasks are completed promptly, and the renovation progresses smoothly without unnecessary delays.",
+    "question": " Which of the following options are participating decision activities in the objective criterion for this problem?",
+    "choices": {
+      "A": "Task completion deadline",
+      "B": "Task selection indicator",
+      "C": "Task required duration",
+      "D": "Task importance score"
+    },
+    "correct_answer": "B",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q9, instance index 807",
+    "question_subtype": "Q9"
+  },
+  {
+    "id": "orqa_0049",
+    "task_type": "or_model_identification",
+    "split": "test",
+    "context": "You are a grid planner for a regional power distribution company and have been asked to design a robust electrical grid to distribute electricity to homes, businesses, and factories. You need to determine the optimal number of direct high-tension (HT) and low-tension (LT) power lines connecting various substations. Additionally, you must determine how much power load should be routed through each direct power line and how much should go through the main distribution substation, which is designated as Substation Zeta. This central substation (Substation Zeta) serves as the central hub of the grid. Your goal is to meet power demand while keeping the total cost of constructing and maintaining the grid to a minimum. The cost breakdown includes both fixed and variable expenses. Fixed costs stem from placing these HT and LT lines between substations, while variable costs vary based on the power load transferred between the substations. You know the expected power consumption between each pair of substations, as well as the fixed and variable costs for HT and LT lines for each pair. You also understand the power capacity of both HT and LT lines.",
+    "question": " Which of the following options are participating decision activities in the objective criterion for this problem?",
+    "choices": {
+      "A": "The fixed and variable costs for HT and LT lines for each pair",
+      "B": "The power load to be routed through each direct power line",
+      "C": "The amount used via the hub",
+      "D": "Number of HT lines between each substation pair, Number of LT lines between each substation pair"
+    },
+    "correct_answer": "D",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q9, instance index 883",
+    "question_subtype": "Q9"
+  },
+  {
+    "id": "orqa_0050",
+    "task_type": "or_model_identification",
+    "split": "test",
+    "context": "The Worthington crown estate has many artifacts that span generations. You are a specialist that has been hired by the family matriarch to distribute the belongings after her passing. These artifacts must be handed out to her four grandchildren - Tim, James, Alice, and Nile. You need to figure out how to fairly distribute inherited items among these heirs. The goal is to find a solution that gives each heir the most satisfaction, while making sure that no one heir benefits significantly more than the others. You have some vintage photos, books, paintings, jewelry, among other artifacts. To give an example of preference, Tim, having spent a lot of time in the estate library, holds a deep affection for the books and paintings in the library. The jewelry, however, is not as important to him. Similarly, each grandchild's preference to these heirlooms varies, adds layers of complexity to your task. While the tangible value of these items is easy to understand, it is their sentimental worth that you must consider. You need to make sure that each heir receives items they cherish while maintaining a balance in their relative sentimental value. Your challenge is twofold: you need to recognize and respect the preference of each grandchild, while also ensuring that the distribution feels fair.",
+    "question": " Which of the following options are participating decision activities in the objective criterion for this problem?",
+    "choices": {
+      "A": "Allocation of belongings to each grandchild",
+      "B": "Preference of each grandchild for each belonging",
+      "C": "Weight applied to minimize the maximum allocation",
+      "D": "Minimum allocation for each grandchild"
+    },
+    "correct_answer": "D",
+    "source_category": 1,
+    "source_detail": "ORQA test set, QUESTION_TYPE Q9, instance index 924",
+    "question_subtype": "Q9"
   }
 ]

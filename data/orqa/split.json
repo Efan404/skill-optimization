@@ -1,14 +1,58 @@
 {
   "seed": [
-    "orqa_lp_001", "orqa_lp_002",
-    "orqa_co_001", "orqa_co_002"
+    "orqa_0001",
+    "orqa_0002",
+    "orqa_0003",
+    "orqa_0004",
+    "orqa_0005"
   ],
   "dev": [
-    "orqa_lp_003", "orqa_lp_004", "orqa_lp_005", "orqa_lp_006", "orqa_lp_007",
-    "orqa_co_003", "orqa_co_004", "orqa_co_005", "orqa_co_006", "orqa_co_007"
+    "orqa_0006",
+    "orqa_0007",
+    "orqa_0008",
+    "orqa_0009",
+    "orqa_0010",
+    "orqa_0011",
+    "orqa_0012",
+    "orqa_0013",
+    "orqa_0014",
+    "orqa_0015",
+    "orqa_0016",
+    "orqa_0017",
+    "orqa_0018",
+    "orqa_0019",
+    "orqa_0020",
+    "orqa_0021",
+    "orqa_0022",
+    "orqa_0023",
+    "orqa_0024",
+    "orqa_0025",
+    "orqa_0026",
+    "orqa_0027",
+    "orqa_0028",
+    "orqa_0029",
+    "orqa_0030"
   ],
   "test": [
-    "orqa_lp_008", "orqa_lp_009", "orqa_lp_010", "orqa_lp_011", "orqa_lp_012",
-    "orqa_co_008", "orqa_co_009", "orqa_co_010", "orqa_co_011", "orqa_co_012"
+    "orqa_0031",
+    "orqa_0032",
+    "orqa_0033",
+    "orqa_0034",
+    "orqa_0035",
+    "orqa_0036",
+    "orqa_0037",
+    "orqa_0038",
+    "orqa_0039",
+    "orqa_0040",
+    "orqa_0041",
+    "orqa_0042",
+    "orqa_0043",
+    "orqa_0044",
+    "orqa_0045",
+    "orqa_0046",
+    "orqa_0047",
+    "orqa_0048",
+    "orqa_0049",
+    "orqa_0050"
   ]
 }
