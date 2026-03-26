@@ -35,13 +35,63 @@ Output the complete updated skill in the same YAML format, followed by:
 - What you changed and why (one bullet per change)"""
 
 
+def _try_parse_yaml(text: str) -> dict | None:
+    """Try to parse YAML, with a repair pass for common LLM output issues.
+
+    LLMs often produce YAML with unquoted strings containing colons, e.g.:
+        check: Match the question to: objective, constraints
+    This is invalid YAML. We attempt a repair by quoting such lines.
+
+    Returns parsed dict, or None if parsing fails.
+    """
+    # First, try parsing as-is
+    try:
+        result = yaml.safe_load(text)
+        if isinstance(result, dict):
+            return result
+    except yaml.YAMLError:
+        pass
+
+    # Repair: quote values that contain unquoted colons
+    # Pattern: lines like "    key: value with: colon" → "    key: 'value with: colon'"
+    repaired_lines = []
+    for line in text.split("\n"):
+        stripped = line.lstrip()
+        if stripped.startswith("- step:") or stripped.startswith("- check:") or stripped.startswith("check:") or stripped.startswith("step:"):
+            # Find the key: value boundary
+            match = re.match(r"^(\s*(?:-\s+)?(?:step|check):\s*)(.*)", line)
+            if match:
+                prefix, value = match.group(1), match.group(2)
+                # If value contains a colon and isn't already quoted
+                if ":" in value and not (value.startswith("'") or value.startswith('"')):
+                    value = "'" + value.replace("'", "''") + "'"
+                    repaired_lines.append(prefix + value)
+                    continue
+        repaired_lines.append(line)
+
+    repaired_text = "\n".join(repaired_lines)
+    try:
+        result = yaml.safe_load(repaired_text)
+        if isinstance(result, dict):
+            return result
+    except yaml.YAMLError:
+        pass
+
+    return None
+
+
 def extract_yaml_from_response(response: str) -> dict:
     """Extract a YAML skill dict from an LLM response.
 
     Tries multiple strategies:
     1. Look for a YAML code block (```yaml ... ```)
+    1b. Unclosed ```yaml block (truncated response)
     2. Look for any code block (``` ... ```)
     3. Try to parse everything before the CHANGELOG marker as YAML
+    4. Try the entire response as YAML
+
+    All parsing attempts use _try_parse_yaml which includes a repair
+    pass for common LLM YAML issues (unquoted colons in strings).
 
     Args:
         response: The raw LLM response text.
@@ -55,59 +105,39 @@ def extract_yaml_from_response(response: str) -> dict:
     # Strategy 1: Look for ```yaml ... ``` code block (closed)
     yaml_block_match = re.search(r"```yaml\s*\n(.*?)```", response, re.DOTALL)
     if yaml_block_match:
-        yaml_text = yaml_block_match.group(1).strip()
-        try:
-            result = yaml.safe_load(yaml_text)
-            if isinstance(result, dict):
-                return result
-        except yaml.YAMLError:
-            pass
+        result = _try_parse_yaml(yaml_block_match.group(1).strip())
+        if result:
+            return result
 
     # Strategy 1b: Unclosed ```yaml block (LLM response truncated at max_tokens)
     yaml_open_match = re.search(r"```yaml\s*\n(.*)", response, re.DOTALL)
     if yaml_open_match:
-        yaml_text = yaml_open_match.group(1).strip()
-        # Remove trailing ``` if present
-        yaml_text = re.sub(r"\n?```\s*$", "", yaml_text)
-        try:
-            result = yaml.safe_load(yaml_text)
-            if isinstance(result, dict):
-                return result
-        except yaml.YAMLError:
-            pass
+        yaml_text = re.sub(r"\n?```\s*$", "", yaml_open_match.group(1).strip())
+        result = _try_parse_yaml(yaml_text)
+        if result:
+            return result
 
     # Strategy 2: Look for any code block ``` ... ``` (closed)
     code_block_match = re.search(r"```\s*\n(.*?)```", response, re.DOTALL)
     if code_block_match:
-        yaml_text = code_block_match.group(1).strip()
-        try:
-            result = yaml.safe_load(yaml_text)
-            if isinstance(result, dict):
-                return result
-        except yaml.YAMLError:
-            pass
+        result = _try_parse_yaml(code_block_match.group(1).strip())
+        if result:
+            return result
 
     # Strategy 3: Everything before **CHANGELOG:** or CHANGELOG:
     changelog_match = re.search(r"\*?\*?CHANGELOG\*?\*?\s*:", response)
     if changelog_match:
         yaml_text = response[: changelog_match.start()].strip()
-        # Remove any leading/trailing code block markers
         yaml_text = re.sub(r"^```(?:yaml)?\s*\n?", "", yaml_text)
         yaml_text = re.sub(r"\n?```\s*$", "", yaml_text)
-        try:
-            result = yaml.safe_load(yaml_text)
-            if isinstance(result, dict):
-                return result
-        except yaml.YAMLError:
-            pass
+        result = _try_parse_yaml(yaml_text)
+        if result:
+            return result
 
     # Strategy 4: Try parsing the entire response as YAML (last resort)
-    try:
-        result = yaml.safe_load(response)
-        if isinstance(result, dict):
-            return result
-    except yaml.YAMLError:
-        pass
+    result = _try_parse_yaml(response)
+    if result:
+        return result
 
     raise ValueError(
         f"Could not extract valid YAML from LLM response. "
