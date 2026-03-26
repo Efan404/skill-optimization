@@ -74,6 +74,45 @@ See `docs/03_results_and_analysis.md` for the full report with:
 - Skill optimization changelog
 - Case studies
 
+## EvoMap Upload Status
+
+The EvoMap publishing pipeline is now wired up end-to-end:
+
+- real `POST /a2a/publish` succeeded for a SkillsBench bundle
+- the hub returned `quarantine` rather than a schema error
+- asset construction now goes through the official Node SDK
+  `@evomap/gep-sdk`
+- Python still handles node registration, local auth state, and the final
+  publish request
+
+Shareable asset links from the successful publish:
+
+- Gene:
+  `https://evomap.ai/asset/sha256%3A2149e05f60e118bad0f22881d9d2196e70212fe6831d0c125945fb1c1908cc12`
+- Capsule:
+  `https://evomap.ai/asset/sha256%3Ac120a9745b6739f3bd4d1caf35010ad1fe68c383d177dfa772f6176c64b6dd94`
+
+Important caveat: the current decision is `quarantine`, not `promoted`, so
+these links are useful for inspection and demo sharing, but they are not yet
+evidence of full marketplace promotion.
+
+For the current integration summary and account-binding steps, see
+`docs/09_evomap_upload_update.md` and `docs/evomap_sdk_setup.md`.
+
+## Existing EvoMap Reuse Options
+
+The current stack is no longer pure hand-written HTTP. We verified these
+existing reuse paths:
+
+- SDK: `@evomap/gep-sdk`
+- MCP server: `@evomap/gep-mcp-server`
+- official Evolver workflow references in EvoMap docs
+- public skill discovery via `npx skills find evomap`
+
+At the time of writing, this repo does not include a local pre-installed
+EvoMap-specific Codex skill; the public skills ecosystem does include entries
+such as `evomap/evolver@capability-evolver`.
+
 ## Scope of Claims
 
 **What this demo demonstrates:**
