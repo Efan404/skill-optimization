@@ -1,4 +1,4 @@
-"""Tests for src/task_loader.py"""
+"""Tests for src/task_loader.py — adapted for real ORQA data."""
 
 import pytest
 from src.task_loader import (
@@ -14,9 +14,9 @@ class TestLoadQuestions:
     def test_load_all_questions(self):
         """All questions load and have required fields."""
         questions = load_questions()
-        assert len(questions) >= 20  # at least 20 questions expected
+        assert len(questions) == 50
         required_fields = [
-            "id", "task_type", "split", "question",
+            "id", "task_type", "split", "context", "question",
             "choices", "correct_answer", "source_category", "source_detail",
         ]
         for q in questions:
@@ -26,19 +26,19 @@ class TestLoadQuestions:
     def test_load_by_split_seed(self):
         """Filtering by 'seed' returns only seed questions."""
         seed_qs = load_questions(split="seed")
-        assert len(seed_qs) >= 2
+        assert len(seed_qs) == 5
         assert all(q["split"] == "seed" for q in seed_qs)
 
     def test_load_by_split_dev(self):
         """Filtering by 'dev' returns only dev questions."""
         dev_qs = load_questions(split="dev")
-        assert len(dev_qs) >= 8
+        assert len(dev_qs) == 25
         assert all(q["split"] == "dev" for q in dev_qs)
 
     def test_load_by_split_test(self):
         """Filtering by 'test' returns only test questions."""
         test_qs = load_questions(split="test")
-        assert len(test_qs) >= 8
+        assert len(test_qs) == 20
         assert all(q["split"] == "test" for q in test_qs)
 
     def test_load_invalid_split_raises(self):
@@ -53,12 +53,23 @@ class TestLoadQuestions:
                 f"Question {q['id']}: answer '{q['correct_answer']}' not in choices"
             )
 
-    def test_choice_texts_are_unique_per_question(self):
-        """Choice text should not contain duplicates within a question."""
+    def test_all_choices_are_abcd(self):
+        """Every question has exactly A, B, C, D choices."""
         for q in load_questions():
-            choice_texts = list(q["choices"].values())
-            assert len(choice_texts) == len(set(choice_texts)), (
-                f"Question {q['id']} has duplicate choice text: {choice_texts}"
+            assert set(q["choices"].keys()) == {"A", "B", "C", "D"}, (
+                f"Question {q['id']} has wrong choice keys: {set(q['choices'].keys())}"
+            )
+
+    def test_all_have_context(self):
+        """Every ORQA question has a non-empty context field."""
+        for q in load_questions():
+            assert q.get("context"), f"Question {q['id']} missing or empty context"
+
+    def test_all_have_question_subtype(self):
+        """Every question has a question_subtype field (Q1-Q11)."""
+        for q in load_questions():
+            assert q.get("question_subtype", "").startswith("Q"), (
+                f"Question {q['id']} missing or invalid question_subtype"
             )
 
 
@@ -92,19 +103,18 @@ class TestSplitIntegrity:
 
 
 class TestSeedExamples:
-    def test_seed_lp(self):
-        """Returns seed questions for linear_programming."""
-        seeds = get_seed_examples("linear_programming")
-        assert len(seeds) >= 2
-        assert all(q["task_type"] == "linear_programming" for q in seeds)
+    def test_seed_or_model_id(self):
+        """Returns seed questions for or_model_identification."""
+        seeds = get_seed_examples("or_model_identification")
+        assert len(seeds) == 5
+        assert all(q["task_type"] == "or_model_identification" for q in seeds)
         assert all(q["split"] == "seed" for q in seeds)
 
-    def test_seed_co(self):
-        """Returns seed questions for combinatorial_optimization."""
-        seeds = get_seed_examples("combinatorial_optimization")
-        assert len(seeds) >= 2
-        assert all(q["task_type"] == "combinatorial_optimization" for q in seeds)
-        assert all(q["split"] == "seed" for q in seeds)
+    def test_seed_covers_multiple_subtypes(self):
+        """Seed questions cover at least 3 different question subtypes."""
+        seeds = get_seed_examples("or_model_identification")
+        subtypes = {q["question_subtype"] for q in seeds}
+        assert len(subtypes) >= 3, f"Only {len(subtypes)} subtypes in seed: {subtypes}"
 
     def test_seed_unknown_type(self):
         """Unknown task type returns empty list."""
@@ -113,92 +123,66 @@ class TestSeedExamples:
 
 
 class TestDatasetLabel:
-    def test_label_with_source_3(self):
-        """If any source_category == 3, label is 'ORQA-derived evaluation set'."""
+    def test_label_orqa_subset(self):
+        """Real ORQA data has source_category 1, label is 'ORQA subset'."""
         label = get_dataset_label()
-        # Our data is all source_category 3
-        assert label == "ORQA-derived evaluation set"
+        assert label == "ORQA subset"
 
 
 class TestQuestionsByType:
-    def test_dev_lp(self):
-        """Returns dev LP questions."""
+    def test_dev_or_model_id(self):
+        """Returns dev or_model_identification questions."""
+        qs = get_questions_by_type("dev", "or_model_identification")
+        assert len(qs) == 25
+        assert all(q["split"] == "dev" for q in qs)
+        assert all(q["task_type"] == "or_model_identification" for q in qs)
+
+    def test_test_or_model_id(self):
+        """Returns test or_model_identification questions."""
+        qs = get_questions_by_type("test", "or_model_identification")
+        assert len(qs) == 20
+        assert all(q["split"] == "test" for q in qs)
+
+    def test_seed_or_model_id(self):
+        """Returns seed or_model_identification questions."""
+        qs = get_questions_by_type("seed", "or_model_identification")
+        assert len(qs) == 5
+
+    def test_nonexistent_type_returns_empty(self):
+        """Filtering by a type that doesn't exist returns empty."""
         qs = get_questions_by_type("dev", "linear_programming")
-        assert len(qs) == 5
-        assert all(q["split"] == "dev" for q in qs)
-        assert all(q["task_type"] == "linear_programming" for q in qs)
-
-    def test_dev_co(self):
-        """Returns dev CO questions."""
-        qs = get_questions_by_type("dev", "combinatorial_optimization")
-        assert len(qs) == 5
-        assert all(q["split"] == "dev" for q in qs)
-        assert all(q["task_type"] == "combinatorial_optimization" for q in qs)
-
-    def test_test_lp(self):
-        """Returns test LP questions."""
-        qs = get_questions_by_type("test", "linear_programming")
-        assert len(qs) == 5
-
-    def test_seed_lp(self):
-        """Returns seed LP questions."""
-        qs = get_questions_by_type("seed", "linear_programming")
-        assert len(qs) == 2
+        assert len(qs) == 0
 
 
-class TestDatasetAudit:
-    """Regression tests for the manually audited 24-question corpus."""
+class TestORQADataIntegrity:
+    """Regression tests for the real ORQA 50-instance subset."""
 
-    VERIFIED_CORRECT_ANSWERS = {
-        "orqa_lp_001": "C",
-        "orqa_lp_002": "A",
-        "orqa_lp_003": "B",
-        "orqa_lp_004": "B",
-        "orqa_lp_005": "D",
-        "orqa_lp_006": "A",
-        "orqa_lp_007": "A",
-        "orqa_lp_008": "C",
-        "orqa_lp_009": "D",
-        "orqa_lp_010": "A",
-        "orqa_lp_011": "B",
-        "orqa_lp_012": "B",
-        "orqa_co_001": "D",
-        "orqa_co_002": "A",
-        "orqa_co_003": "B",
-        "orqa_co_004": "C",
-        "orqa_co_005": "A",
-        "orqa_co_006": "C",
-        "orqa_co_007": "A",
-        "orqa_co_008": "A",
-        "orqa_co_009": "B",
-        "orqa_co_010": "B",
-        "orqa_co_011": "B",
-        "orqa_co_012": "A",
-    }
-
-    def test_audited_answer_key_matches_verified_results(self):
-        questions = {q["id"]: q for q in load_questions()}
-        assert set(questions) == set(self.VERIFIED_CORRECT_ANSWERS)
-        for qid, expected in self.VERIFIED_CORRECT_ANSWERS.items():
-            assert questions[qid]["correct_answer"] == expected, (
-                f"Question {qid} should have verified correct_answer={expected}"
+    def test_all_source_category_1(self):
+        """All questions are source_category 1 (real ORQA data)."""
+        for q in load_questions():
+            assert q["source_category"] == 1, (
+                f"Question {q['id']} has source_category {q['source_category']}, expected 1"
             )
 
-    def test_no_question_contains_draft_residue(self):
-        forbidden_phrases = [
-            "let me redesign",
-            "problem again",
-            "none of my choices are right",
-            "my choices are wrong",
-            "not among choices",
-        ]
+    def test_all_task_type_or_model_identification(self):
+        """All questions have unified task_type."""
         for q in load_questions():
-            detail = q["source_detail"].lower()
-            for phrase in forbidden_phrases:
-                assert phrase not in detail, (
-                    f"Question {q['id']} still contains draft residue: {phrase}"
-                )
+            assert q["task_type"] == "or_model_identification"
 
-    def test_integer_lp_stem_is_explicit_when_needed(self):
-        questions = {q["id"]: q for q in load_questions()}
-        assert "whole batches" in questions["orqa_lp_006"]["question"].lower()
+    def test_seed_from_validation_set(self):
+        """Seed questions should come from the ORQA validation set."""
+        for q in load_questions(split="seed"):
+            assert "validation" in q["source_detail"].lower(), (
+                f"Seed question {q['id']} doesn't appear to be from validation set"
+            )
+
+    def test_dev_test_from_test_set(self):
+        """Dev and test questions should come from the ORQA test set."""
+        for q in load_questions(split="dev"):
+            assert "test" in q["source_detail"].lower(), (
+                f"Dev question {q['id']} doesn't appear to be from test set"
+            )
+        for q in load_questions(split="test"):
+            assert "test" in q["source_detail"].lower(), (
+                f"Test question {q['id']} doesn't appear to be from test set"
+            )
