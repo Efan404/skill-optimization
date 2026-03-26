@@ -18,6 +18,7 @@ These are two phases, not one. Step 4 is gated on Step 3 results.
 - **Repository:** https://github.com/nl4opt/ORQA
 - **Files:** `ORQA_test.jsonl` (1,468 instances), `ORQA_validation.jsonl` (45 instances with expert reasoning steps)
 - **Dataset label:** "ORQA subset" (source_category 1 — directly from published benchmark)
+- **IMPORTANT framing note:** Our dev/test split is an **internal re-split of the published ORQA data**, NOT the canonical ORQA public-test evaluation. Results should never be compared directly to Table 2 of the ORQA paper. All reporting must state: "Evaluated on an internal 20-dev/25-test split of ORQA instances, not the official ORQA test benchmark."
 
 ### Task Format
 
@@ -37,14 +38,19 @@ Rationale: ORQA has 11 question subtypes, but at 50 questions total, splitting i
 ### Sampling Protocol
 
 **Source allocation:**
-- **Seed set (5 questions):** Drawn exclusively from `ORQA_validation.jsonl` (45 instances). These come with expert reasoning steps that inform v1_curated skill design. Seed questions are NEVER evaluated and NEVER seen by the optimizer.
+- **Seed set (5 questions):** Drawn exclusively from `ORQA_validation.jsonl` (45 instances). Used ONLY for v0 skill generation (the LLM sees these 5 examples). Seed questions are NEVER evaluated and NEVER seen by the optimizer.
 - **Dev set (20 questions):** Drawn from `ORQA_test.jsonl` (1,468 instances). Used for all condition runs, error analysis, and optimization.
 - **Test set (25 questions):** Drawn from `ORQA_test.jsonl`. Held out — optimizer never sees these.
 
-**Stratified sampling rule:**
-1. From `ORQA_validation.jsonl`: select 5 questions covering at least 3 different question subtypes. Prefer questions with the most detailed expert reasoning.
-2. From `ORQA_test.jsonl`: stratified random sample by question subtype. Each subtype should appear at least once in dev if it has ≥ 3 instances. Use fixed random seed (42) for reproducibility.
-3. Dev and test are disjoint. Assign to dev first, then test, by alternating within each stratum.
+**Knowledge source boundary (v0 vs v1):**
+- **v0_self_generated:** The LLM sees ONLY the 5 seed questions (with their context, question, and options — but NOT the expert reasoning). It generates a skill from these examples alone.
+- **v1_curated:** The researcher may reference ALL 45 validation instances and their expert reasoning steps when designing the skill. This is explicitly disclosed in the methodology section. The rationale: v1 represents "human expertise informed by domain literature", not "few-shot example adaptation."
+- This asymmetry is intentional and must be stated in the report: "v1 was designed with access to 45 expert reasoning traces from the ORQA validation set; v0 was generated from 5 seed examples without expert reasoning."
+
+**Stratified sampling rule (fully deterministic, no researcher discretion):**
+1. From `ORQA_validation.jsonl`: group by question subtype, sort each group by REASONING field length descending (longer reasoning = more detailed procedure), take the top instance from each subtype until 5 are selected. If fewer than 5 subtypes exist, take the next-longest from already-sampled subtypes. Ties broken by instance order in the file.
+2. From `ORQA_test.jsonl`: stratified random sample by question subtype using fixed random seed (42). Each subtype with ≥ 3 instances gets at least 1 representative in dev. Remaining quota filled proportionally.
+3. Dev and test are disjoint. Within each stratum, assign by alternating: first instance to dev, second to test, third to dev, etc.
 
 **Frozen after creation:** `split.json` is committed before any experiment runs and never modified.
 
@@ -199,22 +205,28 @@ Same structure: 6 steps, 4 common_failures, 3 preconditions. Generic problem-sol
 
 Run the existing pipeline (`python -m src.run_pipeline --model deepseek`) with the new data and skills.
 
-### Signal Definition (Decidable Criteria)
+### Signal Definition (Two-Layer Gating)
 
-The following conditions must ALL be met to confirm "signal exists":
+**Gate 1: Project continues (skill has value)**
 
-1. **v1_curated test accuracy > baseline test accuracy** — the curated skill improves over no-skill baseline on held-out test
+Both conditions must be met:
+1. **v1_curated test accuracy > baseline test accuracy** — the curated skill improves over no-skill baseline
 2. **v1_curated test accuracy > generic_scaffold test accuracy** — improvement comes from domain content, not just structure
-3. **If v2_optimized dev accuracy > v1_curated dev accuracy BUT v2_optimized test accuracy <= v1_curated test accuracy:** flag as overfitting risk, document, but still consider signal present (the optimization loop produced a dev-better candidate, even if it didn't generalize)
 
-**If signal is NOT found:**
-- Document the negative result
-- Analyze why (error analysis on v1 failures)
-- Consider: is the skill targeting the wrong capability? Are the questions too easy/hard for skill differentiation?
-- Do NOT proceed to Step 4
+If Gate 1 fails: document negative result, analyze why, do NOT proceed to Step 4.
 
-**If signal IS found:**
-- Proceed to Step 4
+**Gate 2: Auto-search is warranted (optimization loop is not purely overfitting)**
+
+Gate 1 must pass AND at least one of these must hold:
+- **v2_optimized test accuracy >= v1_curated test accuracy** — single-step optimization at least didn't hurt on test
+- **v2_optimized test accuracy < v1_curated test accuracy BUT the gap is ≤ 1 question** — minor regression, still worth exploring whether a more controlled search can do better
+
+If Gate 2 fails (i.e., single-step v2 significantly regresses on test):
+- Document the overfitting finding
+- Do NOT run auto-search as a "capability enhancement" branch
+- Optionally: reposition Step 4 as an **overfitting diagnosis** experiment — "Can a constrained search with regression penalty avoid the overfit that single-step optimization showed?" This must be explicitly re-framed in the report.
+
+**If both gates pass:** Proceed to Step 4 as designed (auto-search as ablation).
 
 ---
 
