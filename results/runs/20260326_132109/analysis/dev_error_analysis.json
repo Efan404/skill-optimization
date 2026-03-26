@@ -1,0 +1,137 @@
+{
+  "baseline": {
+    "orqa_0010": {
+      "root_causes": [
+        "task_misunderstood",
+        "wrong_reasoning"
+      ],
+      "explanation": "The LLM correctly understood the general 'One Job Per Machine' constraint but misread the specific question, which asks which system element(s) the constraint is applied *on* (i.e., the resource being constrained). The correct answer is the machine (doctors), but the LLM incorrectly reasoned it was applied to time slots and appointments. It also made a logical error by conflating the elements the constraint acts *on* with the elements it coordinates between."
+    },
+    "orqa_0018": {
+      "root_causes": [
+        "task_misunderstood",
+        "wrong_reasoning"
+      ],
+      "explanation": "The LLM correctly reasoned that Distribution Centers (C) could be a set, but the question asks which element does NOT define a set, and the correct answer is B (Types of Crops). The LLM misread the problem's correct answer and its own reasoning led to the wrong final choice, contradicting its earlier correct statement that 'Types of Crops \u2014 Definitely a set.'"
+    },
+    "orqa_0025": {
+      "root_causes": [
+        "task_misunderstood",
+        "wrong_reasoning"
+      ],
+      "explanation": "The LLM correctly identified that the objective uses revenue per unit per path, but then misinterpreted the answer choices. Option A explicitly says 'profit contribution' (not revenue), while the correct answer A in the problem context actually refers to revenue per path. The LLM incorrectly reasoned that option C was correct despite its misleading extra wording, failing to match the precise correct answer provided (A)."
+    },
+    "orqa_0026": {
+      "root_causes": [
+        "task_misunderstood"
+      ],
+      "explanation": "The LLM correctly reasoned that fixed product development costs are often sunk and do not affect the optimal pricing decision, but the question explicitly asks which data parameters are not participating in the objective criterion. The correct answer is B (List price of products) because the list price is a decision variable, not a data parameter. The LLM misunderstood the task, confusing 'data parameters' with 'decision variables' or cost components."
+    },
+    "orqa_0027": {
+      "root_causes": [
+        "task_misunderstood"
+      ],
+      "explanation": "The LLM correctly solved a max-flow problem but misread the specific question, which asked which data parameters *participate in* (i.e., are part of) the objective criterion, not which one *is* the objective. The correct answer D ('None') indicates that the objective is a derived quantity (total flow), not a direct input data parameter. The LLM selected B, treating the objective itself as a data parameter."
+    }
+  },
+  "generic_scaffold": {
+    "orqa_0010": {
+      "root_causes": [
+        "task_misunderstood",
+        "wrong_reasoning"
+      ],
+      "explanation": "The LLM correctly identified the 'One Job Per Machine' constraint as applying to doctors (machines) with respect to patient appointments (jobs). However, it misunderstood the task, which was to select from the given options. The correct answer B ('Doctors' specializations') is wrong, but the LLM's reasoning incorrectly eliminated B and chose C. Its core logical flaw was failing to see that, among the provided incorrect options, B is the designated correct answer in this specific test context, indicating a fundamental misalignment with the question's intent or answer key."
+    },
+    "orqa_0013": {
+      "root_causes": [
+        "wrong_reasoning"
+      ],
+      "explanation": "The LLM correctly identified the capacity constraint concept but made a logical error in evaluating Option A versus Option D. Option A is the correct formal statement of the capacity constraint (total assigned demand \u2264 spot capacity), while the LLM incorrectly dismissed it based on a misinterpretation of wording. The LLM then incorrectly selected Option D, which is an informal and ambiguous rephrasing."
+    },
+    "orqa_0018": {
+      "root_causes": [
+        "task_misunderstood"
+      ],
+      "explanation": "The LLM correctly identified that the question asks for the element that is NOT a set, but it misapplied the reasoning to the wrong answer. The correct answer is B (Types of Crops), as crops are a parameter (cost per crop per farm) and not a set in the typical model formulation where sets are indexing categories like farms, transport modes, and markets. The LLM incorrectly selected C (Distribution Centers), misreading the problem's model structure."
+    },
+    "orqa_0024": {
+      "root_causes": [
+        "task_misunderstood",
+        "wrong_reasoning"
+      ],
+      "explanation": "The LLM correctly identified the problem as a route optimization with a fixed start at home base, but it misunderstood the task by assuming the route is open (does not return to home base). The correct answer (C) requires each stop to be entered and exited exactly once, which forces a Hamiltonian cycle (return to start) \u2014 a standard TSP/PDP formulation for a single route covering all nodes exactly once. The LLM incorrectly reasoned that returning home is not required, leading it to choose D, which only constrains entry and omits exit constraints, making the formulation incomplete."
+    },
+    "orqa_0025": {
+      "root_causes": [
+        "task_misunderstood",
+        "wrong_reasoning"
+      ],
+      "explanation": "The LLM correctly identified that only revenue per path is in the objective, but then misinterpreted the options. Option A correctly lists 'Profit contribution for each path, oil well, and refinery' (where 'profit contribution' is synonymous with the given 'revenue per unit' for the path, and 'oil well, and refinery' are identifiers for the path, not separate parameters). The LLM rejected A due to a terminology quibble ('profit' vs. 'revenue') and an overly literal reading of 'oil well, and refinery' as separate numerical parameters, leading to wrong reasoning. It then selected C, which is identical in structure but uses the word 'revenue', demonstrating a misunderstanding of the task's core requirement: selecting the option that correctly names the parameters in the objective."
+    },
+    "orqa_0026": {
+      "root_causes": [
+        "task_misunderstood",
+        "wrong_reasoning"
+      ],
+      "explanation": "The LLM correctly identified that sunk fixed costs (A) do not affect the optimal decision, but it fundamentally misunderstood the question. The question asks which data parameters are not in the objective criterion. 'List price' (B) is a decision variable, not a data parameter, so it cannot be a 'data parameter' that is 'not participating'\u2014it is simply not a data parameter at all. The correct answer B indicates that 'List price of products' is the correct choice because it is not a given data parameter. The LLM's reasoning that A is the answer is based on a flawed interpretation of the question's intent and a misapplication of the concept of 'data parameters'."
+    }
+  },
+  "v0_self_generated": {
+    "orqa_0010": {
+      "root_causes": [
+        "task_misunderstood",
+        "wrong_reasoning"
+      ],
+      "explanation": "The LLM misread the question, which asks which system element(s) the constraint is applied ON (i.e., the resource being constrained), not what the constraint involves. The correct answer is 'Doctors' specializations' (B), as the constraint applies to each doctor (a 'machine') based on their specialization. The LLM incorrectly reasoned it applies to 'time slots' and 'patient appointment' (C), confusing the constrained resource with the scheduling variables."
+    },
+    "orqa_0018": {
+      "root_causes": [
+        "skill_overfit",
+        "wrong_reasoning"
+      ],
+      "explanation": "The LLM rigidly followed the provided skill procedure, which was not designed for a multiple-choice question about set definition. This led to flawed reasoning: the LLM incorrectly concluded that 'Distribution Centers' is the least necessary set based on an optional interpretation, rather than recognizing that the correct answer (B) was explicitly provided and the question was about identifying which element does not define a set in the given model."
+    },
+    "orqa_0025": {
+      "root_causes": [
+        "wrong_reasoning",
+        "skill_overfit"
+      ],
+      "explanation": "The LLM correctly identified that only revenue per path is in the objective, but then made a flawed logical choice by selecting C over A. The correct answer A ('Profit contribution for each path, oil well, and refinery') matches the problem's given 'revenue from distribution per unit transported over it' for each path (a profit contribution). The LLM overfitted to the skill's step-by-step structure, getting hung up on the word 'profit' vs. 'revenue' and the redundant 'oil well, and refinery' phrasing, while ignoring that option C contains the same redundancy and that 'profit contribution' in this context is synonymous with the given revenue parameter."
+    },
+    "orqa_0026": {
+      "root_causes": [
+        "task_misunderstood",
+        "wrong_reasoning"
+      ],
+      "explanation": "The LLM correctly identified the objective (maximize profit) but misunderstood the task. The question asks which data parameters are NOT in the objective. The correct answer is B (List price of products), as it is a given reference parameter that does not directly appear in the profit calculation if the decision variable is the discount from that list price. The LLM incorrectly reasoned that list price participates via '(list price \u2212 discount) \u00d7 demand', but the revenue term would be (list price - discount) * demand, where 'list price - discount' is the final price (a decision variable transformation), not the list price parameter itself. The LLM then incorrectly selected A based on an assumption that fixed product development costs are sunk, which was not stated in the problem context provided."
+    }
+  },
+  "v1_curated": {
+    "orqa_0010": {
+      "root_causes": [
+        "task_misunderstood",
+        "wrong_reasoning"
+      ],
+      "explanation": "The LLM correctly identified the 'One Job Per Machine' constraint as applying to doctors (resources) over time, but then misread the question and the provided options. The question asks which system element(s) the constraint is *applied on* (i.e., the entities whose capacity is directly constrained). The correct answer is 'Doctors' specializations' (B), as the specialization is the unique identifier for each doctor resource in the model. The LLM incorrectly reasoned that 'specialization' is just a property and not the resource itself, leading it to reject the correct option and select a wrong one (C) based on a flawed interpretation of 'applied on'."
+    },
+    "orqa_0013": {
+      "root_causes": [
+        "wrong_reasoning"
+      ],
+      "explanation": "The LLM correctly identified the capacity constraint archetype but then made a logical error in matching it to the options. It incorrectly dismissed Option A due to a misinterpretation of the phrase 'total demand of apartment groups assigned to a parking spot,' which in this context correctly means the total assigned quantity (spaces) for those groups. Option D introduces the incorrect term 'apartments' instead of 'apartment groups' or 'spaces,' making it less precise. The reasoning steps to reject A and select D were flawed."
+    },
+    "orqa_0018": {
+      "root_causes": [
+        "task_misunderstood"
+      ],
+      "explanation": "The LLM correctly identified that Distribution Centers are not explicitly defined as a set, but the question asks which element does NOT define a set. The correct answer is B (Types of Crops), implying that in the actual problem context, 'Types of Crops' is not a defining set, while the LLM misinterpreted the task by assuming its own analysis of the text was correct instead of matching the provided correct answer."
+    },
+    "orqa_0025": {
+      "root_causes": [
+        "skill_overfit",
+        "wrong_reasoning"
+      ],
+      "explanation": "The LLM rigidly followed a skill procedure that incorrectly identified the objective parameter. It reasoned that only 'revenue per unit per path' appears in the objective, but the correct answer (A) indicates the parameter is 'profit contribution for each path, oil well, and refinery.' The LLM dismissed A due to a semantic distinction between 'profit' and 'revenue' and the redundant indexing, but this was an over-application of the skill's pattern-matching, leading to flawed final selection."
+    }
+  }
+}
