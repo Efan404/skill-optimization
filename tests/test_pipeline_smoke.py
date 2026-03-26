@@ -287,6 +287,30 @@ class TestBuildPrompt:
         assert q["context"] in messages[0]["content"]
         assert q["question"] in messages[0]["content"]
 
+    def test_component_minimal_prompt_includes_skill(self, dev_questions):
+        q = dev_questions[0]
+        skill = {
+            "name": "or-model-identification",
+            "version": "v1_component_minimal",
+            "procedure": [{"step": "Analyze the problem", "check": "Done"}],
+        }
+        messages = build_prompt(q, "v1_component_minimal", skill)
+        assert len(messages) == 1
+        assert "v1_component_minimal" in messages[0]["content"]
+        assert q["context"] in messages[0]["content"]
+
+    def test_component_enriched_prompt_includes_skill(self, dev_questions):
+        q = dev_questions[0]
+        skill = {
+            "name": "or-model-identification",
+            "version": "v1_component_enriched",
+            "procedure": [{"step": "Analyze the problem", "check": "Done"}],
+        }
+        messages = build_prompt(q, "v1_component_enriched", skill)
+        assert len(messages) == 1
+        assert "v1_component_enriched" in messages[0]["content"]
+        assert q["question"] in messages[0]["content"]
+
     def test_invalid_condition_raises(self, dev_questions):
         with pytest.raises(ValueError, match="Unknown condition"):
             build_prompt(dev_questions[0], "nonexistent_condition")

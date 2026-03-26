@@ -11,6 +11,8 @@ _CONDITION_PATHS = {
     "generic_scaffold": lambda task_type: SKILLS_DIR / "generic_scaffold" / "generic_problem_solving.yaml",
     "v0_self_generated": lambda task_type: SKILLS_DIR / "orqa" / "v0_self_generated" / f"{task_type}.yaml",
     "v1_curated": lambda task_type: SKILLS_DIR / "orqa" / "v1_curated" / f"{task_type}.yaml",
+    "v1_component_minimal": lambda task_type: SKILLS_DIR / "orqa" / "v1_component_minimal" / f"{task_type}.yaml",
+    "v1_component_enriched": lambda task_type: SKILLS_DIR / "orqa" / "v1_component_enriched" / f"{task_type}.yaml",
     "v2_optimized": lambda task_type: SKILLS_DIR / "orqa" / "v2_optimized" / f"{task_type}.yaml",
 }
 
@@ -64,7 +66,8 @@ def get_skill_for_condition(condition: str, task_type: str) -> dict | None:
 
     Args:
         condition: One of 'baseline', 'generic_scaffold', 'v0_self_generated',
-                   'v1_curated', 'v2_optimized'.
+                   'v1_curated', 'v1_component_minimal',
+                   'v1_component_enriched', 'v2_optimized'.
         task_type: The task type, e.g. 'linear_programming' or
                    'combinatorial_optimization'.
 

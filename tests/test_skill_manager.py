@@ -163,6 +163,22 @@ def test_get_skill_for_curated():
     assert ormi["task_type"] == "or_model_identification"
 
 
+def test_get_skill_for_component_minimal():
+    """Track A A1 skill resolves to the component-minimal artifact."""
+    skill = get_skill_for_condition("v1_component_minimal", "or_model_identification")
+    assert skill is not None
+    assert skill["version"] == "v1_component_minimal"
+    assert skill["task_type"] == "or_model_identification"
+
+
+def test_get_skill_for_component_enriched():
+    """Track A A2 skill resolves to the component-enriched artifact."""
+    skill = get_skill_for_condition("v1_component_enriched", "or_model_identification")
+    assert skill is not None
+    assert skill["version"] == "v1_component_enriched"
+    assert skill["task_type"] == "or_model_identification"
+
+
 def test_get_skill_for_generic_scaffold():
     """generic_scaffold returns the generic skill regardless of task_type."""
     scaffold = get_skill_for_condition("generic_scaffold", "linear_programming")

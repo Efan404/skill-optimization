@@ -1,10 +1,12 @@
 """Agent runner — build prompts from templates, call LLM, return raw responses.
 
-Supports five experimental conditions:
+Supports ORQA experiment conditions:
   - baseline: plain prompt, no skill/scaffold
   - generic_scaffold: length-matched generic problem-solving scaffold
   - v0_self_generated: LLM-generated skill
-  - v1_curated: hand-designed domain-specific skill
+  - v1_curated: hand-designed archetype skill
+  - v1_component_minimal: Track A minimal component-semantics skill
+  - v1_component_enriched: Track A enriched component-semantics skill
   - v2_optimized: iteratively refined skill
 """
 
@@ -80,7 +82,13 @@ Follow the skill procedure step by step, then provide your final answer.
 **IMPORTANT:** Your final line MUST be exactly: "ANSWER: X" where X is A, B, C, or D."""
 
 # Conditions that use a skill YAML (as opposed to scaffold or no skill)
-_SKILL_CONDITIONS = {"v0_self_generated", "v1_curated", "v2_optimized"}
+_SKILL_CONDITIONS = {
+    "v0_self_generated",
+    "v1_curated",
+    "v1_component_minimal",
+    "v1_component_enriched",
+    "v2_optimized",
+}
 _SCAFFOLD_CONDITIONS = {"generic_scaffold"}
 _ALL_CONDITIONS = {"baseline"} | _SCAFFOLD_CONDITIONS | _SKILL_CONDITIONS
 
@@ -98,7 +106,8 @@ def build_prompt(
     Args:
         question: A question dict with keys 'question' and 'choices' (A-D).
         condition: One of 'baseline', 'generic_scaffold', 'v0_self_generated',
-                   'v1_curated', 'v2_optimized'.
+                   'v1_curated', 'v1_component_minimal',
+                   'v1_component_enriched', 'v2_optimized'.
         skill: The skill/scaffold dict.  Required for all conditions except
                'baseline'.
 
@@ -136,7 +145,7 @@ def build_prompt(
         content = SCAFFOLD_PROMPT.format(**fmt_kwargs)
 
     else:
-        # v0_self_generated, v1_curated, v2_optimized
+        # Conditions that inject a domain skill YAML
         if skill is None:
             raise ValueError(
                 f"Condition '{condition}' requires a skill, but None was provided."
