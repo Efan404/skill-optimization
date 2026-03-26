@@ -56,6 +56,12 @@ common_failures:
 verification: [final check procedure]"""
 
 TASK_TYPE_DESCRIPTIONS = {
+    "or_model_identification": (
+        "Operations research model identification problems where you must "
+        "identify optimization model components (decision variables, parameters, "
+        "constraints, objectives, model type) from a natural language problem "
+        "description"
+    ),
     "linear_programming": (
         "Linear programming problems where you must optimize a linear "
         "objective function subject to linear constraints"
@@ -78,16 +84,20 @@ _V0_SKILL_DIR = Path("skills") / "orqa" / "v0_self_generated"
 def _format_example(example: dict) -> str:
     """Format a seed example question for inclusion in the prompt.
 
-    Produces a readable text block containing the question and its choices.
+    Produces a readable text block containing the context (if present),
+    question, and choices.
     """
     choices = example["choices"]
-    lines = [
-        example["question"],
+    lines = []
+    if example.get("context"):
+        lines.append(f"Context: {example['context']}")
+    lines.extend([
+        f"Question: {example['question']}",
         f"  A) {choices['A']}",
         f"  B) {choices['B']}",
         f"  C) {choices['C']}",
         f"  D) {choices['D']}",
-    ]
+    ])
     return "\n".join(lines)
 
 

@@ -8,5 +8,4 @@ experiment:
     - "v1_curated"
     - "v2_optimized"
   task_types:
-    - "linear_programming"
-    - "combinatorial_optimization"
+    - "or_model_identification"
