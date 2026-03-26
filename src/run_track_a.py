@@ -19,6 +19,7 @@ from src.error_analyzer import analyze_dev_failures
 from src.evaluator import evaluate_condition
 from src.llm_client import LLMClient
 from src.report_generator import compute_accuracy
+from src.report_generator_track_a import generate_track_a_report
 from src.skill_manager import get_skill_for_condition, validate_scaffold_length
 from src.task_loader import (
     get_dataset_label,
@@ -197,6 +198,19 @@ def run_track_a(model_name: str = "step_2_mini", run_id: str | None = None) -> d
     console.rule("[bold yellow]Phase 3: Test Set")
     test_results, _ = _run_split(client, "test", task_types)
     _save_results(test_results, "test", run_id)
+
+    console.rule("[bold yellow]Phase 4: Report Generation")
+    report_path = Path(f"results/runs/{run_id}/track_a_report.md")
+    generate_track_a_report(
+        dev_results=dev_results,
+        test_results=test_results,
+        dev_analysis=dev_analysis,
+        questions=all_questions,
+        run_id=run_id,
+        model_name=client.config["model"],
+        dataset_label=dataset_label,
+    )
+    console.print(f"[green]Track A report saved to {report_path}")
 
     console.rule("[bold green]Track A Complete")
     table = Table(title="Track A Test Results")
