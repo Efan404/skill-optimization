@@ -20,10 +20,12 @@ procedure:
     \ activities -- what the decision-maker\n    controls or chooses;\n(b) Parameters / given data -- fixed constants, coefficients, costs,\n    capacities, demands;\n(c) Objective function -- what is maximized\
     \ or minimized, and which\n    variables and parameters participate;\n(d) Constraints / restrictions -- limits, requirements, balance\n    equations, logical conditions;\n(e) Sets -- indexing collections\
     \ (time periods, locations, products,\n    people, machines);\n(f) Model type -- LP, ILP, MILP, NLP classification; (g) Problem category -- assignment, routing, scheduling, blending,\n    facility location,\
-    \ etc.;\n(h) Relationships -- how specific components relate to each other\n    (e.g., which parameter appears in which constraint).\nNote any qualifiers in the question: negations (\"which is NOT\"\
-    ), superlatives (\"which BEST\"), or specificity (\"which of the following constraints\" vs. \"which constraint type\").\n"
-  check: 'Can you state in one sentence what model component the question targets? Have you noted any negations, qualifiers, or specificity in the question stem? Is your identified target one of the eight
-    categories listed above? Have you avoided jumping to the problem description before understanding the question?
+    \ etc.;\n(h) Relationships -- how specific components relate to each other\n    (e.g., which parameter appears in which constraint).\n\nCRITICAL: Note the EXACT phrasing of the question. Pay special\
+    \ attention to:\n- Negations (\"which is NOT\", \"does not define\", \"are not participating\") -- these require identifying the component that is FALSE or ABSENT.\n- Superlatives (\"which BEST\") --\
+    \ these require selecting the most precise match.\n- Specificity (\"which of the following constraints\" vs. \"which constraint type\") -- match the granularity.\n- Prepositions (\"applied on\", \"\
+    participating in\", \"define\") -- these specify the relationship being queried. For \"applied on\", identify the domain/index set of the constraint.\n"
+  check: 'Can you state in one sentence what model component the question targets? Have you explicitly noted any negations, qualifiers, prepositions, or specificity in the question stem? Is your identified
+    target one of the eight categories listed above? Have you avoided jumping to the problem description before understanding the question?
 
     '
 - step: "Read the full problem description. Identify trigger cues and match the scenario to one of the following OR archetypes. Use the matched archetype to activate priors about expected model components.\n\
@@ -85,16 +87,17 @@ procedure:
 - step: "Focus narrowly on the component identified in Stage A. Using your model skeleton from Stage C, evaluate each answer option:\n(a) For each option, check: does this match what you found in\n    Stage\
     \ C for the targeted component? Can you cite specific\n    textual evidence supporting or contradicting this option?\n\n(b) Eliminate options that:\n    - Contradict the problem text (e.g., listing\
     \ a parameter as a\n      decision variable)\n    - Include elements with no textual reference in the problem\n      description (even if semantically plausible)\n    - Mischaracterize the relationship\
-    \ (e.g., wrong constraint\n      direction, wrong objective quantity)\n    - Use different terminology for the same concept without\n      justification (e.g., \"profit\" vs. \"revenue\" when the text\
-    \ uses\n      one term; treat them as distinct unless the text equates them).\n\n(c) Among remaining options, prefer the one with the most direct\n    and complete textual support. If an option partially\
-    \ matches\n    but includes an unsupported element, it is less preferable\n    than an option where every element has textual grounding.\n\n(d) If the question asks about model type or problem category,\n\
-    \    verify your classification against the full model skeleton:\n    check variable types for LP/ILP/MILP and function linearity\n    for NLP. Match the decision structure to standard OR archetypes\n\
-    \    for the problem category.\n\n(e) For questions about constraints, carefully identify what the\n    constraint is \"applied on.\" This typically refers to the entity\n    over which the constraint\
-    \ is indexed (e.g., \"for each machine\") or\n    the specific resource/attribute being limited. Do not confuse the\n    constrained entity with the variable being constrained.\n\n(f) For questions\
-    \ with negations (\"which is NOT\"), first identify all\n    options that ARE correct components. The remaining option is the\n    answer. Double-check your final selection against the negation\n  \
-    \  requirement.\n\nState your final answer with explicit justification referencing the problem text.\n"
+    \ (e.g., wrong constraint\n      direction, wrong objective quantity)\n    - For questions about sets: represent an individual parameter\n      or variable, not an indexing collection.\n    - For questions\
+    \ about constraint application (\"applied on\"):\n      incorrectly identify the domain/index set.\n\n(c) Among remaining options, prefer the one with the most direct\n    and complete textual support.\
+    \ If an option partially matches\n    but includes an unsupported element, it is less preferable\n    than an option where every element has textual grounding.\n\n(d) If the question asks about model\
+    \ type or problem category,\n    verify your classification against the full model skeleton:\n    check variable types for LP/ILP/MILP and function linearity\n    for NLP. Match the decision structure\
+    \ to standard OR archetypes\n    for the problem category.\n\n(e) FOR NEGATION QUESTIONS (\"which is NOT\"): Invert your\n    reasoning. Identify the component that is FALSE or ABSENT\n    according\
+    \ to your model skeleton. Verify that the other\n    options are indeed present/correct.\n\n(f) FOR PARAMETER/OBJECTIVE QUESTIONS: Match the parameter\n    description in the option to the exact parameter\
+    \ described in\n    the text. Do not reject an option based on semantic nuances\n    (e.g., \"profit\" vs. \"revenue\") if the intended meaning is\n    clear from context and the indexing matches. Prioritize\n\
+    \    textual correspondence over minor phrasing differences.\n\nState your final answer with explicit justification referencing the problem text.\n"
   check: 'Have you evaluated every answer option against the problem text? Have you eliminated options with elements that lack textual support? Is your selected answer consistent with ALL components of
-    your model skeleton? If the question has a negation ("which is NOT"), have you inverted your reasoning correctly? Can you justify your answer with a direct quote or paraphrase from the problem description?
+    your model skeleton? If the question has a negation ("which is NOT"), have you inverted your reasoning correctly? For "applied on" questions, does your answer correctly identify the constraint domain/index
+    set? Can you justify your answer with a direct quote or paraphrase from the problem description?
 
     '
 common_failures:
@@ -117,13 +120,18 @@ common_failures:
   of continuous variables. Re-read the problem specifically looking for these archetype-predicted constraints.
 
   '
-- 'Overfitting to archetype priors at the expense of problem-specific text. The archetype provides guidance, but the final model skeleton must be grounded in the specific problem description. If the text
-  defines a component differently than the archetype default (e.g., a "profit contribution" parameter instead of generic "revenue"), the text takes precedence.
+- 'Misinterpreting question phrasing, especially negations ("which is NOT") and relational prepositions ("applied on"). For "applied on", the answer is the domain/index set the constraint is defined over
+  (e.g., "for each machine"), not the constraint type or the entities being constrained. For negation questions, carefully identify the component that is false or absent.
+
+  '
+- 'Over-interpreting answer options and rejecting correct matches due to minor semantic differences (e.g., "profit" vs. "revenue") or redundant indexing. Prioritize textual correspondence: if the problem
+  describes "revenue per unit per path" and an option says "profit contribution for each path, oil well, and refinery", accept it as a match for the revenue parameter if the indexing is correct and the
+  intended meaning is clear from context.
 
   '
 verification: 'After completing the analysis, cross-check every identified component against the original problem text. For each decision variable, confirm a supporting text span exists. For each parameter,
   confirm it is given data. For each constraint, confirm the LHS meaning, RHS value, and the set element it applies to. Verify the objective direction and quantity match the goal sentence. Confirm the model
   type is consistent with the variable types and function linearity you identified. Verify your archetype choice is supported by at least two trigger cues from the text. If the question offers answer choices,
-  compare your analysis against each option and eliminate those that contradict the problem text.
+  compare your analysis against each option and eliminate those that contradict the problem text. For negation questions, double-check that your selected answer is indeed the false/absent one.
 
   '

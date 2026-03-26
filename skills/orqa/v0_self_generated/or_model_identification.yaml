@@ -1,42 +1,28 @@
-name: OR Model Component Identification
+name: Identify Optimization Model Components
 version: v0_self_generated
 source: self_generated
 domain: operations_research
 task_type: or_model_identification
-when_to_use:
-- When given a natural language description of an operations research problem
-- When asked to identify specific components of an optimization model (decision variables, parameters, constraints, objectives, model type)
-- When presented with multiple-choice questions about model structure from a textual scenario
-when_not_to_use:
-- When asked to actually formulate or solve the mathematical model
-- When the problem is purely algorithmic or computational without optimization modeling
-- When the description lacks sufficient information about goals, limitations, or system elements
+when_to_use: When you need to identify the components of an optimization model from a natural language problem description.
+when_not_to_use: When the problem description is not clear or lacks necessary details to identify model components.
 preconditions:
-- The problem description contains identifiable goals (minimize/maximize something)
-- The description mentions limitations, requirements, or resources
-- The question specifically asks about model components or classification
+- The problem description is provided in natural language.
+- The problem is an operations research model identification problem.
 procedure:
-- step: Read the entire context and question carefully. Identify the core business decision being made.
-  check: Can you state in one sentence what decision the manager needs to make?
-- step: Extract explicit goal statements. Look for words like "minimize," "maximize," "goal is to," "objective is."
-  check: Have you found at least one clear optimization objective in the text?
-- step: Identify all resources, limitations, and requirements. Look for words like "must," "cannot exceed," "limited to," "ensure," "meet."
-  check: Have you listed all mentioned constraints or requirements?
-- step: Determine what can be controlled (decision variables). Look for phrases about choosing, assigning, determining, or deciding amounts/allocations/routes.
-  check: Can you identify what quantities the decision-maker directly controls?
-- step: Identify fixed data (parameters). Look for given numbers, costs, capacities, demands, times, or values that are not decided.
-  check: Have you separated given data from decision variables?
-- step: Classify the problem type by recognizing patterns. Check for network flows, time periods, assignments, blending, inventory, or routing patterns.
-  check: Does the problem match known OR model types (LP, IP, network flow, assignment, etc.)?
-- step: For constraint identification questions, determine what the constraint must balance or limit based on the system logic.
-  check: Does your interpretation maintain feasibility while respecting all described requirements?
-- step: Compare your analysis against each multiple-choice option. Eliminate options that contradict the identified objective, constraints, or model type.
-  check: Can you explain why each wrong option is incorrect based on the context?
+- step: Understand the problem context and objectives.
+  check: Verify that you have a clear understanding of the problem's goals and constraints.
+- step: Identify decision variables.
+  check: Ensure that decision variables are explicitly stated or can be inferred from the problem description.
+- step: Determine parameters.
+  check: Verify that parameters are clearly defined or can be derived from the problem context.
+- step: Define constraints.
+  check: Ensure that constraints are explicitly mentioned or can be logically deduced from the problem description.
+- step: Identify the objective function.
+  check: Verify that the objective function is clearly stated or can be inferred from the problem's goals.
+- step: Determine the model type.
+  check: Ensure that the model type is appropriate for the problem context and objectives.
 common_failures:
-- Confusing parameters with decision variables (e.g., treating given costs as decisions)
-- Misidentifying the objective by focusing on intermediate goals rather than the ultimate financial/performance metric
-- Overlooking implicit constraints (like non-negativity or logical dependencies)
-- Applying a familiar model template without verifying it matches the described system structure
-- Getting distracted by technical details that are irrelevant to the specific component being asked about
-verification: After selecting an answer, re-read the question and verify that your chosen option directly answers what was asked about (objective, constraint meaning, applied elements, or model category)
-  and aligns with the primary goal and constraints identified in steps 2-3.
+- Insufficient problem description leading to ambiguity in identifying components.
+- Misinterpretation of problem constraints or objectives.
+- Overlooking the importance of certain parameters or decision variables.
+verification: Review the identified components (decision variables, parameters, constraints, objectives, model type) to ensure they accurately represent the problem described in the natural language.
