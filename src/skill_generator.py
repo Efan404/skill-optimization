@@ -1,21 +1,37 @@
 """Skill generator — use an LLM to create a v0 self-generated skill from seed examples.
 
 The generator takes seed examples (disjoint from dev/test) for a given task
-type, asks the LLM to produce a structured YAML skill, parses the response,
+type, asks the LLM to produce a structured JSON skill, parses the response,
 and saves the result to ``skills/orqa/v0_self_generated/{task_type}.yaml``.
 """
 
-import re
+import json
 from pathlib import Path
-
-import yaml
 
 from src.llm_client import LLMClient
 from src.skill_manager import save_skill
+from src.skill_schema import validate_skill_dict
 
 # ---------------------------------------------------------------------------
 # Prompt template & task-type descriptions
 # ---------------------------------------------------------------------------
+
+SKILL_SCHEMA_FOR_PROMPT = """
+Output a JSON object with this structure:
+{
+  "name": "string - skill name",
+  "version": "v0_self_generated",
+  "source": "self_generated",
+  "domain": "operations_research",
+  "task_type": "string",
+  "when_to_use": "string",
+  "when_not_to_use": "string",
+  "preconditions": ["string", ...],
+  "procedure": [{"step": "string", "check": "string"}, ...],
+  "common_failures": ["string", ...],
+  "verification": "string"
+}
+"""
 
 SKILL_GEN_PROMPT = """You are an expert in operations research and problem-solving methodology.
 
@@ -29,27 +45,7 @@ NOTE: These examples are provided only to illustrate the problem format. Your sk
 
 Create a general-purpose skill as a step-by-step procedure with verification checks.
 
-Output the skill in this exact YAML format:
-
-name: [skill name]
-version: "v0_self_generated"
-source: "self_generated"
-domain: "operations_research"
-task_type: {task_type}
-when_to_use: [when this skill applies]
-when_not_to_use: [when this skill should NOT be used]
-preconditions:
-  - [precondition 1]
-  - [precondition 2]
-procedure:
-  - step: [what to do]
-    check: [how to verify]
-  - step: [what to do]
-    check: [how to verify]
-common_failures:
-  - [failure mode 1]
-  - [failure mode 2]
-verification: [final check procedure]"""
+""" + SKILL_SCHEMA_FOR_PROMPT.strip()
 
 TASK_TYPE_DESCRIPTIONS = {
     "or_model_identification": (
@@ -97,123 +93,9 @@ def _format_example(example: dict) -> str:
     return "\n".join(lines)
 
 
-def extract_yaml_from_response(response: str) -> str:
-    """Extract YAML content from an LLM response.
-
-    Strategy:
-      1. Look for a fenced code block (```yaml ... ``` or ``` ... ```).
-      2. Fall back to detecting raw YAML starting with ``name:``.
-
-    Args:
-        response: The full LLM response text.
-
-    Returns:
-        A string containing the YAML content.
-
-    Raises:
-        ValueError: If no YAML content could be found.
-    """
-    # Strategy 1: fenced code block
-    # Match ```yaml ... ``` or ``` ... ``` (greedy-minimal)
-    pattern = r"```(?:yaml|yml)?\s*\n(.*?)```"
-    match = re.search(pattern, response, re.DOTALL)
-    if match:
-        return match.group(1).strip()
-
-    # Strategy 2: raw YAML — look for a block starting with "name:"
-    pattern_raw = r"(^name:\s*.+(?:\n.+)*)"
-    match_raw = re.search(pattern_raw, response, re.MULTILINE)
-    if match_raw:
-        return match_raw.group(1).strip()
-
-    raise ValueError(
-        "Could not extract YAML from LLM response. "
-        "Expected a ```yaml``` code block or raw YAML starting with 'name:'."
-    )
-
-
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
-
-
-def _parse_yaml_robust(yaml_text: str) -> dict:
-    """Try to parse YAML with fallback sanitization for LLM-generated content.
-
-    Handles common issues like unquoted values containing colons.
-
-    Args:
-        yaml_text: Raw YAML text extracted from LLM response.
-
-    Returns:
-        Parsed YAML as a dict.
-
-    Raises:
-        ValueError: If all parsing strategies fail.
-    """
-    # Strategy 1: direct parse
-    try:
-        result = yaml.safe_load(yaml_text)
-        if isinstance(result, dict):
-            return result
-    except yaml.YAMLError:
-        pass
-
-    # Strategy 2: fix unquoted values containing colons
-    lines = yaml_text.split("\n")
-    fixed_lines = []
-    for line in lines:
-        stripped = line.rstrip()
-        if not stripped or stripped.lstrip().startswith("#"):
-            fixed_lines.append(stripped)
-            continue
-
-        content = stripped.lstrip()
-        indent = " " * (len(stripped) - len(content))
-
-        # Handle "- key: value" list items where value has unquoted colons
-        if content.startswith("- "):
-            inner = content[2:].strip()
-            if ":" in inner:
-                key_part, _, val_part = inner.partition(":")
-                val_stripped = val_part.strip()
-                if val_stripped and ":" in val_stripped and not (
-                    val_stripped.startswith('"') or val_stripped.startswith("'") or
-                    val_stripped.startswith(">") or val_stripped.startswith("|")
-                ):
-                    val_escaped = val_stripped.replace('"', '\\"')
-                    fixed_lines.append(f'{indent}- {key_part}: "{val_escaped}"')
-                    continue
-            fixed_lines.append(stripped)
-            continue
-
-        # Handle "key: value" lines where value has unquoted colons
-        if ":" in content:
-            key_part, _, val_part = content.partition(":")
-            val_stripped = val_part.strip()
-            if val_stripped and ":" in val_stripped and not (
-                val_stripped.startswith('"') or val_stripped.startswith("'") or
-                val_stripped.startswith("[") or val_stripped.startswith(">") or
-                val_stripped.startswith("|")
-            ):
-                val_escaped = val_stripped.replace('"', '\\"')
-                fixed_lines.append(f'{indent}{key_part}: "{val_escaped}"')
-                continue
-
-        fixed_lines.append(stripped)
-
-    fixed_yaml = "\n".join(fixed_lines)
-    try:
-        result = yaml.safe_load(fixed_yaml)
-        if isinstance(result, dict):
-            return result
-    except yaml.YAMLError:
-        pass
-
-    raise ValueError(
-        f"Could not parse YAML after sanitization. "
-        f"Preview:\n{yaml_text[:500]}"
-    )
 
 
 def generate_skill(
@@ -256,44 +138,40 @@ def generate_skill(
         task_type_description=TASK_TYPE_DESCRIPTIONS[task_type],
         n=len(seed_examples),
         seed_examples_block=seed_examples_block,
-        task_type=task_type,
     )
 
-    last_error = None
-    for attempt in range(3):
-        messages = [{"role": "user", "content": prompt_text}]
-        result = client.chat(messages, purpose=f"skill_gen_{task_type}")
-
-        # Parse the YAML from the response
-        try:
-            yaml_text = extract_yaml_from_response(result["response"])
-            skill = _parse_yaml_robust(yaml_text)
-
-            if not isinstance(skill, dict):
-                raise ValueError(
-                    f"Parsed YAML is not a dict (got {type(skill).__name__}). "
-                    f"Raw YAML:\n{yaml_text}"
-                )
-
-            # Save to the v0 skill directory
-            save_path = _V0_SKILL_DIR / f"{task_type}.yaml"
-            save_skill(skill, str(save_path))
-
-            return skill
-
-        except (ValueError, yaml.YAMLError) as e:
-            last_error = e
-            if attempt < 2:
-                # Retry with cleaner YAML instructions
-                prompt_text += (
-                    "\n\nIMPORTANT: Your previous YAML had formatting errors. "
-                    "Ensure ALL string values containing colons, commas, or "
-                    "special characters are properly quoted with double quotes. "
-                    "Use the > or | YAML block scalar syntax for long text."
-                )
-                continue
-
-    raise ValueError(
-        f"Failed to generate valid YAML skill after 3 attempts. "
-        f"Last error: {last_error}"
+    messages = [{"role": "user", "content": prompt_text}]
+    result = client.chat(
+        messages,
+        purpose=f"skill_gen_{task_type}",
+        response_format={"type": "json_object"},
     )
+
+    # Parse JSON response
+    try:
+        skill = json.loads(result["response"])
+    except json.JSONDecodeError as e:
+        raise ValueError(
+            f"LLM returned invalid JSON for skill generation. "
+            f"Error: {e}. Response preview: {result['response'][:300]}"
+        ) from e
+
+    if not isinstance(skill, dict):
+        raise ValueError(
+            f"LLM returned JSON but not a dict (got {type(skill).__name__}). "
+            f"Response preview: {result['response'][:300]}"
+        )
+
+    # Validate required fields
+    issues = validate_skill_dict(skill)
+    if issues:
+        raise ValueError(
+            f"Generated skill is missing required fields: {'; '.join(issues)}. "
+            f"Response preview: {result['response'][:300]}"
+        )
+
+    # Save to the v0 skill directory (internal storage remains YAML)
+    save_path = _V0_SKILL_DIR / f"{task_type}.yaml"
+    save_skill(skill, str(save_path))
+
+    return skill
