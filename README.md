@@ -31,6 +31,15 @@ docker run --rm skill-optimization-dev uv run pytest tests/test_evomap_publisher
 docker run --rm skill-optimization-dev python3 scripts/publish_to_evomap.py --list
 ```
 
+## Fast Docker Compose Reproduction
+
+```bash
+docker compose build
+docker compose run --rm app uv run pytest tests/test_evomap_publisher.py -q
+docker compose run --rm app python3 scripts/publish_to_evomap.py --list
+docker compose run --rm app bash
+```
+
 For the full local setup, Docker notes, command reference, and EvoMap
 credential caveats, see [docs/setup_and_repro.md](docs/setup_and_repro.md).
 

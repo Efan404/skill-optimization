@@ -38,6 +38,7 @@ def test_repo_level_repro_docs_and_docker_files_exist():
     readme = (PROJECT_ROOT / "README.md").read_text()
     assert "uv sync --dev" in readme
     assert "docker build -t skill-optimization-dev ." in readme
+    assert "docker compose run --rm app uv run pytest tests/test_evomap_publisher.py -q" in readme
     assert "docs/setup_and_repro.md" in readme
 
     setup_doc = PROJECT_ROOT / "docs" / "setup_and_repro.md"
@@ -46,6 +47,7 @@ def test_repo_level_repro_docs_and_docker_files_exist():
     assert "npm ci" in setup_text
     assert "uv run pytest" in setup_text
     assert ".evomap_secrets.json" in setup_text
+    assert "docker compose run --rm app bash" in setup_text
 
     dockerfile = PROJECT_ROOT / "Dockerfile"
     assert dockerfile.exists(), "Repo-level Dockerfile should exist"
@@ -53,6 +55,15 @@ def test_repo_level_repro_docs_and_docker_files_exist():
     assert "FROM python:3.12-slim" in docker_text
     assert "uv sync --frozen --dev" in docker_text
     assert "npm ci" in docker_text
+
+    compose = PROJECT_ROOT / "compose.yaml"
+    assert compose.exists(), "compose.yaml should exist for Docker Compose workflows"
+    compose_text = compose.read_text()
+    assert "services:" in compose_text
+    assert "app:" in compose_text
+    assert "build:" in compose_text
+    assert "image: skill-optimization-dev" in compose_text
+    assert 'command: ["bash"]' in compose_text
 
     dockerignore = PROJECT_ROOT / ".dockerignore"
     assert dockerignore.exists(), ".dockerignore should exist"

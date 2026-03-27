@@ -145,6 +145,37 @@ docker run --rm -it skill-optimization-dev bash
 If you need API keys or publish secrets inside the container, mount or pass
 them explicitly rather than baking them into the image.
 
+## Docker Compose Reproduction
+
+The repo also includes `compose.yaml` for the same image. This compose setup
+is intentionally reproduction-oriented rather than live-edit oriented: it does
+not bind-mount the repo into `/app`, so the container uses the exact checked-in
+code and dependencies baked into the image.
+
+### 1. Build through Compose
+
+```bash
+docker compose build
+```
+
+### 2. Run smoke checks
+
+```bash
+docker compose run --rm app uv run pytest tests/test_evomap_publisher.py -q
+docker compose run --rm app python3 scripts/publish_to_evomap.py --list
+```
+
+### 3. Open an interactive shell
+
+```bash
+docker compose run --rm app bash
+```
+
+If you later want a live-edit development container, add a separate compose
+override for bind mounts. Do not overload the default compose file, because
+mounting the repo over `/app` would hide the preinstalled `.venv` and
+`node_modules` directories from the image.
+
 ## EvoMap Credentials
 
 EvoMap publisher state is stored locally in:
