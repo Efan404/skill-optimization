@@ -1,4 +1,10 @@
 {
+  "name": "skill-optimization-demo",
+  "private": true,
+  "scripts": {
+    "evomap:build": "node scripts/evomap_sdk_build.mjs",
+    "evomap:list": "uv run python scripts/publish_to_evomap.py --list"
+  },
   "dependencies": {
     "@evomap/gep-sdk": "^1.0.1",
     "yaml": "^2.8.3"

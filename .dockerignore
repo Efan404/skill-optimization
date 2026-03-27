@@ -1,0 +1,9 @@
+.env
+.evomap_secrets.json
+.git
+.pytest_cache
+.venv
+.worktrees
+__pycache__/
+node_modules/
+results/
