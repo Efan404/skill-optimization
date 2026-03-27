@@ -1,7 +1,3 @@
-openai>=1.0.0
-pyyaml>=6.0
-jsonschema>=4.0
-rich>=13.0
-python-dotenv>=1.0
-tiktoken>=0.7.0
-tqdm>=4.60.0
+# Legacy compatibility shim.
+# Prefer `uv sync --dev` for local setup and `uv run ...` for commands.
+-e .

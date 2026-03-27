@@ -8,17 +8,40 @@ A lightweight pipeline that tests whether structured skills can improve LLM reas
 # Clone and setup
 git clone <repo-url>
 cd skill-optimization
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-pip install "httpx[socks]"  # if using SOCKS proxy
+uv sync --dev
+npm ci
 
 # Configure API keys
 cp .env.example .env
 # Edit .env with your DeepSeek and/or OpenRouter API keys
 
+# Verify the environment
+uv run pytest tests/test_evomap_publisher.py -q
+npm run evomap:list
+
 # Run the full pipeline
-python -m src.run_pipeline --model deepseek
+uv run python -m src.run_pipeline --model deepseek
 ```
+
+## Fast Docker Reproduction
+
+```bash
+docker build -t skill-optimization-dev .
+docker run --rm skill-optimization-dev uv run pytest tests/test_evomap_publisher.py -q
+docker run --rm skill-optimization-dev python3 scripts/publish_to_evomap.py --list
+```
+
+## Fast Docker Compose Reproduction
+
+```bash
+docker compose build
+docker compose run --rm app uv run pytest tests/test_evomap_publisher.py -q
+docker compose run --rm app python3 scripts/publish_to_evomap.py --list
+docker compose run --rm app bash
+```
+
+For the full local setup, Docker notes, command reference, and EvoMap
+credential caveats, see [docs/setup_and_repro.md](docs/setup_and_repro.md).
 
 ## What This Does
 
