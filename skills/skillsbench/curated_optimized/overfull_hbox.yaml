@@ -1,0 +1,283 @@
+name: "overfull-hbox-fix"
+version: "1.1"
+source: "curated"
+domain: "latex"
+task_type: "latex_debugging"
+
+when_to_use: >
+  When fixing LaTeX compilation warnings about "Overfull \hbox" by
+  substituting words with shorter synonyms from a provided dictionary.
+  The task involves an iterative compile-check-fix loop: compile the
+  document, parse the log for overfull warnings, identify words on
+  offending lines that have shorter synonyms, substitute, and recompile.
+
+when_not_to_use: >
+  When the LaTeX issue is not about overfull hboxes (e.g., underfull hboxes,
+  missing packages, syntax errors), when the fix involves changing page
+  geometry or LaTeX commands rather than word substitutions, or when no
+  synonym dictionary is provided.
+
+preconditions:
+  - "A LaTeX document exists that produces one or more 'Overfull \\hbox' warnings when compiled with pdflatex."
+  - "A synonym dictionary file is provided containing comma-separated families of interchangeable words."
+  - "An input text file (e.g., input.tex) is the designated editable file; the main LaTeX document and synonym dictionary must remain unmodified."
+
+procedure:
+  - step: >
+      Before making any changes, understand what you are working with:
+
+      (a) Identify the files in the working directory. There should be a
+          main LaTeX document (e.g., main.tex) that includes an input file
+          (e.g., input.tex) and a synonyms dictionary file (e.g.,
+          synonyms.txt).
+
+      (b) Determine which files you are allowed to edit. Typically you may
+          ONLY edit the input text file (input.tex). The main LaTeX document
+          and the synonym dictionary must remain unmodified.
+
+      (c) Read the synonym dictionary to understand the available
+          substitutions. Note the format: each line is a comma-separated
+          family of interchangeable words. Build a mental model (or data
+          structure) mapping each word to its family of synonyms.
+
+      (d) Read the input text file to understand its content. Note that
+          this is plain text that gets included into the LaTeX document.
+
+      (e) Read the main LaTeX document to understand the page layout. Pay
+          attention to \textwidth, \oddsidemargin, \evensidemargin, and
+          any other geometry settings. A narrow text width means more
+          potential for overfull lines.
+    check: >
+      Can you identify which file to edit and which files are read-only?
+      Have you read the synonym dictionary and understand the family
+      structure? Do you understand the page geometry and why overfull hboxes
+      occur?
+
+  - step: >
+      Run the LaTeX compiler (pdflatex) on the main document to generate
+      the compilation log. Then parse the log to identify all overfull
+      hbox warnings.
+
+      (a) Compile the document. Use a command like:
+          pdflatex main.tex
+          This produces main.log (and main.pdf, main.aux, etc.).
+
+      (b) Search the log file for lines containing "Overfull". Each
+          occurrence represents one overfull hbox warning.
+
+      (c) For each overfull warning, extract:
+          - The line number in the source file (the number before "--"
+            in "at lines M--N")
+          - The overflow amount in points (the "Xpt too wide" value)
+          - The rendered text shown on the next line of the log (this
+            shows what characters were on the overflowing line)
+
+      (d) Count the total number of overfull warnings. This is your
+          target: you need to reduce this count to zero.
+
+      If there are zero overfull warnings, the task is already complete.
+      Otherwise, proceed to the next step.
+    check: >
+      Did compilation succeed (even with warnings)? Did you find all
+      overfull hbox warnings in the log? For each warning, do you know
+      the source line number and the rendered text?
+
+  - step: >
+      For each overfull hbox warning, find a word that (a) appears on or
+      near the offending line, (b) exists in the synonym dictionary, and
+      (c) has a shorter synonym available.
+
+      (a) Look at the source line number from the log. Read that line
+          from the input file.
+
+      (b) Also examine the rendered text shown in the log (the line after
+          the "Overfull" warning). This shows the actual content that
+          overflowed. Note that the rendered text may have hyphens
+          inserted by LaTeX's hyphenation algorithm -- these are not in
+          the source.
+
+      (c) For each word on the offending line, check if it appears in the
+          synonym dictionary. Strip punctuation (periods, commas, quotes,
+          dashes) before looking up.
+
+      (d) If a word is in the dictionary, check if any of its synonyms
+          is SHORTER (fewer characters). The goal is to reduce the width
+          of the line, so you want a shorter replacement.
+
+      (e) If no words on the exact line number have synonyms, expand your
+          search. The log line number points to where the overfull content
+          starts, but the actual offending word might be earlier in the
+          same paragraph (because LaTeX typesets whole paragraphs at once).
+          Look at preceding lines in the same paragraph for substitutable
+          words. Even replacing a word several lines before the overflow
+          can cause enough reflow to fix the problem.
+
+      (f) Among candidate substitutions, prefer:
+          - Words with the greatest length reduction (more characters
+            saved = more likely to fix the overflow)
+          - Words closer to the overfull line (more direct effect)
+          - Words that are clearly on the rendered overflow text shown
+            in the log
+
+      Focus on fixing ONE overfull warning at a time, starting with the
+      first one in the log.
+    check: >
+      Did you find at least one word that has a shorter synonym? Is the
+      synonym actually from the synonym dictionary (same family)? Is the
+      replacement word genuinely shorter than the original?
+
+  - step: >
+      Perform the chosen substitution in the input text file.
+
+      (a) Open the input file and locate the word to replace. Be precise
+          about which occurrence to replace if the word appears multiple
+          times. Target the occurrence on or near the overfull line.
+
+      (b) Replace the word with its shorter synonym. Preserve the
+          surrounding punctuation and spacing. If the original word was
+          capitalized, capitalize the replacement appropriately. If it
+          had trailing punctuation (comma, period), keep that punctuation.
+
+      (c) Do NOT change anything else in the file. Each substitution
+          should be minimal and targeted.
+
+      (d) Do NOT edit the main LaTeX document or the synonym dictionary.
+
+      (e) Make only ONE substitution before recompiling. Because text
+          reflow can change the overfull landscape, it is safer to fix
+          one at a time and reassess.
+    check: >
+      Did you edit only the input text file? Is the replacement word from
+      the correct synonym family? Did you preserve punctuation and
+      capitalization? Did you make exactly one substitution?
+
+  - step: >
+      After each substitution, recompile the document and re-check the
+      log for overfull hbox warnings.
+
+      (a) Run pdflatex again on the main document.
+
+      (b) Search the new log for "Overfull" warnings.
+
+      (c) If warnings remain, return to Step 3 with the updated log.
+          Note that line numbers may have shifted due to text reflow, so
+          you must re-parse the log fresh each time.
+
+      (d) If no overfull warnings remain, the task is complete.
+
+      (e) If a substitution did not reduce the warning count (or made it
+          worse), consider reverting it and trying a different word or a
+          different synonym. Sometimes a word that seems shorter in
+          character count does not reduce the rendered width enough
+          because of font metrics (e.g., 'w' is wider than 'i').
+
+      This step forms the outer loop of the iterative process:
+      compile -> check -> fix -> compile -> check -> fix -> ...
+      Continue until zero overfull warnings remain.
+    check: >
+      Did compilation succeed? How many overfull warnings remain compared
+      to before? If warnings remain, have you re-parsed the log for
+      updated line numbers? If zero warnings remain, is the task complete?
+
+  - step: >
+      Before declaring the task complete, verify all constraints:
+
+      (a) Compile one final time and confirm zero "Overfull \hbox"
+          warnings in the log.
+
+      (b) Verify that the main LaTeX document has not been modified.
+          Compare its content to the original (e.g., using checksums or
+          diff). Any modification is a failure.
+
+      (c) Verify that the synonym dictionary has not been modified.
+          Compare its content to the original. Any modification is a failure.
+
+      (d) Verify that every word substitution you made uses a word from
+          the synonym dictionary (i.e., the replacement word appears in
+          the same synonym family as the original word).
+
+      (e) Verify that the document still compiles successfully (no
+          errors, only clean output).
+
+      (f) Verify that the input file contains only the allowed synonym
+          substitutions. No other changes (spacing, punctuation, line
+          breaks, or content outside the synonym families) should be
+          present. If you made any temporary changes or reverts, ensure
+          the final input file matches the required output exactly.
+    check: >
+      Zero overfull hbox warnings in the final compilation log? Main
+      document file is unmodified? Synonym file is unmodified? All
+      substitutions use words from the synonym dictionary? Input file
+      contains only the allowed synonym substitutions with no extra changes?
+
+common_failures:
+  - >
+    Editing the wrong file: The agent modifies the main LaTeX document
+    (e.g., changing page geometry, adding \sloppy, inserting line breaks)
+    instead of only editing the input text file with synonym substitutions.
+    Before editing any file, confirm it is the designated input text file.
+    The task explicitly states that only word substitutions in the input
+    file are allowed. Geometry changes, LaTeX command insertions, or edits
+    to the main document all violate constraints.
+  - >
+    Using words not in the synonym dictionary: The agent replaces a word
+    with a synonym it knows from general knowledge, but the replacement
+    word is not in the synonym family listed in synonyms.txt. Always look
+    up the original word in the synonym dictionary before choosing a
+    replacement. Only use words that appear in the same comma-separated
+    line as the original word. Never invent synonyms or use external
+    knowledge of word meanings.
+  - >
+    Making lines longer instead of shorter: The agent replaces a word with
+    a synonym that has MORE characters or wider glyphs, making the overfull
+    hbox worse or creating new overfull warnings. Always compare character
+    counts before substituting. Choose the shortest available synonym from
+    the family. When character counts are similar, prefer the synonym with
+    narrower characters (e.g., words with i, l, t tend to be narrower than
+    words with w, m, o).
+  - >
+    Not iterating (single-pass approach): The agent tries to fix all
+    overfull warnings in a single pass by making multiple substitutions
+    before recompiling. This ignores text reflow effects and can introduce
+    new overfull warnings or make unnecessary substitutions. Fix ONE
+    warning at a time, recompile after each fix, and re-parse the log.
+    Text reflow means the overfull landscape changes after every
+    substitution. A single-pass approach risks operating on stale line
+    numbers and making incorrect substitutions.
+  - >
+    Searching only the exact line number: The agent looks only at the exact
+    line number reported in the log and finds no substitutable words there,
+    then gives up. The actual word causing the overflow may be earlier in
+    the same paragraph. If no substitutable words are found on the reported
+    line, expand the search to the surrounding paragraph context. The
+    rendered text in the log (shown after the warning) can help identify
+    the actual content that overflowed.
+  - >
+    Not stripping punctuation when looking up synonyms: The agent tries to
+    look up "curious," or "riotous." (with trailing punctuation) in the
+    synonym dictionary and fails to find a match, even though "curious" and
+    "riotous" are listed. Strip common punctuation characters from both
+    ends of each word before checking the synonym dictionary. When
+    performing the substitution, preserve the original punctuation around
+    the replacement word.
+  - >
+    Making unauthorized changes to the input file: The agent adds, removes,
+    or modifies text beyond the allowed synonym substitutions (e.g., changing
+    spacing, adding/removing punctuation, inserting line breaks, or altering
+    words not in the synonym dictionary). This causes test failures because
+    the final input file must match the expected output exactly. Only perform
+    the minimal substitution of a word with its shorter synonym from the
+    dictionary. Do not make any other edits.
+
+verification: >
+  Compile the document one final time with pdflatex. Search the resulting
+  log file for any line containing "Overfull". If none are found, the
+  overfull hbox requirement is satisfied. Verify that the main LaTeX
+  document and the synonym dictionary have not been changed. For each word
+  you changed, verify that both the original word and the replacement word
+  appear in the same line of the synonym dictionary. Verify that the input
+  file contains only the allowed synonym substitutions with no other
+  modifications (compare to the expected output if available). The final
+  pdflatex run should complete without fatal errors. Warnings other than
+  overfull hbox (e.g., underfull hbox) are acceptable as long as there are
+  zero overfull hbox warnings.

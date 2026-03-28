@@ -1,0 +1,12 @@
+{
+  "task_id": "db-wal-recovery",
+  "error_category": "skill_failure",
+  "failure_mode": "2_test_failures",
+  "description": "Tests failed: test_outputs.py::test_recovered_data_completeness, test_outputs.py::test_wal_was_decrypted",
+  "failed_tests": [
+    "test_outputs.py::test_recovered_data_completeness",
+    "test_outputs.py::test_wal_was_decrypted"
+  ],
+  "trajectory_summary": "Agent executed 58 steps. See full trajectory for details.",
+  "optimization_hint": "Skill should address: test_outputs.py::test_recovered_data_completeness, test_outputs.py::test_wal_was_decrypted. Review agent trajectory for specific decision points that led to failure."
+}

@@ -1,0 +1,11 @@
+{
+  "task_id": "overfull-hbox",
+  "error_category": "skill_failure",
+  "failure_mode": "1_test_failures",
+  "description": "Tests failed: test_outputs.py::test_input_file_matches",
+  "failed_tests": [
+    "test_outputs.py::test_input_file_matches"
+  ],
+  "trajectory_summary": "Agent executed 28 steps. See full trajectory for details.",
+  "optimization_hint": "Skill should address: test_outputs.py::test_input_file_matches. Review agent trajectory for specific decision points that led to failure."
+}

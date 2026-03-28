@@ -1,0 +1,11 @@
+{
+  "task_id": "feal-differential-cryptanalysis",
+  "error_category": "agent_system_failure",
+  "failure_mode": "AgentTimeoutError",
+  "description": "Agent execution timed out after 1800.0 seconds",
+  "failed_tests": [
+    "test_outputs.py::test_feal_differential_cryptanalysis_attack"
+  ],
+  "trajectory_summary": "Agent executed 44 steps. See full trajectory for details.",
+  "optimization_hint": "Agent hit a system-level failure. Consider adding time management or error recovery guidance to the skill."
+}
