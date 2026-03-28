@@ -107,3 +107,76 @@ class TestMakeJobName:
     def test_long_condition(self):
         assert make_job_name("db-wal-recovery", "self_generated_one_shot", 3) == \
             "dbwal-self_generated_one_shot-deepseek-r3"
+
+
+from scripts.skillsbench_error_analysis import build_error_analysis
+
+
+class TestBuildErrorAnalysis:
+    def test_success_returns_none(self):
+        result_json = {
+            "verifier_result": {"rewards": {"reward": 1.0}},
+            "exception_info": None,
+        }
+        ctrf = {
+            "results": {
+                "tests": [{"name": "test_a", "status": "passed"}],
+                "summary": {"passed": 1, "failed": 0},
+            }
+        }
+        assert build_error_analysis("overfull-hbox", result_json, ctrf, None, None) is None
+
+    def test_timeout_classified_as_agent_system_failure(self):
+        result_json = {
+            "verifier_result": {"rewards": {"reward": 0.0}},
+            "exception_info": {
+                "exception_type": "AgentTimeoutError",
+                "exception_message": "Agent execution timed out after 1800.0 seconds",
+            },
+        }
+        ctrf = {
+            "results": {
+                "tests": [{"name": "test_a", "status": "failed"}],
+                "summary": {"passed": 0, "failed": 1},
+            }
+        }
+        ea = build_error_analysis("feal-differential-cryptanalysis", result_json, ctrf, None, None)
+        assert ea["error_category"] == "agent_system_failure"
+        assert ea["task_id"] == "feal-differential-cryptanalysis"
+        assert "test_a" in ea["failed_tests"]
+
+    def test_test_failure_classified_as_skill_failure(self):
+        result_json = {
+            "verifier_result": {"rewards": {"reward": 0.0}},
+            "exception_info": None,
+        }
+        ctrf = {
+            "results": {
+                "tests": [
+                    {"name": "test_pass", "status": "passed"},
+                    {"name": "test_fail", "status": "failed"},
+                ],
+                "summary": {"passed": 1, "failed": 1},
+            }
+        }
+        ea = build_error_analysis("db-wal-recovery", result_json, ctrf, None, None)
+        assert ea["error_category"] == "skill_failure"
+        assert ea["failed_tests"] == ["test_fail"]
+
+    def test_all_canonical_fields_present(self):
+        result_json = {
+            "verifier_result": {"rewards": {"reward": 0.0}},
+            "exception_info": None,
+        }
+        ctrf = {
+            "results": {
+                "tests": [{"name": "test_x", "status": "failed"}],
+                "summary": {"passed": 0, "failed": 1},
+            }
+        }
+        ea = build_error_analysis("overfull-hbox", result_json, ctrf, None, None)
+        required_fields = {
+            "task_id", "error_category", "failure_mode", "description",
+            "failed_tests", "trajectory_summary", "optimization_hint",
+        }
+        assert set(ea.keys()) == required_fields
