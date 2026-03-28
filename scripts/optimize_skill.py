@@ -69,7 +69,13 @@ def find_latest_trial(task_id: str, condition: str) -> Path | None:
                 if trial_dir.is_dir() and "__" in trial_dir.name:
                     result_path = trial_dir / "result.json"
                     if result_path.exists():
-                        candidates.append(trial_dir)
+                        # Only consider complete trials (have verifier_result)
+                        try:
+                            rj = json.loads(result_path.read_text())
+                            if rj.get("verifier_result") is not None:
+                                candidates.append(trial_dir)
+                        except (json.JSONDecodeError, OSError):
+                            continue
 
     if not candidates:
         return None
@@ -93,7 +99,7 @@ def load_error_analysis(trial_dir: Path, task_id: str) -> dict | None:
 
 
 def generate_revision(current_skill_yaml: str, error_analysis: dict,
-                      api_key: str) -> str:
+                      api_key: str, max_retries: int = 3) -> str:
     if OpenAI is None:
         raise RuntimeError("openai package required. Run: pip install openai")
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
@@ -103,12 +109,23 @@ def generate_revision(current_skill_yaml: str, error_analysis: dict,
         error_analysis=json.dumps(error_analysis, indent=2),
     )
 
-    response = client.chat.completions.create(
-        model="deepseek-chat",
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=MAX_OUTPUT_TOKENS,
-        temperature=0.3,
-    )
+    import time
+    for attempt in range(max_retries):
+        try:
+            response = client.chat.completions.create(
+                model="deepseek-chat",
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=MAX_OUTPUT_TOKENS,
+                temperature=0.3,
+            )
+            break
+        except Exception as e:
+            if attempt < max_retries - 1:
+                wait = 5 * (attempt + 1)
+                print(f"  Retry {attempt + 1}/{max_retries} after error: {e.__class__.__name__}. Waiting {wait}s...")
+                time.sleep(wait)
+            else:
+                raise
 
     content = response.choices[0].message.content.strip()
     if content.startswith("```yaml"):
