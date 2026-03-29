@@ -1,0 +1,193 @@
+name: "db-wal-recovery"
+version: "1.0"
+source: "self_generated"
+domain: "database_forensics"
+task_type: "database_forensics"
+
+# One-shot skill generated from the task description alone.
+# The generator has access to the instruction.md but NOT to the solution,
+# curated skill, or any prior failure logs.
+#
+# Description: Recovers data from a SQLite database in WAL mode where the
+# WAL file appears corrupted or encrypted. The goal is to extract all 11
+# records (the base 5 plus 6 additional records in the WAL) and produce a
+# JSON output file at /app/recovered.json.
+
+when_to_use: >
+  When recovering data from a SQLite database in WAL mode where the WAL
+  file appears corrupted or encrypted, and querying the database returns
+  fewer records than expected.
+
+when_not_to_use: >
+  When the database issue is not related to WAL corruption, when the
+  main .db file itself is damaged, or when a different database engine
+  is involved.
+
+preconditions:
+  - "A SQLite database file and associated WAL file exist, where the WAL appears corrupted or encrypted."
+  - "Querying the database returns fewer records than expected (e.g., 5 instead of 11)."
+  - "Tools for hex inspection and scripting (Python) are available."
+
+procedure:
+  # =========================================================================
+  # Step 1 -- Assess the database and WAL file
+  # =========================================================================
+  # Domain knowledge: SQLite WAL (Write-Ahead Logging) mode writes changes
+  # to a separate WAL file. If the WAL is corrupted, SQLite ignores it and
+  # only shows data from the main database file. A WAL file has the
+  # extension .db-wal.
+  # =========================================================================
+  - step: >
+      (a) List files in /app/ to find the database and WAL files.
+          A SQLite WAL file typically has the extension .db-wal.
+
+      (b) Try opening the database with sqlite3 and querying all records:
+          sqlite3 /app/<dbfile> "SELECT * FROM <table>;"
+          This will likely show only 5 records if the WAL is broken.
+
+      (c) Check the WAL file size. A non-empty WAL file suggests there
+          are uncommitted changes that should be readable.
+
+      (d) Use a hex viewer (xxd or hexdump) to examine the first few
+          hundred bytes of the WAL file. Look for the WAL magic number
+          and header structure.
+
+      (e) Also examine the main database file header to confirm it is
+          a valid SQLite database and note the page size.
+    check: >
+      Did you find the database and WAL files? How many records does a
+      normal query return? What does the WAL file header look like?
+
+  # =========================================================================
+  # Step 2 -- Diagnose the WAL corruption
+  # =========================================================================
+  # Domain knowledge: A WAL file header starts with magic bytes 0x377f0682
+  # (big-endian) or 0x377f0683 (little-endian). If these do not match,
+  # the file may have been systematically transformed (e.g., XOR encrypted).
+  # =========================================================================
+  - step: >
+      (a) Compare the WAL file header against the expected SQLite WAL
+          format. The first 4 bytes should be a WAL magic number
+          (0x377f0682 or 0x377f0683).
+
+      (b) If the magic bytes are wrong, the header may have been
+          tampered with or the entire file may be transformed.
+
+      (c) Look for patterns in the hex dump. If the data appears to be
+          systematically altered (e.g., all bytes shifted, XOR'd, or
+          otherwise transformed), try to identify the pattern.
+
+      (d) Compare known values -- if you can determine what certain
+          bytes SHOULD be (like the magic number or page size), compare
+          them against what you see to deduce the transformation.
+
+      (e) Check if the WAL file is simply truncated or has a bad
+          checksum. SQLite validates WAL checksums and will ignore
+          frames with bad checksums.
+    check: >
+      Is the WAL header valid or corrupted? Can you identify a pattern
+      in the corruption? Is it a simple corruption or a systematic
+      transformation?
+
+  # =========================================================================
+  # Step 3 -- Repair the WAL file
+  # =========================================================================
+  - step: >
+      Based on your diagnosis in Step 2, repair the WAL file:
+
+      (a) If the file has been systematically transformed (encrypted,
+          XOR'd, byte-shifted, etc.), write a script to reverse the
+          transformation and produce a corrected WAL file.
+
+      (b) If only the header is corrupted, reconstruct a valid WAL
+          header with the correct magic number, page size (matching the
+          main database), and appropriate salt/checksum values.
+
+      (c) If the checksums are invalid, you may need to recalculate
+          them. SQLite WAL uses a cumulative checksum scheme.
+
+      (d) After repairing, replace the original WAL file with the
+          fixed version (or work on a copy).
+
+      (e) Alternatively, if you can extract the raw page data from the
+          WAL frames, you could manually parse the B-tree pages to read
+          the records without relying on SQLite's WAL recovery.
+    check: >
+      Did you identify and reverse the corruption/transformation? Does
+      the repaired WAL have a valid header?
+
+  # =========================================================================
+  # Step 4 -- Extract the data
+  # =========================================================================
+  - step: >
+      (a) Try querying the database again with the repaired WAL file:
+          sqlite3 /app/<dbfile> "SELECT * FROM <table> ORDER BY id;"
+
+      (b) Verify that you now get 11 records instead of 5.
+
+      (c) If SQLite still cannot read the WAL, try alternative
+          approaches:
+          - Manually parse the WAL frame data to extract page contents
+          - Use the .recover command in sqlite3
+          - Copy the database and WAL to a new location and try again
+
+      (d) Note all 11 records with their id, name, and value fields.
+    check: >
+      Do you now see all 11 records? Are the records complete with id,
+      name, and value?
+
+  # =========================================================================
+  # Step 5 -- Write the output JSON
+  # =========================================================================
+  - step: >
+      (a) Format the 11 records as a JSON array of objects, each with
+          "id", "name", and "value" keys.
+
+      (b) Sort the array by id.
+
+      (c) Write the output to /app/recovered.json.
+
+      (d) The format should be:
+          [{"id": 1, "name": "item1", "value": X}, ...]
+    check: >
+      Does the JSON contain exactly 11 records? Are records sorted by
+      id? Is the file at /app/recovered.json?
+
+  # =========================================================================
+  # Step 6 -- Verify
+  # =========================================================================
+  - step: >
+      (a) Read back /app/recovered.json and confirm it is valid JSON.
+
+      (b) Confirm it contains 11 records sorted by id.
+
+      (c) Verify the data looks reasonable -- ids should be sequential,
+          names and values should be present for all records.
+    check: >
+      Is the JSON valid? Are there exactly 11 records? Are all fields
+      populated?
+
+common_failures:
+  - >
+    Ignoring the WAL file entirely: The agent queries the database, gets 5
+    records, and tries to fabricate the missing 6 records instead of
+    actually recovering them from the WAL. The WAL file contains the actual
+    data. You must examine and repair it rather than guessing what the
+    missing records contain.
+  - >
+    Not identifying the corruption method: The agent sees the WAL is broken
+    but cannot figure out how to fix it, and falls back on generic file
+    repair tools. Carefully examine the hex dump of the WAL file and
+    compare expected byte values against actual bytes to determine the
+    transformation applied.
+  - >
+    Incorrect JSON format: The output JSON does not match the expected
+    format or is missing fields. Follow the exact format from the task
+    description. Ensure all fields (id, name, value) are present and
+    records are sorted by id.
+
+verification: >
+  Verify the JSON file at /app/recovered.json contains exactly 11 records
+  with correct data recovered from both the main database and the WAL.
+  Confirm the file is valid JSON, records are sorted by the "id" field
+  in ascending order, and all required fields are present.

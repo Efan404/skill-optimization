@@ -1,0 +1,169 @@
+name: "overfull-hbox-fix"
+version: "1.0"
+source: "self_generated"
+domain: "latex"
+task_type: "latex_debugging"
+
+# One-shot skill generated from the task description alone.
+# The generator has access to the instruction.md but NOT to the solution,
+# curated skill, or any prior failure logs.
+#
+# Description: Fixes "overfull hbox" warnings in a LaTeX document by
+# replacing words in the input file with synonyms from a provided
+# dictionary. The approach is to compile the document, find overfull
+# warnings in the log, identify words that can be swapped with synonyms,
+# make the substitution, and recompile until no warnings remain.
+
+when_to_use: >
+  When fixing LaTeX compilation warnings about "Overfull \hbox" by
+  substituting words with shorter synonyms from a provided dictionary.
+  The task involves compiling the document, finding overfull warnings in
+  the log, identifying words that can be swapped, and recompiling
+  iteratively.
+
+when_not_to_use: >
+  When the LaTeX issue is not about overfull hboxes, when the fix
+  involves changing page geometry or LaTeX commands rather than word
+  substitutions, or when no synonym dictionary is provided.
+
+preconditions:
+  - "A LaTeX document exists that produces 'Overfull \\hbox' warnings when compiled with pdflatex."
+  - "A synonym dictionary file (synonyms.txt) is provided with comma-separated groups of interchangeable words."
+  - "An input text file (input.tex) is the designated editable file; other files must remain unmodified."
+
+procedure:
+  # =========================================================================
+  # Step 1 -- Read the files and understand the setup
+  # =========================================================================
+  # Domain knowledge: When LaTeX typesets a paragraph and a line exceeds the
+  # allowed text width, it reports an "Overfull \hbox" warning in the
+  # compilation log. The synonyms.txt file contains comma-separated groups
+  # of interchangeable words.
+  # =========================================================================
+  - step: >
+      Read the files in the working directory:
+
+      (a) Read main.tex to understand the document structure. Do NOT edit
+          this file.
+
+      (b) Read input.tex -- this is the only file you may edit.
+
+      (c) Read synonyms.txt to understand available word substitutions.
+          Each line is a comma-separated list of interchangeable words.
+
+      (d) Note which words in input.tex appear in the synonym dictionary.
+    check: >
+      Have you identified input.tex as the only editable file? Have you
+      read the synonym dictionary?
+
+  # =========================================================================
+  # Step 2 -- Compile and check for warnings
+  # =========================================================================
+  # Domain knowledge: After compiling with pdflatex, check the log file for
+  # "Overfull" warnings. These warnings include line numbers that point to
+  # the source file, with the format "at lines M--N".
+  # =========================================================================
+  - step: >
+      Compile the document and look for overfull hbox warnings:
+
+      (a) Run: pdflatex main.tex
+
+      (b) Open main.log and search for lines containing "Overfull".
+
+      (c) For each warning, note the line number mentioned in the log.
+          The format is typically "at lines M--N".
+
+      (d) Count the total number of overfull warnings.
+
+      If there are no warnings, the task is complete.
+    check: >
+      Did compilation complete? How many overfull warnings did you find?
+
+  # =========================================================================
+  # Step 3 -- Find a word to substitute
+  # =========================================================================
+  - step: >
+      For each overfull warning:
+
+      (a) Go to the line number indicated in the log.
+
+      (b) Look at the words on that line.
+
+      (c) Check if any of those words appear in the synonym dictionary.
+
+      (d) If a word is in the dictionary, pick a synonym to replace it
+          with. Try to choose a synonym that is different enough to
+          potentially change the line layout.
+
+      (e) If no words on that exact line are in the dictionary, look at
+          nearby lines in the same paragraph.
+
+      Focus on one warning at a time.
+    check: >
+      Did you find a word in the synonym dictionary? Is the replacement
+      from the same synonym family?
+
+  # =========================================================================
+  # Step 4 -- Make the substitution
+  # =========================================================================
+  - step: >
+      (a) Replace the chosen word with the selected synonym in input.tex.
+
+      (b) Be careful to preserve punctuation (commas, periods) around
+          the word.
+
+      (c) Preserve capitalization if the original word was capitalized.
+
+      (d) Only edit input.tex. Do not touch main.tex or synonyms.txt.
+    check: >
+      Did you only edit input.tex? Did you preserve surrounding
+      punctuation?
+
+  # =========================================================================
+  # Step 5 -- Recompile and iterate
+  # =========================================================================
+  - step: >
+      (a) Run pdflatex main.tex again.
+
+      (b) Check the log for remaining overfull warnings.
+
+      (c) If warnings remain, go back to Step 3.
+
+      (d) If no warnings remain, the task is done.
+
+      Repeat this loop until all overfull hbox warnings are gone.
+    check: >
+      Did the number of warnings decrease? Are there any remaining
+      overfull warnings?
+
+  # =========================================================================
+  # Step 6 -- Final check
+  # =========================================================================
+  - step: >
+      (a) Do a final compile and confirm zero overfull hbox warnings.
+
+      (b) Confirm that main.tex and synonyms.txt were not modified.
+
+      (c) Confirm the document still compiles without errors.
+    check: >
+      Zero overfull hbox warnings? Only input.tex was edited?
+
+common_failures:
+  - >
+    Editing the wrong file: Modifying main.tex or synonyms.txt instead of
+    input.tex. Only edit input.tex. The task explicitly prohibits editing
+    other files.
+  - >
+    Using words not in the dictionary: Replacing a word with a synonym
+    from general knowledge rather than from synonyms.txt. Always look up
+    words in synonyms.txt before making substitutions.
+  - >
+    Not iterating: Trying to fix everything in one pass instead of
+    recompiling after each change. Make one substitution at a time and
+    recompile to check the effect.
+
+verification: >
+  Compile the document with pdflatex and search the log for "Overfull".
+  There should be zero matches. Verify that main.tex and synonyms.txt
+  are unchanged. Verify every word change uses a synonym from the same
+  family in synonyms.txt.

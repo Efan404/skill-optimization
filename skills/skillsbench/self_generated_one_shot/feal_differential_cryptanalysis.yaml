@@ -1,0 +1,217 @@
+name: "feal-differential-cryptanalysis"
+version: "1.0"
+source: "self_generated"
+domain: "cryptography"
+task_type: "cryptanalysis"
+
+# One-shot skill generated from the task description alone.
+# The generator has access to the instruction.md but NOT to the solution,
+# curated skill, or any prior failure logs.
+#
+# Description: Implements a differential cryptanalysis attack against a
+# FEAL-like cipher to recover the value of key[5] (a uint32 round key).
+# The attack uses chosen plaintext pairs with specific input differences
+# to statistically recover the round key. Must complete in under 30 seconds.
+
+when_to_use: >
+  When implementing a differential cryptanalysis attack against a FEAL-like
+  block cipher to recover a round key value. The cipher uses addition-based
+  round functions and round keys derived from 16-bit seeds.
+
+when_not_to_use: >
+  When the cipher uses a different structure (e.g., S-box based), when the
+  key schedule has full entropy, or when a different cryptanalytic technique
+  is more appropriate.
+
+preconditions:
+  - "A FEAL-like cipher implementation is provided with an encrypt function taking a 64-bit integer and returning a 64-bit integer."
+  - "The cipher uses round keys derived from 16-bit seeds (65536 possible values per key)."
+  - "The attack must complete within 30 seconds and return key[5] as a uint32."
+
+procedure:
+  # =========================================================================
+  # Step 1 -- Analyze the cipher implementation
+  # =========================================================================
+  # Domain knowledge: FEAL (Fast Data Encipherment Algorithm) is a Feistel
+  # cipher that uses addition and rotation operations instead of S-boxes.
+  # Round keys are derived from 16-bit seeds, limiting the search space
+  # to 65536 candidates per key.
+  # =========================================================================
+  - step: >
+      (a) Read /app/feal.py carefully. Understand the full encryption
+          function, including:
+          - How plaintext is split into halves
+          - The round function F and its operations
+          - How round keys are applied
+          - The number of rounds
+          - How the ciphertext is assembled from the final state
+
+      (b) Identify how key[5] is used in the cipher. It may be used
+          in the final round, in an output whitening step, or as the
+          last Feistel round key.
+
+      (c) Understand the key schedule -- each key is derived from a
+          16-bit seed, so there are only 65536 possible values per
+          round key.
+
+      (d) Note the data types and byte ordering used in the
+          implementation (big-endian vs little-endian, uint32 packing).
+    check: >
+      Do you understand the full encryption algorithm? How is key[5]
+      used specifically? What is the structure of the round function F?
+
+  # =========================================================================
+  # Step 2 -- Design the differential attack
+  # =========================================================================
+  # Domain knowledge: Differential cryptanalysis works by analyzing how
+  # differences in plaintext pairs propagate through the cipher. For FEAL,
+  # good differentials exploit the arithmetic properties of the addition-
+  # based round function (e.g., 0x80 + 0x80 = 0x00 mod 256).
+  # =========================================================================
+  - step: >
+      (a) Determine what input difference to use. The input difference
+          (delta) is the XOR between two chosen plaintexts. Choose a
+          difference that propagates predictably through the cipher
+          rounds.
+
+      (b) For a FEAL-like cipher, good differentials often involve
+          differences that cause the addition-based round function to
+          behave predictably. Try differences where specific bytes are
+          set to create high-probability differential characteristics.
+
+      (c) Plan the statistical analysis. For each candidate value of
+          key[5], compute what the expected output difference should be.
+          The correct key will produce the expected difference for most
+          plaintext pairs, while wrong keys will produce random-looking
+          differences.
+
+      (d) Determine how many plaintext pairs you need. A few hundred
+          to a few thousand pairs are typically sufficient for
+          differential cryptanalysis of weak ciphers.
+    check: >
+      Have you chosen an input differential? Do you have a plan for
+      statistical filtering? How many plaintext pairs will you collect?
+
+  # =========================================================================
+  # Step 3 -- Implement the attack
+  # =========================================================================
+  - step: >
+      Create /app/attack.py with a function attack(encrypt_fn) that:
+
+      (a) Generates chosen plaintext pairs. For each pair, create two
+          plaintexts P and P' = P XOR delta, where delta is your chosen
+          input difference. Use random base plaintexts.
+
+      (b) Encrypts both plaintexts using encrypt_fn to get ciphertext
+          pairs (C, C').
+
+      (c) For each candidate value of key[5] (iterate through possible
+          values -- since the key is derived from a 16-bit seed, there
+          are at most 65536 candidates):
+          - Partially decrypt the last round of both ciphertexts using
+            the candidate key
+          - Check if the resulting intermediate difference matches the
+            expected differential after the second-to-last round
+          - Count how many pairs are consistent with this candidate
+
+      (d) The candidate key value with the highest count is likely the
+          correct key[5].
+
+      (e) Return the recovered key[5] as a uint32 integer.
+    check: >
+      Does the function signature match attack(encrypt_fn)? Are you
+      generating proper chosen-plaintext pairs? Are you iterating over
+      candidate key values? Does the attack complete in under 30 seconds?
+
+  # =========================================================================
+  # Step 4 -- Handle implementation details
+  # =========================================================================
+  - step: >
+      (a) Make sure byte packing and unpacking matches the cipher
+          implementation. Use the same struct format strings and byte
+          ordering as feal.py.
+
+      (b) Implement the partial decryption of the last round correctly.
+          You need to reverse only the final round's operations using
+          each candidate key.
+
+      (c) The round function F in the cipher must be reimplemented in
+          your attack code (or imported from feal.py if possible) to
+          perform the partial decryption.
+
+      (d) Handle the XOR and addition operations correctly, paying
+          attention to modular arithmetic (mod 2^8 or mod 2^32 as
+          appropriate).
+
+      (e) Optimize for speed. Use numpy or bitwise operations to avoid
+          slow Python loops where possible.
+    check: >
+      Do byte ordering and packing match feal.py? Is the round function
+      F implemented correctly? Does the attack run in under 30 seconds?
+
+  # =========================================================================
+  # Step 5 -- Test and validate
+  # =========================================================================
+  - step: >
+      (a) Run the attack and check that it returns a uint32 value.
+
+      (b) The correct key should have a significantly higher count than
+          other candidates in the statistical analysis.
+
+      (c) If the attack does not converge (no clear winner), try:
+          - Using more plaintext pairs
+          - Trying different input differentials
+          - Checking your partial decryption logic
+          - Verifying byte ordering
+
+      (d) If brute-forcing over 2^16 candidates per key is too slow,
+          try to reduce the search space by analyzing the key schedule
+          more carefully.
+    check: >
+      Does the attack return a uint32 value? Is there a clear
+      statistical winner? Does it complete in under 30 seconds?
+
+  # =========================================================================
+  # Step 6 -- (placeholder for structural matching)
+  # =========================================================================
+  - step: >
+      Verify the attack module is correctly structured for submission:
+
+      (a) The file is at /app/attack.py and is importable.
+
+      (b) The attack(encrypt_fn) function has the correct signature.
+
+      (c) No hardcoded keys or seeds are present in the attack logic.
+
+      (d) The attack works with any randomly generated key set.
+    check: >
+      Is the module importable? Does attack(encrypt_fn) have the correct
+      signature? Are there no hardcoded values?
+
+common_failures:
+  - >
+    Wrong input differential: Choosing an input difference that does not
+    propagate usefully through the cipher, leading to no statistical
+    signal. Study the round function F carefully and choose differentials
+    that exploit the structure of the addition and rotation operations.
+  - >
+    Incorrect partial decryption: Errors in reversing the last round
+    operations, leading to wrong key recovery. Carefully match the partial
+    decryption to the cipher's actual operations and verify against known
+    test vectors if possible.
+  - >
+    Byte ordering mismatch: Using different endianness or packing format
+    than the cipher implementation, causing the attack to fail silently.
+    Read feal.py carefully and use the exact same struct format strings
+    and byte ordering conventions.
+  - >
+    Timeout: The attack takes more than 30 seconds because the search
+    space is too large or the implementation is too slow. Exploit the
+    16-bit seed constraint to limit the search space and use efficient
+    data structures.
+
+verification: >
+  Verify that /app/attack.py defines attack(encrypt_fn) that takes an
+  encryption function and returns a uint32 value. The returned value must
+  match the actual key[5] used by the cipher when tested by the benchmark
+  harness. The attack must complete within the 30-second time limit.

@@ -1,0 +1,317 @@
+name: "generic-task-execution"
+version: "1.0"
+source: "curated"
+domain: "general"
+task_type: "general"
+
+# This skill encodes generic procedural knowledge for completing any
+# coding or debugging task. It provides structured guidance for task
+# comprehension, environment exploration, solution planning, iterative
+# implementation, testing, and final validation. It contains NO domain-
+# specific content -- it serves as the structure-only control condition
+# to isolate the effect of prompt structure from domain knowledge.
+#
+# Description: Guides an agent through completing a coding, debugging, or
+# data-processing task by following a structured six-step procedure. The
+# procedure covers the full lifecycle of task execution: understanding what
+# is being asked, exploring the working environment to discover relevant
+# files and tools, planning a solution approach before writing any code,
+# implementing the solution incrementally, testing and verifying each
+# change, and performing a final validation to confirm all requirements
+# are satisfied.
+
+when_to_use: >
+  When completing any coding, debugging, or data-processing task that
+  involves reading instructions, exploring a working environment,
+  modifying or creating files, and producing a verifiable output. This
+  is a domain-agnostic procedure that applies to any structured technical
+  task.
+
+when_not_to_use: >
+  When a domain-specific skill is available that provides targeted
+  procedural guidance for the particular task type. This generic scaffold
+  should only be used as a baseline when no specialized skill exists.
+
+preconditions:
+  - "A task description is provided containing a high-level goal, constraints on what may and may not be done, and an expected output specification."
+  - "A working environment is available with files to read, tools to use, and an output location to write results."
+  - "The task can be broken into discrete sub-problems that can be solved and verified incrementally."
+
+procedure:
+  # =========================================================================
+  # Step 1 -- Understand the task and constraints
+  # =========================================================================
+  # General principle: Rushing to implement before fully understanding the
+  # requirements is the most common cause of wasted effort. Pay special
+  # attention to negative constraints -- things you must NOT do -- as these
+  # are easy to overlook but cause immediate failure if violated.
+  # =========================================================================
+  - step: >
+      Before taking any action, carefully read and internalize the full
+      task description:
+
+      (a) Identify the high-level goal. What does the task ask you to
+          produce or accomplish? State this in your own words to confirm
+          you understand it.
+
+      (b) Identify all explicit constraints. What are you allowed to do?
+          What are you NOT allowed to do? Which files may you edit?
+          Which must remain unmodified? Are there time limits or tool
+          restrictions?
+
+      (c) Identify the expected output. What is the deliverable? What
+          format must it be in? Where must it be located?
+
+      (d) Identify implicit requirements. What does the task assume you
+          will figure out? Are there details hinted at but not spelled
+          out?
+
+      (e) Re-read the task description with fresh eyes. Look for
+          requirements you missed on the first pass, especially negative
+          constraints and edge cases mentioned in passing.
+
+      Do not proceed until you can articulate the goal, constraints,
+      and expected output clearly.
+    check: >
+      Can you state the task goal in your own words? Have you identified
+      all explicit constraints on what you may and may not do? Do you
+      know exactly what output is expected and in what format? Have you
+      re-read the instructions to catch anything you missed initially?
+
+  # =========================================================================
+  # Step 2 -- Explore the environment and gather information
+  # =========================================================================
+  # General principle: Before modifying anything, understand what is
+  # present. Never assume a file's contents or purpose based solely on
+  # its name -- always verify by reading it.
+  # =========================================================================
+  - step: >
+      Survey the working directory and available tools to build a mental
+      model of the environment:
+
+      (a) List all files and directories in the working directory. Note
+          file names, extensions, sizes, and directory structure. Do not
+          guess what files contain based on names -- open and read them.
+
+      (b) Classify files as inputs (data, configuration, reference
+          material), targets (files to modify or create), or
+          infrastructure (tools, scripts, libraries).
+
+      (c) Read each relevant file carefully. For code files, understand
+          structure and data flow. For data files, understand format
+          and contents. For configuration files, understand settings.
+
+      (d) Identify available tools and commands. Test that key tools
+          work by running simple commands (e.g., version checks).
+
+      (e) Note discrepancies between the task description and the
+          actual environment. Missing or unexpected files are important
+          signals that may affect your approach.
+
+      Build a clear picture of the starting state before making changes.
+    check: >
+      Have you listed and examined all files in the working directory?
+      Do you understand the purpose and contents of each relevant file?
+      Have you identified which files to read, which to modify, and
+      which to leave alone? Have you verified that the necessary tools
+      and commands are available?
+
+  # =========================================================================
+  # Step 3 -- Plan your approach before making changes
+  # =========================================================================
+  # General principle: Large changes are harder to debug than small ones.
+  # Break the task into discrete sub-problems and plan a testing strategy
+  # for each.
+  # =========================================================================
+  - step: >
+      Based on your understanding of the task (Step 1) and the
+      environment (Step 2), develop a plan:
+
+      (a) Break the task into discrete sub-problems. What steps are
+          needed to go from the current state to the desired output?
+          Order them logically -- some may depend on others.
+
+      (b) For each sub-problem, identify the approach. What technique
+          or method will you use? What files will you read or modify?
+          What commands will you run?
+
+      (c) Identify potential difficulties. Where might things go wrong?
+          What assumptions might be incorrect? Anticipating problems
+          helps you recognize them quickly if they occur.
+
+      (d) Decide on a testing strategy. After each sub-problem is
+          solved, how will you verify that it worked? What command will
+          you run, what output will you check, or what file will you
+          inspect?
+
+      (e) Consider alternative approaches. If your primary plan fails,
+          what is your fallback? Having a backup plan prevents you from
+          getting stuck. The plan does not need to be perfect -- you will
+          refine it as you learn more.
+    check: >
+      Have you broken the task into discrete, ordered sub-problems? Do
+      you have a specific approach for each sub-problem? Have you
+      identified the riskiest parts of your plan? Do you know how you
+      will test each step?
+
+  # =========================================================================
+  # Step 4 -- Implement the solution incrementally
+  # =========================================================================
+  # General principle: Make one change at a time, verify it works, and
+  # then proceed. If something breaks, you know exactly which change
+  # caused the problem.
+  # =========================================================================
+  - step: >
+      Work through your plan from Step 3, making one change at a time:
+
+      (a) Start with the first sub-problem in your plan. Make the
+          minimum change needed to address it. Do not try to solve
+          multiple sub-problems in a single edit.
+
+      (b) After making a change, immediately verify it. Run the
+          relevant test, command, or check to confirm the change had
+          the intended effect. Read back the modified file to ensure
+          the edit is correct.
+
+      (c) If the verification succeeds, record what you did and move
+          to the next sub-problem. If it fails, stop and diagnose the
+          problem before continuing. Do not pile more changes on top
+          of a broken state.
+
+      (d) After each successful sub-problem, re-run any global checks
+          (e.g., compile the full project, run the full test suite)
+          to confirm you have not introduced regressions.
+
+      (e) If you encounter an unexpected problem, revisit your plan.
+          The new information may require adjusting your approach,
+          reordering steps, or trying an alternative strategy.
+
+      (f) Keep track of all modifications you have made. You will need
+          this list for final validation.
+    check: >
+      Are you making one change at a time rather than batching multiple
+      changes? Did you verify each change immediately after making it?
+      If a verification failed, did you stop and diagnose before
+      continuing? Have you re-run global checks to detect regressions?
+      Are you keeping track of all modifications?
+
+  # =========================================================================
+  # Step 5 -- Test the complete solution
+  # =========================================================================
+  # General principle: Testing can take many forms: running a compiler,
+  # executing a test suite, checking output against expected values,
+  # inspecting log files. The goal is to catch errors as early as possible.
+  # =========================================================================
+  - step: >
+      After completing all sub-problems, test the entire solution
+      end-to-end:
+
+      (a) Run the full pipeline from start to finish. Compile from
+          clean, process the full input, or generate the complete
+          output as appropriate for the task.
+
+      (b) Compare the result against the expected output. Does it
+          match the format specification? Does it contain the correct
+          values? Does it satisfy all stated requirements?
+
+      (c) Check for edge cases and boundary conditions. If the task
+          description mentions specific edge cases, test them.
+
+      (d) Check for side effects. Confirm that files which should not
+          have been changed are unmodified. Remove any temporary files
+          or debug output.
+
+      (e) If any test fails, return to Step 4 to fix the issue.
+          After fixing, re-run all tests from the beginning of this
+          step -- do not assume that fixing one problem did not
+          affect other things.
+    check: >
+      Did you run the full pipeline end-to-end? Does the output match
+      the expected format and content? Did you check for accidental
+      side effects on read-only files? If tests failed, did you fix
+      the issues and re-test completely?
+
+  # =========================================================================
+  # Step 6 -- Final validation and cleanup
+  # =========================================================================
+  # General principle: Many tasks require output in a specific format.
+  # Format requirements are strict -- even a minor deviation can cause
+  # automated grading to reject an otherwise correct solution.
+  # =========================================================================
+  - step: >
+      Before declaring the task complete, systematically verify every
+      requirement from the task description:
+
+      (a) Re-read the original task instructions one final time. Check
+          each requirement against the current state of your solution.
+          Do not rely on memory -- go back to the source.
+
+      (b) Verify the output exists at the correct location and in the
+          correct format. Open it and inspect its contents.
+
+      (c) Verify that all constraints were respected. Confirm read-only
+          files are unmodified, forbidden approaches were not used, and
+          numerical or structural requirements are met.
+
+      (d) Verify the solution works reproducibly. Running the pipeline
+          again should produce the same correct result.
+
+      (e) Clean up temporary files, debug output, or intermediate
+          artifacts that should not be part of the final submission.
+
+      (f) Final sanity check: does the solution actually solve the
+          problem that was asked? Confirm alignment between the task
+          goal and your deliverable.
+    check: >
+      Have you re-read the task instructions and checked every
+      requirement? Does the output exist at the correct location in the
+      correct format? Are all constraints satisfied (no forbidden
+      modifications, no rule violations)? Have you cleaned up temporary
+      files and debug artifacts? Does the solution actually address the
+      stated goal?
+
+common_failures:
+  - >
+    Not reading the task instructions carefully: The agent skims the task
+    description and misses a critical constraint, output requirement, or
+    restriction, producing a solution that violates an explicitly stated
+    rule. Read the task description at least twice. On the first pass,
+    understand the high-level goal. On the second pass, extract every
+    constraint, requirement, and specification.
+  - >
+    Modifying the wrong files: The agent edits a file that the task says
+    should not be changed, or modifies the wrong file when multiple similar
+    files exist, violating task constraints and corrupting the environment.
+    Before editing any file, confirm it is the correct target by checking
+    the task instructions and the file's path and contents.
+  - >
+    Making too many changes at once: The agent makes multiple modifications
+    without verifying intermediate results. When the final result is wrong,
+    it is impossible to determine which change caused the problem. Make one
+    change at a time and verify after each.
+  - >
+    Not testing changes before declaring completion: The agent declares the
+    task complete without running any tests. The solution contains errors
+    that basic verification would have caught. Never declare a task
+    complete without a final end-to-end test.
+  - >
+    Ignoring error messages or warnings: The agent encounters an error
+    message or warning and continues without investigating. Many errors
+    contain precise diagnostic information pointing directly to the fix.
+    Treat every error message as significant until proven otherwise.
+  - >
+    Producing output in the wrong format: The agent solves the core problem
+    correctly but produces output in a format that does not match the
+    specification. Re-read the output specification before producing the
+    final result. After writing, read it back and verify against the
+    expected format.
+
+verification: >
+  Verify that the primary deliverable exists and contains the correct
+  content. Confirm every constraint from the task instructions has been
+  respected: read-only files are unmodified, forbidden approaches were not
+  used, and all requirements are satisfied. Verify the output matches the
+  exact format specification, including file names, paths, data structures,
+  field names, field types, ordering, and encoding. Confirm the solution
+  is reproducible and no unintended side effects remain (no extra files,
+  no unintended modifications, no debug artifacts).
