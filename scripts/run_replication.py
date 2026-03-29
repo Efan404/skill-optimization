@@ -6,8 +6,12 @@ job naming and disconnect recovery.
 """
 from __future__ import annotations
 
+import functools
 import json
 import os
+
+# Force unbuffered output so background runs show progress
+print = functools.partial(print, flush=True)
 import subprocess
 import sys
 from datetime import datetime, timezone
